@@ -53,6 +53,24 @@ const ClinicalServicesView = (() => {
     });
     view.appendChild(_entryListEl);
 
+    const noServicesToggle = document.createElement("label");
+    noServicesToggle.className = "inline-toggle";
+
+    const noServicesCheckbox = document.createElement("input");
+    noServicesCheckbox.type = "checkbox";
+    noServicesCheckbox.checked = Boolean(state.noServicesProvided);
+    noServicesCheckbox.addEventListener("change", (event) => {
+      state.noServicesProvided = event.target.checked;
+      if (state.noServicesProvided) {
+        state.services = [];
+      }
+    });
+
+    const noServicesText = document.createElement("span");
+    noServicesText.textContent = "No services provided";
+    noServicesToggle.append(noServicesCheckbox, noServicesText);
+    view.appendChild(noServicesToggle);
+
     // Navigation
     const nav = NavigationButtons.create({
       backLabel: "Back",
@@ -66,6 +84,11 @@ const ClinicalServicesView = (() => {
   }
 
   function _handleNext(state, onNext) {
+    if (state.noServicesProvided) {
+      onNext();
+      return;
+    }
+
     const errors = _entryListEl.validate();
     if (errors.length > 0) {
       const firstBad = _entryListEl.querySelector(".is-error");

@@ -54,6 +54,24 @@ const VolunteerHoursView = (() => {
     });
     view.appendChild(_entryListEl);
 
+    const noHoursToggle = document.createElement("label");
+    noHoursToggle.className = "inline-toggle";
+
+    const noHoursCheckbox = document.createElement("input");
+    noHoursCheckbox.type = "checkbox";
+    noHoursCheckbox.checked = Boolean(state.noVolunteerHours);
+    noHoursCheckbox.addEventListener("change", (event) => {
+      state.noVolunteerHours = event.target.checked;
+      if (state.noVolunteerHours) {
+        state.volunteers = [];
+      }
+    });
+
+    const noHoursText = document.createElement("span");
+    noHoursText.textContent = "No volunteer hours to report";
+    noHoursToggle.append(noHoursCheckbox, noHoursText);
+    view.appendChild(noHoursToggle);
+
     // Navigation
     const nav = NavigationButtons.create({
       backLabel: "Back",
@@ -67,6 +85,11 @@ const VolunteerHoursView = (() => {
   }
 
   function _handleNext(state, onNext) {
+    if (state.noVolunteerHours) {
+      onNext();
+      return;
+    }
+
     const errors = _entryListEl.validate();
     if (errors.length > 0) {
       // Focus first invalid field

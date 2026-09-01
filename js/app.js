@@ -28,6 +28,12 @@
     /** @type {Array<{ id: string, serviceId: string, count: number }>} */
     services: [],
 
+    /** @type {boolean} */
+    noVolunteerHours: false,
+
+    /** @type {boolean} */
+    noServicesProvided: false,
+
     /** @type {ImpactSummary|null} */
     impact: null,
 

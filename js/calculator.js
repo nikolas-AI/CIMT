@@ -25,8 +25,11 @@ const Calculator = (() => {
    * @returns {ImpactSummary}
    */
   function computeImpact(state) {
-    const volunteerBreakdown = _computeVolunteerBreakdown(state.volunteers);
-    const serviceBreakdown   = _computeServiceBreakdown(state.services);
+    const volunteerEntries = state.noVolunteerHours ? [] : (state.volunteers || []);
+    const serviceEntries   = state.noServicesProvided ? [] : (state.services || []);
+
+    const volunteerBreakdown = _computeVolunteerBreakdown(volunteerEntries);
+    const serviceBreakdown   = _computeServiceBreakdown(serviceEntries);
 
     const volunteerValue     = volunteerBreakdown.reduce((sum, r) => sum + r.estimatedValue, 0);
     const clinicalValue      = serviceBreakdown.reduce((sum, r) => sum + r.estimatedValue, 0);

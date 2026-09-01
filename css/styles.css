@@ -305,6 +305,23 @@ body {
 
 .field__error.is-visible { display: block; }
 
+.inline-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-slate);
+  cursor: pointer;
+}
+
+.inline-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-accent);
+}
+
 /* ---------------------------------------------------------
    ENTRY ROWS (Volunteer / Services)
    --------------------------------------------------------- */
