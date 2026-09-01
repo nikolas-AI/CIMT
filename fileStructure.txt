@@ -1,0 +1,19 @@
+clinic-impact-estimator/
+├── index.html                          # App shell, script load order
+├── css/styles.css                      # All styling, design tokens
+└── js/
+    ├── data.js                         # Benchmark rates, role/service catalogs, references
+    ├── utils.js                        # Formatting, validation, DOM helpers
+    ├── calculator.js                   # All math — zero DOM access
+    ├── app.js                          # State object + router (boots the app)
+    ├── components/
+    │   ├── ProgressIndicator.js        # Step dots nav
+    │   ├── NavigationButtons.js        # Back/Next row
+    │   └── EntryList.js               # Reusable add/remove row list
+    ├── views/
+    │   ├── ClinicInformationView.js    # Step 1 — clinic name + intro
+    │   ├── VolunteerHoursView.js       # Step 2 — role + hours entries
+    │   ├── ClinicalServicesView.js     # Step 3 — service + visit count entries
+    │   └── ImpactSummaryView.js        # Step 4 — totals, tables, references
+    └── services/
+        └── exportService.js            # PDF (print) + Excel (CSV) download stubs
