@@ -243,7 +243,14 @@ body {
 /* ---------------------------------------------------------
    FORM ELEMENTS
    --------------------------------------------------------- */
-.field { margin-bottom: var(--space-5); }
+.field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: var(--space-5);
+  min-width: 0;
+}
 
 .field__label {
   display: block;
@@ -297,10 +304,12 @@ body {
 
 .field__error {
   display: none;
+  width: 100%;
   margin-top: var(--space-2);
   font-size: var(--text-sm);
   color: var(--color-error);
   font-weight: 500;
+  overflow-wrap: anywhere;
 }
 
 .field__error.is-visible { display: block; }
@@ -329,9 +338,9 @@ body {
 
 .entry-row {
   display: grid;
-  grid-template-columns: 1fr 140px auto;
+  grid-template-columns: minmax(0, 1fr) minmax(140px, 180px) auto;
   gap: var(--space-3);
-  align-items: end;
+  align-items: start;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -339,7 +348,12 @@ body {
   box-shadow: var(--shadow-card);
 }
 
-.entry-row .field { margin-bottom: 0; }
+.entry-row .field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
+  min-width: 0;
+}
 
 .entry-row__remove {
   padding: var(--space-3);
@@ -355,6 +369,7 @@ body {
   margin-bottom: 0;
   height: 44px;
   width: 44px;
+  align-self: center;
 }
 
 .entry-row__remove:hover {
