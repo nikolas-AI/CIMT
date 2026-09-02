@@ -26,8 +26,8 @@
   --color-error-bg:      #FEF0EE;
   --color-success:       #1E7E5A;
 
-  --color-step-done:     #4A6CF7;
-  --color-step-active:   #1A2340;
+  --color-step-done:     var(--color-success);
+  --color-step-active:   var(--color-accent);
   --color-step-future:   #DDE2EE;
 
   /* Typography */
@@ -192,17 +192,17 @@ body {
   border-color: var(--color-step-done);
   color: #fff;
 }
-.progress-step--done .progress-step__text { color: var(--color-accent); }
+.progress-step--done .progress-step__text { color: var(--color-step-done); }
 .progress-step--done + .progress-step .progress-step__connector,
 .progress-step--done .progress-step__connector { background: var(--color-step-done); }
 
 /* Active */
 .progress-step--active .progress-step__dot {
-  background: var(--color-navy);
-  border-color: var(--color-navy);
+  background: var(--color-step-active);
+  border-color: var(--color-step-active);
   color: #fff;
 }
-.progress-step--active .progress-step__text { color: var(--color-navy); font-weight: 600; }
+.progress-step--active .progress-step__text { color: var(--color-step-active); font-weight: 600; }
 
 /* ---------------------------------------------------------
    VIEWS — shared wrapper
