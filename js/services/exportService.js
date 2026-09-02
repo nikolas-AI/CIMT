@@ -126,6 +126,14 @@ const ExportService = (() => {
       </tr>
     `).join("");
 
+    const referenceItems = REFERENCES.map(ref => `
+      <li>
+        <a href="${_escapeHTML(ref.url)}">${_escapeHTML(ref.title)}</a>
+        — ${_escapeHTML(ref.organization)}${ref.year ? ` (${ref.year})` : ""}.
+        ${ref.description ? `<br><span>${_escapeHTML(ref.description)}</span>` : ""}
+      </li>
+    `).join("");
+
     return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8">
 <title>Impact Summary — ${summary.clinicName}</title>
@@ -149,18 +157,24 @@ const ExportService = (() => {
 It does not represent actual revenue, Medicare reimbursement, or guaranteed healthcare savings.</p>
 <h2>Clinical Services</h2>
 <table><thead><tr><th>Service</th><th>Code</th><th style="text-align:right">Visits</th><th style="text-align:right">Rate</th><th style="text-align:right">Est. Value</th></tr></thead>
-<tbody>${svcRows}</tbody></table>
-<p style="text-align:right;font-weight:600">Clinical Total: ${_fmt(summary.clinicalServiceValue)}</p>
+<tbody>${svcRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Clinical Total</th><th style="text-align:right">${_fmt(summary.clinicalServiceValue)}</th></tr></tfoot></table>
 <h2>Volunteer Hours</h2>
 <table><thead><tr><th>Role</th><th style="text-align:right">Hours</th><th style="text-align:right">Rate/Hr</th><th style="text-align:right">Est. Value</th></tr></thead>
-<tbody>${volRows}</tbody></table>
-<p style="text-align:right;font-weight:600">Volunteer Total: ${_fmt(summary.volunteerValue)}</p>
+<tbody>${volRows}</tbody><tfoot><tr><th colspan="3" style="text-align:right">Volunteer Total</th><th style="text-align:right">${_fmt(summary.volunteerValue)}</th></tr></tfoot></table>
 <h2>References</h2>
 <ul style="font-size:0.85em;color:#475C8A;padding-left:20px">
-  <li>CMS Physician Fee Schedule Look-Up Tool — cms.gov</li>
-  <li>Independent Sector / Do Good Institute — Value of Volunteer Time (2025 data)</li>
+  ${referenceItems}
 </ul>
 </body></html>`;
+  }
+
+  function _escapeHTML(value) {
+    return String(value === null || value === undefined ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   return { downloadPDF, downloadExcel };
