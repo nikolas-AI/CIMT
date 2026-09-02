@@ -135,7 +135,8 @@ const EntryList = (() => {
       config.options.forEach(opt => {
         const option = document.createElement("option");
         option.value = opt.id;
-        option.textContent = opt.displayName;
+        const codeLabel = opt.codeSystem && opt.code ? ` (${opt.codeSystem} ${opt.code})` : "";
+        option.textContent = `${opt.displayName}${codeLabel}`;
         if (usedIds.includes(opt.id)) option.disabled = true;
         if (opt.id === entry.selectValue) option.selected = true;
         select.appendChild(option);
