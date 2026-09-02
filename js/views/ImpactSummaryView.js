@@ -12,7 +12,7 @@
 
 const ImpactSummaryView = (() => {
 
-  function render(summary, { onBack }) {
+  function render(summary, { onBack, onStartOver }) {
     const container = document.getElementById("view-container");
     container.innerHTML = "";
 
@@ -33,11 +33,9 @@ const ImpactSummaryView = (() => {
     const nav = NavigationButtons.create({
       backLabel: "Back",
       onBack,
-      nextLabel: "Edit Inputs",
-      onNext: onBack,  // "Edit Inputs" is just back
+      nextLabel: "Start Over",
+      onNext: onStartOver,
     });
-    // Override next button to say "Edit Inputs" not "Next"
-    // (already set via nextLabel above)
     view.appendChild(nav);
 
     container.appendChild(view);

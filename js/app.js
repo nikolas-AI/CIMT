@@ -52,6 +52,16 @@
   function advance() { goTo(state.currentStep + 1); }
   function retreat() { goTo(state.currentStep - 1); }
 
+  function startOver() {
+    state.clinic = { name: "" };
+    state.volunteers = [];
+    state.services = [];
+    state.noVolunteerHours = false;
+    state.noServicesProvided = false;
+    state.impact = null;
+    goTo(0);
+  }
+
   // -----------------------------------------------------------------
   // RENDER
   // Decides which view to show and refreshes the progress indicator.
@@ -73,7 +83,7 @@
         break;
 
       case 3:
-        ImpactSummaryView.render(state.impact, { onBack: retreat });
+        ImpactSummaryView.render(state.impact, { onBack: retreat, onStartOver: startOver });
         break;
 
       default:
