@@ -520,7 +520,7 @@ body {
 }
 
 .impact-hero__clinic {
-  font-size: var(--text-sm);
+  font-size: var(--text-lg);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
