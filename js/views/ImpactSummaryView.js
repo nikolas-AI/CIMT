@@ -26,8 +26,11 @@ const ImpactSummaryView = (() => {
     view.appendChild(_buildHero(summary));
     view.appendChild(_buildDisclaimer());
     view.appendChild(_buildBreakdown(summary));
-    view.appendChild(_buildRateTable(summary));
-    view.appendChild(_buildVolunteerRateSource());
+    const rateTable = _buildRateTable(summary);
+    if (rateTable) view.appendChild(rateTable);
+    if (summary.volunteerBreakdown.length > 0) {
+      view.appendChild(_buildVolunteerRateSource());
+    }
     view.appendChild(_buildReferences());
     view.appendChild(_buildDownloadActions(summary));
 
@@ -125,14 +128,16 @@ const ImpactSummaryView = (() => {
     const section = document.createElement("div");
     section.className = "summary-section";
 
-    section.innerHTML = `
-      <h2 class="summary-section__heading">Medical Benchmark Rates Used</h2>
-      <p class="summary-section__intro">
-        Clinical service values are estimated using publicly available healthcare benchmark rates.
-        These benchmarks provide a consistent reference point for estimating the value of services
-        provided.
-      </p>
-    `;
+    if (summary.serviceBreakdown.length > 0) {
+      section.innerHTML = `
+        <h2 class="summary-section__heading">Medical Benchmark Rates Used</h2>
+        <p class="summary-section__intro">
+          Clinical service values are estimated using publicly available healthcare benchmark rates.
+          These benchmarks provide a consistent reference point for estimating the value of services
+          provided.
+        </p>
+      `;
+    }
 
     const tableWrap = document.createElement("div");
     tableWrap.style.overflowX = "auto";
@@ -194,6 +199,10 @@ const ImpactSummaryView = (() => {
         </tbody>
       `;
       tableWrap.appendChild(volTable);
+    }
+
+    if (summary.serviceBreakdown.length === 0 && summary.volunteerBreakdown.length === 0) {
+      return null;
     }
 
     section.appendChild(tableWrap);
