@@ -12,6 +12,10 @@ const VolunteerHoursView = (() => {
   let _entryListEl = null;
 
   function render(state, { onBack, onNext }) {
+    // This screen converts saved volunteer objects into the generic row format
+    // expected by EntryList. EntryList handles controls; this view handles meaning.
+    // Convert persisted volunteer state into the generic EntryList shape. The
+    // list component handles DOM interactions; this view handles state mapping.
     const container = document.getElementById("view-container");
     container.innerHTML = "";
 
@@ -85,6 +89,9 @@ const VolunteerHoursView = (() => {
   }
 
   function _handleNext(state, onNext) {
+    // A user may choose "no volunteer hours" instead of filling in a row.
+    // Otherwise every visible row must pass EntryList validation first.
+    // The checkbox is an explicit valid choice, so it bypasses row validation.
     if (state.noVolunteerHours) {
       onNext();
       return;
@@ -102,6 +109,10 @@ const VolunteerHoursView = (() => {
   }
 
   function _syncToState(state, entries) {
+    // Form controls produce strings, but the rest of the app expects hours to be
+    // numbers. This is the boundary where the conversion happens.
+    // EntryList stores values as strings because they come from form controls.
+    // Convert hours back to numbers before putting them in application state.
     state.volunteers = entries.map(e => ({
       id:     e.id,
       roleId: e.selectValue,

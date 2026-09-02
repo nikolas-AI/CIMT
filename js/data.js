@@ -15,6 +15,10 @@
 // Each role has an id, display label, and benchmark hourly rate.
 // The rate source is documented in VOLUNTEER_RATE_SOURCE below.
 // -----------------------------------------------------------------
+// Every catalog item uses a stable id for saved state, a displayName for the
+// UI, and an active flag so an item can be retired without deleting old data.
+// Every catalog item has a stable id for saved answers, a display name for the
+// screen, and an active flag so an item can be retired without deleting history.
 const VOLUNTEER_ROLES = [
   { id: "physician",        displayName: "Physician (MD/DO)",        benchmarkRateUSD: 120.00, active: true },
   { id: "np-pa",            displayName: "Nurse Practitioner / PA",  benchmarkRateUSD: 75.00,  active: true },
@@ -32,6 +36,10 @@ const VOLUNTEER_ROLES = [
 // Benchmark rates are approximate Medicare Physician Fee Schedule
 // (non-facility, national) amounts. Codes are CPT/HCPCS.
 // -----------------------------------------------------------------
+// Clinical services additionally carry their CPT/HCPCS code and benchmark rate.
+// UI components read these fields instead of maintaining a second service list.
+// Services also store their CPT/HCPCS code and benchmark rate. Screens read
+// these fields instead of keeping a second, easily outdated service list.
 const CLINICAL_SERVICES = [
   { id: "primary-care-brief",    displayName: "Primary Care Visit (brief)",     code: "99213", codeSystem: "CPT", benchmarkRateUSD: 92.00,  active: true },
   { id: "primary-care-moderate", displayName: "Primary Care Visit (moderate)",  code: "99214", codeSystem: "CPT", benchmarkRateUSD: 134.00, active: true },

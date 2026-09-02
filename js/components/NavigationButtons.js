@@ -1,8 +1,9 @@
 /**
  * NavigationButtons.js — Shared Back / Next navigation row
  *
- * Returns a DOM element; does not mount itself.
- * Callers provide label strings and callback functions.
+ * Builds the Back and Next buttons used by the form screens.
+ * It returns the buttons inside a wrapper; the calling screen decides where
+ * to place that wrapper and what each click should do.
  */
 
 "use strict";
@@ -10,14 +11,16 @@
 const NavigationButtons = (() => {
 
   /**
-   * @param {object} options
-   * @param {string}   [options.backLabel]   — omit to hide Back
-   * @param {string}   [options.nextLabel]   — defaults to "Next"
-   * @param {Function} [options.onBack]
-   * @param {Function}  options.onNext
-   * @returns {HTMLElement}
+  * @param {object} options Settings supplied by the current screen.
+  * @param {string} [options.backLabel] Text for Back; omit it on the first screen.
+  * @param {string} [options.nextLabel] Text for the forward button.
+  * @param {Function} [options.onBack] Function called when Back is clicked.
+  * @param {Function} options.onNext Function called when the forward button is clicked.
+  * @returns {HTMLElement} A wrapper containing the requested buttons.
    */
   function create({ backLabel, nextLabel = "Next", onBack, onNext }) {
+    // This component only builds buttons and attaches callbacks. It does not
+    // know which screen is open, so it can be reused throughout the app.
     const row = document.createElement("div");
     row.className = backLabel ? "nav-buttons" : "nav-buttons nav-buttons--end";
 

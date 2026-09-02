@@ -25,10 +25,23 @@
 
 const EntryList = (() => {
 
+  /**
+   * Build a reusable list of selectable entries and numeric values.
+   *
+   * The component copies the supplied entries so it can react immediately to
+   * typing and selection changes. The parent remains responsible for converting
+   * those values into the application's domain state through onEntriesChange.
+   *
+   * @param {object} config Labels, options, initial entries, and callbacks.
+   * @returns {HTMLElement} Wrapper exposing validate() and getEntries().
+   */
   function create(config) {
     let entries = (config.entries && config.entries.length > 0)
       ? config.entries.map(e => ({ ...e }))
       : [_newEntry()];
+
+    // The component owns temporary row data while it is on screen. The parent
+    // view receives a copy through onEntriesChange and stores the durable state.
 
     const wrapper = document.createElement("div");
     wrapper.className = "entry-list-wrapper";
@@ -53,7 +66,8 @@ const EntryList = (() => {
     });
     wrapper.appendChild(addBtn);
 
-    // Public: validate all rows; returns array of error messages (empty = valid)
+    // Public: validate every row and return the indexes of invalid rows. The
+    // screen uses this result to decide whether it may move forward.
     wrapper.validate = () => {
       const errors = [];
       const rows = list.querySelectorAll(".entry-row");
@@ -66,6 +80,8 @@ const EntryList = (() => {
 
         let rowValid = true;
 
+        // Save messages on the row data because a selection change rebuilds all
+        // rows to refresh which options are disabled. This keeps other errors visible.
         if (!sel.value) {
           entry.selectError = `Please select a ${config.selectLabel.toLowerCase()}.`;
           DOM.showError(sel, selErr, entry.selectError);
@@ -94,12 +110,15 @@ const EntryList = (() => {
       return errors;
     };
 
-    // Public: read current values from the DOM
+    // Public: return the current row values. They stay as strings here because
+    // they come directly from HTML select and input controls.
     wrapper.getEntries = () => {
       return entries.map(e => ({ ...e }));
     };
 
     function _render() {
+      // Rebuilding is intentional after selection changes: duplicate options
+      // must be recalculated for every row.
       list.innerHTML = "";
       entries.forEach((entry, index) => {
         const row = _buildRow(entry, index);
@@ -107,12 +126,13 @@ const EntryList = (() => {
       });
     }
 
+    /** Build one row, including its controls, validation messages, and remove button. */
     function _buildRow(entry, index) {
       const row = document.createElement("div");
       row.className = "entry-row";
       row.dataset.index = index;
 
-      // --- Select ---
+      // --- Select: choose a role or service. ---
       const selectId = `entry-select-${index}-${Date.now()}`;
       const selField = document.createElement("div");
       selField.className = "field";
@@ -133,7 +153,8 @@ const EntryList = (() => {
       blank.textContent = `Select a ${config.selectLabel.toLowerCase()}…`;
       select.appendChild(blank);
 
-      // Determine which ids are already used (for duplicate prevention)
+      // Prevent the same role or service from being selected twice when the
+      // parent has configured allowDuplicates as false.
       const usedIds = config.allowDuplicates
         ? []
         : entries.filter((_, i) => i !== index).map(e => e.selectValue);
@@ -154,7 +175,7 @@ const EntryList = (() => {
           delete entries[index].selectError;
           DOM.clearError(select, selError);
         }
-        // Re-render all rows to update disabled states in other dropdowns
+        // Re-render all rows to update disabled states in other dropdowns.
         _render();
         _notify();
       });
@@ -167,7 +188,7 @@ const EntryList = (() => {
 
       selField.append(selLabel, select, selError);
 
-      // --- Count input ---
+      // --- Count input: hours for volunteers or visits for services. ---
       const countId = `entry-count-${index}-${Date.now()}`;
       const countField = document.createElement("div");
       countField.className = "field";
@@ -195,6 +216,7 @@ const EntryList = (() => {
           delete entries[index].countError;
           DOM.clearError(countInput, countError);
         }
+        // Count edits do not need a rebuild, so other rows keep their DOM errors.
         _notify();
       });
 
@@ -206,7 +228,7 @@ const EntryList = (() => {
 
       countField.append(countLabel, countInput, countError);
 
-      // --- Remove button (only when > 1 row) ---
+      // --- Remove button: keep at least one blank row available. ---
       const removeBtn = document.createElement("button");
       removeBtn.type = "button";
       removeBtn.className = "entry-row__remove";
@@ -230,16 +252,23 @@ const EntryList = (() => {
       return row;
     }
 
+    /** Notify the parent with a copy so the parent cannot mutate this component's rows. */
+    // Tell the parent view that a row changed. The parent converts these simple
+    // form values into its own state shape.
     function _notify() {
       if (typeof config.onEntriesChange === "function") {
         config.onEntriesChange(entries.map(e => ({ ...e })));
       }
     }
 
+    /** Create the blank row shown when the user adds another entry. */
+    // New rows start empty and receive an id so they can be tracked reliably.
     function _newEntry() {
       return { id: _uid(), selectValue: "", countValue: "" };
     }
 
+    /** Generate a short client-side id used to track a row across updates. */
+    // This id is only for tracking rows in the browser; it is not a database id.
     function _uid() {
       return Math.random().toString(36).slice(2, 9);
     }

@@ -13,6 +13,8 @@
 const ImpactSummaryView = (() => {
 
   function render(summary, { onBack, onStartOver }) {
+    // The calculator has already finished its work before this screen is shown.
+    // This view only chooses the order of report sections and wires up actions.
     const container = document.getElementById("view-container");
     container.innerHTML = "";
 
@@ -29,7 +31,8 @@ const ImpactSummaryView = (() => {
     view.appendChild(_buildReferences());
     view.appendChild(_buildDownloadActions(summary));
 
-    // Back navigation
+    // Back returns to the last input step; Start Over is a separate callback
+    // that clears state before returning to the first step.
     const nav = NavigationButtons.create({
       backLabel: "Back",
       onBack,
@@ -45,6 +48,8 @@ const ImpactSummaryView = (() => {
   // Hero — clinic name + total value
   // ---------------------------------------------------------------
   function _buildHero(summary) {
+    // The hero gives the user the headline result before the detailed tables.
+    // The hero gives the user the headline result before the detailed tables.
     const hero = document.createElement("div");
     hero.className = "impact-hero";
     hero.setAttribute("aria-label", "Impact total");
@@ -63,6 +68,8 @@ const ImpactSummaryView = (() => {
   // Disclaimer
   // ---------------------------------------------------------------
   function _buildDisclaimer() {
+    // Keep the estimate's limitations visible in the app, not only in exports.
+    // Keep the estimate's limitations visible in both the app and exported report.
     const d = document.createElement("p");
     d.className = "impact-disclaimer";
     d.setAttribute("role", "note");
@@ -76,6 +83,8 @@ const ImpactSummaryView = (() => {
   // Breakdown cards — clinical value + volunteer value
   // ---------------------------------------------------------------
   function _buildBreakdown(summary) {
+    // These cards summarize the same two categories expanded in the rate tables.
+    // These cards summarize the same two categories expanded in the rate tables.
     const section = document.createElement("div");
     section.className = "impact-breakdown";
 
@@ -109,6 +118,10 @@ const ImpactSummaryView = (() => {
   // Medical benchmark rate table
   // ---------------------------------------------------------------
   function _buildRateTable(summary) {
+    // Only selected services and roles appear here. The calculator has already
+    // removed entries that do not match a catalog item.
+    // Only selected services and roles appear here; the calculator has already
+    // removed invalid or unknown entries before this view receives the summary.
     const section = document.createElement("div");
     section.className = "summary-section";
 
@@ -191,6 +204,8 @@ const ImpactSummaryView = (() => {
   // Volunteer rate source info box
   // ---------------------------------------------------------------
   function _buildVolunteerRateSource() {
+    // This explains the source of volunteer rates separately from clinical rates.
+    // This explains the origin of volunteer rates separately from clinical rates.
     const section = document.createElement("div");
     section.className = "summary-section";
 
@@ -210,6 +225,10 @@ const ImpactSummaryView = (() => {
   // References
   // ---------------------------------------------------------------
   function _buildReferences() {
+    // References come from data.js so a source can be updated without changing
+    // this view's markup.
+    // References are rendered from data.js so updating a source updates the UI
+    // without editing this view's markup.
     const section = document.createElement("div");
     section.className = "summary-section";
 
@@ -232,6 +251,10 @@ const ImpactSummaryView = (() => {
   // Download actions (stubs connected to ExportService)
   // ---------------------------------------------------------------
   function _buildDownloadActions(summary) {
+    // Buttons pass the finished summary to the export service. They do not
+    // recalculate values or modify the user's answers.
+    // Export buttons pass the already-computed summary to the export service;
+    // neither button recalculates values or changes application state.
     const wrap = document.createElement("div");
     wrap.className = "download-actions";
 

@@ -10,6 +10,10 @@
 const ClinicInformationView = (() => {
 
   function render(state, { onNext }) {
+    // This first screen asks for only the clinic name. The input is rebuilt
+    // from state whenever the user returns here, so saved text is not lost.
+    // This view owns only the first form step. It reads the current name from
+    // state so returning from a later step preserves edits until Start Over.
     const container = document.getElementById("view-container");
     container.innerHTML = "";
 
@@ -76,6 +80,10 @@ const ClinicInformationView = (() => {
   }
 
   function _handleNext(state, onNext) {
+    // Do not move forward until the name contains something besides whitespace.
+    // The visible error is attached to this input so the user knows what to fix.
+    // Validate before saving and advancing. Keeping the raw value here lets the
+    // validator reject whitespace-only input while the saved value is trimmed.
     const input    = document.getElementById("clinic-name");
     const errorEl  = document.getElementById("clinic-name-error");
     const rawValue = input.value;

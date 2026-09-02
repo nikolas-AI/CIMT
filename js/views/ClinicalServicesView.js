@@ -12,6 +12,10 @@ const ClinicalServicesView = (() => {
   let _entryListEl = null;
 
   function render(state, { onBack, onNext }) {
+    // This screen uses the same reusable row editor as volunteer hours, but its
+    // row values represent service ids and visit counts.
+    // This view follows the same pattern as VolunteerHoursView, but maps each
+    // row to a clinical service id and an integer visit count.
     const container = document.getElementById("view-container");
     container.innerHTML = "";
 
@@ -84,6 +88,9 @@ const ClinicalServicesView = (() => {
   }
 
   function _handleNext(state, onNext) {
+    // "No services provided" is a valid answer and skips the blank starter row.
+    // Otherwise every row must be complete before the summary can be calculated.
+    // "No services" is a valid path and intentionally skips the empty row.
     if (state.noServicesProvided) {
       onNext();
       return;
@@ -99,6 +106,10 @@ const ClinicalServicesView = (() => {
   }
 
   function _syncToState(state, entries) {
+    // Keep visit counts numeric in shared state even though they arrive as text
+    // from the HTML input element.
+    // Keep the app state numeric even though EntryList receives text input
+    // values from the DOM.
     state.services = entries.map(e => ({
       id:        e.id,
       serviceId: e.selectValue,

@@ -19,8 +19,8 @@ const ExportService = (() => {
    * @param {ImpactSummary} summary
    */
   function downloadPDF(summary) {
-    // --- Stub: open a print-friendly version in a new window ---
-    // Replace this body with a real PDF generation call when ready.
+    // The browser's print dialog creates the PDF. The generated page contains
+    // the same report details, references, and links the user sees in the app.
     const win = window.open("", "_blank");
     if (!win) {
       alert("Please allow pop-ups to download the PDF summary.");
@@ -78,12 +78,18 @@ const ExportService = (() => {
   // ---------------------------------------------------------------
 
   function _fmt(value) {
+    // Exports keep two decimal places so downloaded data retains full rate detail.
+    // Exported rates and totals use two decimal places so the data file keeps
+    // more precision than the abbreviated whole-dollar UI formatting.
     return typeof value === "number"
       ? value.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 })
       : value;
   }
 
   function _csvCell(val) {
+    // Quote cells containing commas, quotes, or line breaks so CSV columns stay aligned.
+    // Quote cells containing CSV control characters so commas in names or
+    // descriptions do not shift values into the wrong columns.
     const str = String(val === null || val === undefined ? "" : val);
     if (str.includes(",") || str.includes('"') || str.includes("\n")) {
       return `"${str.replace(/"/g, '""')}"`;
@@ -92,6 +98,9 @@ const ExportService = (() => {
   }
 
   function _triggerDownload(content, filename, mimeType) {
+    // A temporary browser URL downloads generated content without sending it to a server.
+    // A temporary object URL lets the browser download generated content
+    // without sending report data to a server.
     const blob = new Blob([content], { type: mimeType });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement("a");
@@ -104,10 +113,16 @@ const ExportService = (() => {
   }
 
   function _safeFilename(name) {
+    // Keep the filename readable while removing characters that are unsafe in filenames.
+    // Keep the downloaded filename readable while removing unsafe characters.
     return (name || "clinic").replace(/[^a-z0-9]/gi, "-").toLowerCase().slice(0, 40);
   }
 
   function _buildPrintHTML(summary) {
+    // Build the printable page as HTML so browsers can preserve reference links
+    // when the user chooses "Save as PDF".
+    // Build the printable document as HTML so browsers can preserve clickable
+    // reference links when the user chooses "Save as PDF".
     const svcRows = summary.serviceBreakdown.map(r => `
       <tr>
         <td>${r.serviceName}</td><td>${r.code}</td>

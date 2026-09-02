@@ -17,3 +17,37 @@ clinic-impact-estimator/
     │   └── ImpactSummaryView.js        # Step 4 — totals, tables, references
     └── services/
         └── exportService.js            # PDF (print) + Excel (CSV) download stubs
+
+    HOW THE APP WORKS
+    -----------------
+    This is a small browser app made with plain HTML, CSS, and JavaScript. There is
+    no build step and no framework. Open index.html in a browser to run it.
+
+    The user moves through four screens:
+    1. Clinic information: enter the clinic name.
+    2. Volunteer hours: add volunteer roles and hours.
+    3. Clinical services: add services and visit counts.
+    4. Impact summary: review the results and export them.
+
+    FILE RESPONSIBILITIES
+    ---------------------
+    - data.js is the catalog. Change names, rates, codes, or references there.
+    - app.js owns the current answers and decides which screen is visible.
+    - views/ creates screens and translates form values into app state.
+    - components/ contains reusable pieces shared by multiple screens.
+    - calculator.js performs the math and does not create or change HTML.
+    - exportService.js turns the completed summary into printable HTML or CSV.
+    - utils.js contains small helpers used by several other files.
+    - styles.css controls the appearance of every screen.
+
+    TYPICAL DATA FLOW
+    -----------------
+    1. A view creates a form control, such as an input or dropdown.
+    2. The user changes it, and the view/component updates the shared state in app.js.
+    3. When the user continues, the view validates the input before moving on.
+    4. calculator.js reads the saved answers and returns a summary object.
+    5. The summary view displays that object; it does not calculate values itself.
+
+    When adding a service or reference, start in data.js. When adding a screen, add
+    its rendering code in views/ and connect it to the step switch in app.js. Keep
+    calculations in calculator.js and avoid putting business rules in markup.

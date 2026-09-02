@@ -1,11 +1,11 @@
 /**
  * app.js — Application state and router
  *
- * Owns the single source of truth (state) and decides which view
- * to render based on currentStep. Views and components read/write
- * state via the references passed to them.
+ * This is the application's traffic controller. It remembers all answers in
+ * one state object and decides which screen should be displayed. The views do
+ * the form work, while this file connects the screens in the correct order.
  *
- * This file boots the application.
+ * This file starts the application after the HTML page has loaded.
  */
 
 "use strict";
@@ -14,9 +14,8 @@
 
   // -----------------------------------------------------------------
   // APPLICATION STATE
-  // A single plain object. Passed by reference to views so they can
-  // read and write directly. Replace with a more formal state manager
-  // (e.g. Proxy-based observable) in a future version if needed.
+  // All answers live here while the app is open. A view receives this object,
+  // reads values from it when it is drawn, and writes new values back into it.
   // -----------------------------------------------------------------
   const state = {
     /** @type {{ name: string }} */
@@ -44,14 +43,19 @@
   // -----------------------------------------------------------------
   // NAVIGATION
   // -----------------------------------------------------------------
+  // Change the active step and rebuild the progress indicator and view.
   function goTo(step) {
     state.currentStep = step;
     _render();
   }
 
+  // Views do not need to know how the whole app is organized. They call these
+  // small functions when the user clicks a navigation button.
   function advance() { goTo(state.currentStep + 1); }
   function retreat() { goTo(state.currentStep - 1); }
 
+  // Start Over clears every answer and checkbox, then draws the first screen.
+  // Replacing the arrays removes the old rows, not just their displayed text.
   function startOver() {
     state.clinic = { name: "" };
     state.volunteers = [];
@@ -69,6 +73,8 @@
   function _render() {
     ProgressIndicator.render(state.currentStep);
 
+    // A screen is rebuilt when the step changes. It reads saved answers and gets
+    // callbacks for only the buttons that belong to that screen.
     switch (state.currentStep) {
       case 0:
         ClinicInformationView.render(state, { onNext: advance });
@@ -99,6 +105,8 @@
   // Called when the user clicks "See Impact" on View 3.
   // Runs the calculator and then navigates to View 4.
   // -----------------------------------------------------------------
+  // Calculate once, save the result, and then show the summary screen. Keeping
+  // the math here prevents the summary from using stale totals.
   function _computeAndShowImpact() {
     state.impact = Calculator.computeImpact(state);
     advance();

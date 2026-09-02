@@ -1,8 +1,9 @@
 /**
  * ProgressIndicator.js — Step progress nav component
  *
- * Renders into #progress-indicator.
- * Driven entirely by the current step index; no internal state.
+ * Draws the four-step progress bar at the top of the page.
+ * It receives the current step number from app.js and does not store its own
+ * copy, so the bar always follows the screen currently being displayed.
  */
 
 "use strict";
@@ -16,6 +17,15 @@ const ProgressIndicator = (() => {
     { label: "Impact",     index: 3 },
   ];
 
+  /**
+  * Rebuild the progress bar for the currently visible screen.
+   *
+  * A step is complete when it comes before currentStep. The current step gets
+  * aria-current so screen readers can announce the user's position. Rebuilding
+  * this small component is simpler than updating each dot and line separately.
+   *
+  * @param {number} currentStep Zero-based index: 0 is Clinic and 3 is Impact.
+   */
   function render(currentStep) {
     const container = document.getElementById("progress-indicator");
     if (!container) return;
@@ -40,7 +50,8 @@ const ProgressIndicator = (() => {
 
       const ariaCurrent = isActive ? 'aria-current="step"' : "";
 
-      // Connector line before each step except the first
+      // Draw a connector before every step after the first. CSS colors it based
+      // on the preceding step's status.
       const connector = i > 0
         ? `<div class="progress-step__connector" aria-hidden="true"></div>`
         : "";

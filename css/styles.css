@@ -4,10 +4,14 @@
    ========================================================= */
 
 /* ---------------------------------------------------------
-   TOKENS
+  DESIGN TOKENS
+  These variables are the small set of shared design decisions used below.
+  Change a token here when the whole interface should use a new color, font,
+  spacing value, corner radius, or shadow. Keeping values here prevents each
+  component from inventing its own slightly different version.
    --------------------------------------------------------- */
 :root {
-  /* Palette */
+  /* Palette: page, surfaces, text, actions, status, and summary colors. */
   --color-bg:            #F8F9FC;
   --color-surface:       #FFFFFF;
   --color-border:        #DDE2EE;
@@ -30,7 +34,7 @@
   --color-step-active:   var(--color-accent);
   --color-step-future:   #DDE2EE;
 
-  /* Typography */
+  /* Typography: display is used for large results; body is used for controls. */
   --font-display:        'DM Serif Display', Georgia, serif;
   --font-body:           'Inter', system-ui, sans-serif;
 
@@ -43,7 +47,7 @@
   --text-3xl:  2rem;
   --text-hero: 3.5rem;
 
-  /* Spacing */
+  /* Spacing: use these steps instead of adding arbitrary pixel values. */
   --space-1:  0.25rem;
   --space-2:  0.5rem;
   --space-3:  0.75rem;
@@ -54,18 +58,21 @@
   --space-10: 2.5rem;
   --space-12: 3rem;
 
-  /* Shape */
+  /* Shape: small values are for controls; larger values are for grouped panels. */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
 
-  /* Shadow */
+  /* Shadow: the card shadow and keyboard-focus ring are shared by components. */
   --shadow-card: 0 1px 3px rgba(26,35,64,0.08), 0 4px 16px rgba(26,35,64,0.06);
   --shadow-focus: 0 0 0 3px rgba(74,108,247,0.25);
 }
 
 /* ---------------------------------------------------------
-   RESET & BASE
+  RESET AND BASE STYLES
+  Start with predictable sizing and remove browser defaults that would make
+  spacing differ between browsers. The body rules establish the defaults that
+  every screen inherits unless a component intentionally overrides them.
    --------------------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -81,11 +88,16 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Some users ask the browser to reduce motion. Keep the app usable for them
+     by effectively disabling decorative transitions and animations. */
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
 
 /* ---------------------------------------------------------
-   APP SHELL
+  APP SHELL
+  These rules create the page frame: a sticky header and a centered content
+  column. The shell stretches to the viewport height even when a screen has
+  very little content.
    --------------------------------------------------------- */
 #app-shell {
   display: flex;
@@ -102,6 +114,7 @@ body {
 }
 
 .header-inner {
+  /* Match the body width so the header logo and title line up with the form. */
   max-width: 720px;
   margin: 0 auto;
   padding: var(--space-4) var(--space-6);
@@ -122,6 +135,8 @@ body {
 }
 
 .app-body {
+  /* width: 100% plus max-width makes the layout fluid on phones but readable
+     on large screens. Padding keeps content away from the viewport edges. */
   flex: 1;
   max-width: 720px;
   width: 100%;
@@ -130,7 +145,10 @@ body {
 }
 
 /* ---------------------------------------------------------
-   PROGRESS INDICATOR
+  PROGRESS INDICATOR
+  The progress component creates one .progress-step per screen and inserts a
+  connector between them. The modifier classes --done and --active are added
+  by JavaScript; the base styles below describe a future/unvisited step.
    --------------------------------------------------------- */
 #progress-indicator {
   display: flex;
@@ -155,6 +173,8 @@ body {
 }
 
 .progress-step__dot {
+  /* Fixed dimensions keep the progress bar from shifting when a number becomes
+     a checkmark after the user completes a screen. */
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -179,6 +199,7 @@ body {
 }
 
 .progress-step__connector {
+  /* Flex makes each line fill the space between neighboring step dots. */
   height: 2px;
   flex: 1;
   background: var(--color-step-future);
@@ -186,7 +207,7 @@ body {
   margin-bottom: 20px; /* align with dot center */
 }
 
-/* Done */
+/* Done: green indicates a screen the user has already completed. */
 .progress-step--done .progress-step__dot {
   background: var(--color-step-done);
   border-color: var(--color-step-done);
@@ -196,7 +217,7 @@ body {
 .progress-step--done + .progress-step .progress-step__connector,
 .progress-step--done .progress-step__connector { background: var(--color-step-done); }
 
-/* Active */
+/* Active: blue identifies the screen whose form is currently visible. */
 .progress-step--active .progress-step__dot {
   background: var(--color-step-active);
   border-color: var(--color-step-active);
@@ -205,7 +226,10 @@ body {
 .progress-step--active .progress-step__text { color: var(--color-step-active); font-weight: 600; }
 
 /* ---------------------------------------------------------
-   VIEWS — shared wrapper
+  VIEWS - SHARED WRAPPER
+  Every screen renderer creates a .view element. The animation applies once
+  when a new screen is inserted, while the typography rules keep headings and
+  explanatory text consistent across all four steps.
    --------------------------------------------------------- */
 .view { animation: fadeSlideIn 0.22s ease; }
 
@@ -241,7 +265,9 @@ body {
 }
 
 /* ---------------------------------------------------------
-   FORM ELEMENTS
+  FORM ELEMENTS
+  These classes are shared by the clinic name field and the reusable entry rows.
+  A field is a vertical stack: label, control, and optional error message.
    --------------------------------------------------------- */
 .field {
   display: flex;
@@ -267,6 +293,7 @@ body {
 
 .field__input,
 .field__select {
+  /* Shared control sizing makes text inputs and dropdowns line up. */
   width: 100%;
   padding: var(--space-3) var(--space-4);
   font-family: var(--font-body);
@@ -281,6 +308,8 @@ body {
 }
 
 .field__select {
+  /* The native arrow is hidden so the custom arrow has the same appearance in
+     every browser. The extra right padding keeps text away from that arrow. */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238492B0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
@@ -292,6 +321,7 @@ body {
 
 .field__input:focus,
 .field__select:focus {
+  /* Use a visible focus ring for keyboard users without changing layout size. */
   outline: none;
   border-color: var(--color-border-focus);
   box-shadow: var(--shadow-focus);
@@ -299,10 +329,13 @@ body {
 
 .field__input.is-error,
 .field__select.is-error {
+  /* JavaScript adds .is-error after validation fails. */
   border-color: var(--color-error);
 }
 
 .field__error {
+  /* Errors are hidden until JavaScript adds .is-visible. Reserving this style
+     in one place keeps every validation message consistent. */
   display: none;
   width: 100%;
   margin-top: var(--space-2);
@@ -326,17 +359,22 @@ body {
 }
 
 .inline-toggle input {
+  /* Keep the checkbox large enough to tap comfortably on touch screens. */
   width: 18px;
   height: 18px;
   accent-color: var(--color-accent);
 }
 
 /* ---------------------------------------------------------
-   ENTRY ROWS (Volunteer / Services)
+  ENTRY ROWS (VOLUNTEERS AND SERVICES)
+  EntryList uses this same grid for both kinds of repeated data. On desktop the
+  first column grows, the count column stays compact, and the remove button gets
+  its own fixed space. The mobile rules below stack the first field separately.
    --------------------------------------------------------- */
 .entry-list { display: flex; flex-direction: column; gap: var(--space-4); }
 
 .entry-row {
+  /* minmax(0, 1fr) allows long service names to shrink instead of overflowing. */
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(140px, 180px) auto;
   gap: var(--space-3);
@@ -356,6 +394,8 @@ body {
 }
 
 .entry-row__remove {
+  /* The top margin lines this control up with the input below its label. Only
+     the X is red; the neutral border keeps the button visually lightweight. */
   padding: var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -385,7 +425,10 @@ body {
 }
 
 /* ---------------------------------------------------------
-   BUTTONS
+  BUTTONS
+  .btn contains shared button geometry and typography. Modifier classes describe
+  purpose: primary actions, secondary navigation, adding rows, and downloads.
+  Keeping the variants separate makes it easy to change one action type safely.
    --------------------------------------------------------- */
 .btn {
   display: inline-flex;
@@ -405,11 +448,12 @@ body {
 }
 
 .btn:focus-visible {
+  /* Do not remove keyboard focus; make it visible without moving the button. */
   outline: none;
   box-shadow: var(--shadow-focus);
 }
 
-/* Primary */
+/* Primary: the main forward action on a screen. */
 .btn--primary {
   background: var(--color-accent);
   color: #fff;
@@ -417,7 +461,7 @@ body {
 }
 .btn--primary:hover { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
 
-/* Secondary / ghost */
+/* Secondary / ghost: a lower-emphasis action such as Back. */
 .btn--secondary {
   background: transparent;
   color: var(--color-slate);
@@ -425,7 +469,7 @@ body {
 }
 .btn--secondary:hover { background: var(--color-bg); color: var(--color-navy); }
 
-/* Add row */
+/* Add row: a full-width dashed action below the current entries. */
 .btn--add {
   background: transparent;
   color: var(--color-accent);
@@ -437,7 +481,7 @@ body {
 }
 .btn--add:hover { background: rgba(74,108,247,0.05); }
 
-/* Download */
+/* Download: full-width actions on the summary screen. */
 .btn--download {
   background: var(--color-surface);
   color: var(--color-navy);
@@ -449,7 +493,7 @@ body {
 }
 .btn--download:hover { background: var(--color-bg); border-color: var(--color-accent); color: var(--color-accent); }
 
-/* Navigation row */
+/* Navigation row: keeps Back on the left and the forward action on the right. */
 .nav-buttons {
   display: flex;
   justify-content: space-between;
@@ -461,7 +505,10 @@ body {
 .nav-buttons--end { justify-content: flex-end; }
 
 /* ---------------------------------------------------------
-   IMPACT SUMMARY — View 4
+  IMPACT SUMMARY - VIEW 4
+  The summary is intentionally organized from largest result to supporting
+  detail: headline total, category cards, rate tables, references, and exports.
+  These styles belong only to the final report screen.
    --------------------------------------------------------- */
 .impact-hero {
   background: var(--color-impact-bg);
@@ -507,7 +554,7 @@ body {
   line-height: 1.5;
 }
 
-/* Breakdown cards */
+/* Breakdown cards: compare the two sources of estimated impact side by side. */
 .impact-breakdown {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -546,7 +593,7 @@ body {
   line-height: 1.5;
 }
 
-/* Rate / reference sections */
+/* Rate and reference sections: shared spacing and heading treatment. */
 .summary-section {
   margin-bottom: var(--space-8);
 }
@@ -569,7 +616,7 @@ body {
   line-height: 1.6;
 }
 
-/* Rate table */
+/* Rate table: compact tabular data with right-aligned numeric values. */
 .rate-table {
   width: 100%;
   border-collapse: collapse;
@@ -596,7 +643,7 @@ body {
 .rate-table td:last-child { text-align: right; }
 .rate-table th:last-child { text-align: right; }
 
-/* Volunteer rate source box */
+/* Volunteer rate source box: visually separates methodology from the totals. */
 .rate-source-box {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -608,7 +655,7 @@ body {
   line-height: 1.6;
 }
 
-/* References list */
+/* References list: readable linked sources without default bullet indentation. */
 .references-list {
   list-style: none;
   display: flex;
@@ -628,7 +675,7 @@ body {
 }
 .references-list a:hover { text-decoration: underline; }
 
-/* Download actions */
+/* Download actions: stack export buttons so each has a full, easy-to-tap target. */
 .download-actions {
   display: flex;
   flex-direction: column;
@@ -637,7 +684,10 @@ body {
 }
 
 /* ---------------------------------------------------------
-   UTILITY
+  ACCESSIBILITY UTILITY
+  .sr-only keeps text available to screen readers while removing it from the
+  visual layout. It is useful for context that visual users already receive
+  from nearby headings or icons.
    --------------------------------------------------------- */
 .sr-only {
   position: absolute;
@@ -650,7 +700,10 @@ body {
 }
 
 /* ---------------------------------------------------------
-   RESPONSIVE
+  RESPONSIVE LAYOUT
+  At 600px and below, the entry grid gives the main field the full row and keeps
+  the count field and remove button side by side. Summary cards become one column
+  so their text remains readable instead of becoming too narrow.
    --------------------------------------------------------- */
 @media (max-width: 600px) {
   .app-body { padding: var(--space-6) var(--space-4) var(--space-10); }
