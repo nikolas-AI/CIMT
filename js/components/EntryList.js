@@ -58,6 +58,7 @@ const EntryList = (() => {
       const errors = [];
       const rows = list.querySelectorAll(".entry-row");
       rows.forEach((row, i) => {
+        const entry = entries[i];
         const sel = row.querySelector("select");
         const inp = row.querySelector("input");
         const selErr = row.querySelector(".entry-select-error");
@@ -66,20 +67,25 @@ const EntryList = (() => {
         let rowValid = true;
 
         if (!sel.value) {
-          DOM.showError(sel, selErr, `Please select a ${config.selectLabel.toLowerCase()}.`);
+          entry.selectError = `Please select a ${config.selectLabel.toLowerCase()}.`;
+          DOM.showError(sel, selErr, entry.selectError);
           rowValid = false;
         } else {
+          delete entry.selectError;
           DOM.clearError(sel, selErr);
         }
 
         const numVal = parseFloat(inp.value);
         if (inp.value === "" || isNaN(numVal)) {
-          DOM.showError(inp, inpErr, `Please enter a number.`);
+          entry.countError = "Please enter a number.";
+          DOM.showError(inp, inpErr, entry.countError);
           rowValid = false;
         } else if (numVal < 0) {
-          DOM.showError(inp, inpErr, `Value cannot be negative.`);
+          entry.countError = "Value cannot be negative.";
+          DOM.showError(inp, inpErr, entry.countError);
           rowValid = false;
         } else {
+          delete entry.countError;
           DOM.clearError(inp, inpErr);
         }
 
@@ -144,6 +150,10 @@ const EntryList = (() => {
 
       select.addEventListener("change", () => {
         entries[index].selectValue = select.value;
+        if (select.value) {
+          delete entries[index].selectError;
+          DOM.clearError(select, selError);
+        }
         // Re-render all rows to update disabled states in other dropdowns
         _render();
         _notify();
@@ -153,6 +163,7 @@ const EntryList = (() => {
       selError.id = `${selectId}-error`;
       selError.className = "field__error entry-select-error";
       selError.setAttribute("role", "alert");
+      if (entry.selectError) DOM.showError(select, selError, entry.selectError);
 
       selField.append(selLabel, select, selError);
 
@@ -179,6 +190,11 @@ const EntryList = (() => {
 
       countInput.addEventListener("input", () => {
         entries[index].countValue = countInput.value;
+        const count = parseFloat(countInput.value);
+        if (countInput.value !== "" && !isNaN(count) && count >= 0) {
+          delete entries[index].countError;
+          DOM.clearError(countInput, countError);
+        }
         _notify();
       });
 
@@ -186,6 +202,7 @@ const EntryList = (() => {
       countError.id = `${countId}-error`;
       countError.className = "field__error entry-count-error";
       countError.setAttribute("role", "alert");
+      if (entry.countError) DOM.showError(countInput, countError, entry.countError);
 
       countField.append(countLabel, countInput, countError);
 

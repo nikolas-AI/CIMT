@@ -62,6 +62,11 @@ const ClinicInformationView = (() => {
 
     // Allow Enter key to advance
     const input = view.querySelector("#clinic-name");
+    input.addEventListener("input", () => {
+      if (!Validation.clinicName(input.value)) {
+        DOM.clearError(input, view.querySelector("#clinic-name-error"));
+      }
+    });
     input.addEventListener("keydown", e => {
       if (e.key === "Enter") _handleNext(state, onNext);
     });
