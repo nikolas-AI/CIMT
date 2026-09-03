@@ -16,6 +16,7 @@
  *   countStep:       number
  *   addLabel:        string                      — e.g. "+ Add another role"
  *   allowDuplicates: boolean                     — default false
+ *   searchable:       boolean                     — use an inline searchable combobox
  *   entries:         Array<{ id, selectValue, countValue }>
  *   onEntriesChange: Function(entries)           — called on any change
  * }
@@ -74,7 +75,8 @@ const EntryList = (() => {
       rows.forEach((row, i) => {
         const entry = entries[i];
         const sel = row.querySelector("select");
-        const inp = row.querySelector("input");
+        const selControl = row.querySelector(".field__search") || sel;
+        const inp = row.querySelector(".entry-count-input");
         const selErr = row.querySelector(".entry-select-error");
         const inpErr = row.querySelector(".entry-count-error");
 
@@ -84,11 +86,11 @@ const EntryList = (() => {
         // rows to refresh which options are disabled. This keeps other errors visible.
         if (!sel.value) {
           entry.selectError = `Please select a ${config.selectLabel.toLowerCase()}.`;
-          DOM.showError(sel, selErr, entry.selectError);
+          DOM.showError(selControl, selErr, entry.selectError);
           rowValid = false;
         } else {
           delete entry.selectError;
-          DOM.clearError(sel, selErr);
+          DOM.clearError(selControl, selErr);
         }
 
         const numVal = parseFloat(inp.value);
@@ -142,8 +144,41 @@ const EntryList = (() => {
       selLabel.setAttribute("for", selectId);
       selLabel.textContent = config.selectLabel;
 
+      const displayLabel = (option) => {
+        // The same label is used in the input, suggestions, and stored select
+        // so users see consistent service names and codes in every state.
+        const codeLabel = option.codeSystem && option.code
+          ? ` (${option.codeSystem} ${option.code})`
+          : "";
+        return `${option.displayName}${codeLabel}`;
+      };
+
+      let searchInput = null;
+      let optionList = null;
+      if (config.searchable) {
+        // Use a text combobox with an in-page listbox so filtering is immediate
+        // and the suggestions share the application's layout and typography.
+        // The input keeps the same ID that the label expects; the hidden select
+        // receives a separate ID below because it is only the stored value.
+        searchInput = document.createElement("input");
+        searchInput.id = selectId;
+        searchInput.className = "field__input field__search";
+        searchInput.type = "search";
+        searchInput.placeholder = `Select or search ${config.selectLabel.toLowerCase()}s`;
+        searchInput.setAttribute("role", "combobox");
+        searchInput.setAttribute("aria-autocomplete", "list");
+        searchInput.setAttribute("aria-describedby", `${selectId}-error`);
+
+        optionList = document.createElement("div");
+        optionList.className = "field__option-list";
+        optionList.id = `${selectId}-options`;
+        optionList.setAttribute("role", "listbox");
+        searchInput.setAttribute("aria-controls", optionList.id);
+        selField.append(searchInput);
+      }
+
       const select = document.createElement("select");
-      select.id = selectId;
+      select.id = config.searchable ? `${selectId}-stored` : selectId;
       select.className = "field__select";
       select.setAttribute("aria-describedby", `${selectId}-error`);
 
@@ -159,15 +194,77 @@ const EntryList = (() => {
         ? []
         : entries.filter((_, i) => i !== index).map(e => e.selectValue);
 
+      // Keep every catalog option in the hidden select. Disabled options still
+      // document the current choices and prevent duplicate selections in the
+      // regular native-select variant of this reusable component.
+
       config.options.forEach(opt => {
         const option = document.createElement("option");
         option.value = opt.id;
-        const codeLabel = opt.codeSystem && opt.code ? ` (${opt.codeSystem} ${opt.code})` : "";
-        option.textContent = `${opt.displayName}${codeLabel}`;
+        option.textContent = displayLabel(opt);
         if (usedIds.includes(opt.id)) option.disabled = true;
         if (opt.id === entry.selectValue) option.selected = true;
         select.appendChild(option);
+
       });
+
+      if (config.searchable) {
+        // Keep the native select as the internal value source for validation;
+        // the visible combobox is responsible only for searching and display.
+        const selected = config.options.find(opt => opt.id === entry.selectValue);
+        searchInput.value = selected ? displayLabel(selected) : "";
+        const renderOptions = () => {
+          // Rebuild matches on every input event so the list reflects each
+          // keystroke without requiring the user to reopen the control.
+          // Matching includes the display name and code text shown to users.
+          const query = searchInput.value.trim().toLowerCase();
+          optionList.innerHTML = "";
+          const matches = config.options.filter(opt =>
+            !usedIds.includes(opt.id) && displayLabel(opt).toLowerCase().includes(query)
+          );
+          matches.forEach(opt => {
+            const option = document.createElement("button");
+            option.type = "button";
+            option.className = "field__option";
+            option.textContent = displayLabel(opt);
+            option.setAttribute("role", "option");
+            // Keep focus on the input until click runs; otherwise blur hides the
+            // list before a mouse user can choose the highlighted suggestion.
+            option.addEventListener("mousedown", (event) => event.preventDefault());
+            option.addEventListener("click", () => {
+              entries[index].selectValue = opt.id;
+              select.value = opt.id;
+              searchInput.value = displayLabel(opt);
+              delete entries[index].selectError;
+              DOM.clearError(searchInput, selError);
+              _render();
+              _notify();
+            });
+            optionList.appendChild(option);
+          });
+          optionList.hidden = matches.length === 0;
+        };
+
+        searchInput.addEventListener("input", () => {
+          // An exact typed label synchronizes the hidden select immediately;
+          // partial text clears the stored value until the user chooses a match.
+          const query = searchInput.value.trim().toLowerCase();
+          const selectedOption = config.options.find(opt =>
+            !usedIds.includes(opt.id) && displayLabel(opt).toLowerCase() === query
+          );
+          select.value = selectedOption ? selectedOption.id : "";
+          entries[index].selectValue = select.value;
+          renderOptions();
+          _notify();
+        });
+        searchInput.addEventListener("focus", renderOptions);
+        searchInput.addEventListener("blur", () => {
+          // Delay hiding briefly so the click handler on a suggestion can run.
+          window.setTimeout(() => { optionList.hidden = true; }, 150);
+        });
+        renderOptions();
+        optionList.hidden = true;
+      }
 
       select.addEventListener("change", () => {
         entries[index].selectValue = select.value;
@@ -186,7 +283,16 @@ const EntryList = (() => {
       selError.setAttribute("role", "alert");
       if (entry.selectError) DOM.showError(select, selError, entry.selectError);
 
-      selField.append(selLabel, select, selError);
+      if (config.searchable) {
+        select.classList.add("field__select--stored");
+        select.tabIndex = -1;
+        select.setAttribute("aria-hidden", "true");
+        selField.append(select, optionList, selError);
+      } else {
+        selField.append(selLabel, select, selError);
+      }
+
+      if (config.searchable) selField.prepend(selLabel);
 
       // --- Count input: hours for volunteers or visits for services. ---
       const countId = `entry-count-${index}-${Date.now()}`;
@@ -200,7 +306,7 @@ const EntryList = (() => {
 
       const countInput = document.createElement("input");
       countInput.id = countId;
-      countInput.className = "field__input";
+      countInput.className = "field__input entry-count-input";
       countInput.type = "number";
       countInput.min = String(config.countMin !== undefined ? config.countMin : 0);
       countInput.step = String(config.countStep !== undefined ? config.countStep : 1);

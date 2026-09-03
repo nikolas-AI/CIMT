@@ -317,7 +317,57 @@ body {
   cursor: pointer;
 }
 
+.field__select--stored {
+  display: none;
+}
+
 .field__input::placeholder { color: var(--color-muted); }
+
+/* The listbox is positioned against the field so it stays aligned with the
+  combobox instead of relying on browser-specific native popup rendering. */
+.field:has(.field__option-list) {
+  position: relative;
+}
+
+.field__option-list {
+  /* Match the combobox width and anchor the menu to the same field. The fixed
+     max height keeps long catalogs usable without shifting the form layout. */
+  position: absolute;
+  z-index: 10;
+  top: calc(var(--text-sm) * 1.6 + var(--space-2) + 44px);
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: var(--space-1);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-focus);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+.field__option-list[hidden] { display: none; }
+
+.field__option {
+  /* Inherit the body font explicitly so custom buttons match the input rather
+     than falling back to browser button typography. */
+  display: block;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-navy);
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-size: var(--text-base);
+  text-align: left;
+  cursor: pointer;
+}
+
+.field__option:hover,
+.field__option:focus-visible {
+  background: var(--color-background);
+  outline: none;
+}
 
 .field__input:focus,
 .field__select:focus {

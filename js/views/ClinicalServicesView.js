@@ -52,6 +52,9 @@ const ClinicalServicesView = (() => {
       countStep:        1,
       addLabel:         "Add another service",
       allowDuplicates:  false,
+      // Enable the EntryList combobox for this catalog only. Volunteer roles
+      // continue to use the standard native select because their list is short.
+      searchable:       true,
       entries:          savedEntries,
       onEntriesChange:  (entries) => _syncToState(state, entries),
     });
