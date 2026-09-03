@@ -10,8 +10,9 @@
 const ClinicInformationView = (() => {
 
   function render(state, { onNext }) {
-    // This first screen asks for only the clinic name. The input is rebuilt
-    // from state whenever the user returns here, so saved text is not lost.
+    // This first screen asks for the clinic name and reporting dates. The
+    // inputs are rebuilt from state whenever the user returns here, so saved
+    // values are not lost.
     // This view owns only the first form step. It reads the current name from
     // state so returning from a later step preserves edits until Start Over.
     const container = document.getElementById("view-container");
@@ -53,6 +54,35 @@ const ClinicInformationView = (() => {
         >
         <span id="clinic-name-error" class="field__error" role="alert"></span>
       </div>
+
+      <div class="field reporting-period-fields">
+        <span class="field__label">Reporting period <span class="required-mark" aria-hidden="true">*</span></span>
+        <div class="reporting-period-fields__inputs">
+          <div>
+            <label class="field__sublabel" for="reporting-period-from">From</label>
+            <input
+              id="reporting-period-from"
+              class="field__input"
+              type="date"
+              aria-required="true"
+              aria-describedby="reporting-period-error"
+              value="${_escape(state.clinic.reportingPeriodFrom)}"
+            >
+          </div>
+          <div>
+            <label class="field__sublabel" for="reporting-period-to">To</label>
+            <input
+              id="reporting-period-to"
+              class="field__input"
+              type="date"
+              aria-required="true"
+              aria-describedby="reporting-period-error"
+              value="${_escape(state.clinic.reportingPeriodTo)}"
+            >
+          </div>
+        </div>
+        <span id="reporting-period-error" class="field__error" role="alert"></span>
+      </div>
     `;
 
     // Navigation
@@ -66,6 +96,8 @@ const ClinicInformationView = (() => {
 
     // Allow Enter key to advance
     const input = view.querySelector("#clinic-name");
+    const reportingPeriodFrom = view.querySelector("#reporting-period-from");
+    const reportingPeriodTo = view.querySelector("#reporting-period-to");
     input.addEventListener("input", () => {
       if (!Validation.clinicName(input.value)) {
         DOM.clearError(input, view.querySelector("#clinic-name-error"));
@@ -74,6 +106,11 @@ const ClinicInformationView = (() => {
     input.addEventListener("keydown", e => {
       if (e.key === "Enter") _handleNext(state, onNext);
     });
+    [reportingPeriodFrom, reportingPeriodTo].forEach(input => input.addEventListener("change", () => {
+      if (!Validation.reportingPeriod(reportingPeriodFrom.value, reportingPeriodTo.value)) {
+        DOM.clearError(input, view.querySelector("#reporting-period-error"));
+      }
+    }));
 
     // Auto-focus
     input.focus();
@@ -86,6 +123,9 @@ const ClinicInformationView = (() => {
     // validator reject whitespace-only input while the saved value is trimmed.
     const input    = document.getElementById("clinic-name");
     const errorEl  = document.getElementById("clinic-name-error");
+    const reportingPeriodFrom = document.getElementById("reporting-period-from");
+    const reportingPeriodTo = document.getElementById("reporting-period-to");
+    const reportingPeriodError = document.getElementById("reporting-period-error");
     const rawValue = input.value;
     const error    = Validation.clinicName(rawValue);
 
@@ -95,8 +135,23 @@ const ClinicInformationView = (() => {
       return;
     }
 
+    const reportingPeriodValidation = Validation.reportingPeriod(
+      reportingPeriodFrom.value,
+      reportingPeriodTo.value
+    );
+    if (reportingPeriodValidation) {
+      const invalidDate = !reportingPeriodFrom.value ? reportingPeriodFrom : reportingPeriodTo;
+      DOM.showError(invalidDate, reportingPeriodError, reportingPeriodValidation);
+      invalidDate.focus();
+      return;
+    }
+
     DOM.clearError(input, errorEl);
     state.clinic.name = rawValue.trim();
+    DOM.clearError(reportingPeriodFrom, reportingPeriodError);
+    DOM.clearError(reportingPeriodTo, reportingPeriodError);
+    state.clinic.reportingPeriodFrom = reportingPeriodFrom.value;
+    state.clinic.reportingPeriodTo = reportingPeriodTo.value;
     onNext();
   }
 

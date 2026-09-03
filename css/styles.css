@@ -323,6 +323,19 @@ body {
 
 .field__input::placeholder { color: var(--color-muted); }
 
+.reporting-period-fields__inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.field__sublabel {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-slate);
+}
+
 /* The listbox is positioned against the field so it stays aligned with the
   combobox instead of relying on browser-specific native popup rendering. */
 .field:has(.field__option-list) {
@@ -576,6 +589,12 @@ body {
   letter-spacing: 0.08em;
   color: var(--color-impact);
   margin-bottom: var(--space-4);
+}
+
+.impact-hero__period {
+  font-size: var(--text-sm);
+  color: var(--color-slate);
+  margin: calc(var(--space-4) * -1) 0 var(--space-5);
 }
 
 .impact-hero__total {

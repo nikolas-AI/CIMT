@@ -42,6 +42,14 @@ const Validation = (() => {
     return null; // valid
   }
 
+  /** Validate the start and end dates for the impact estimate. */
+  function reportingPeriod(from, to) {
+    if (!from) return "Please select a start date.";
+    if (!to) return "Please select an end date.";
+    if (from > to) return "The start date must be before the end date.";
+    return null; // valid
+  }
+
   /** Validate one volunteer role and its reported hours. */
   function volunteerEntry(roleId, hours) {
     if (!roleId) return "Please select a volunteer role.";
@@ -62,7 +70,7 @@ const Validation = (() => {
     return null;
   }
 
-  return { clinicName, volunteerEntry, serviceEntry };
+  return { clinicName, reportingPeriod, volunteerEntry, serviceEntry };
 })();
 
 // -----------------------------------------------------------------

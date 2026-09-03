@@ -43,6 +43,8 @@ const ExportService = (() => {
 
     rows.push(["Clinic Impact Estimator — Data Export"]);
     rows.push(["Clinic", summary.clinicName]);
+    rows.push(["Reporting Period From", summary.reportingPeriodFrom]);
+    rows.push(["Reporting Period To", summary.reportingPeriodTo]);
     rows.push(["Total Estimated Value", _fmt(summary.totalEstimatedValue)]);
     rows.push([]);
 
@@ -165,6 +167,7 @@ const ExportService = (() => {
   @media print { body { margin: 20px; } }
 </style></head><body>
 <p style="color:#C27A2B;font-size:0.75em;font-weight:600;text-transform:uppercase;letter-spacing:0.08em">${summary.clinicName}</p>
+<p style="color:#475C8A;margin:0 0 12px">Reporting period: ${_formatDate(summary.reportingPeriodFrom)} - ${_formatDate(summary.reportingPeriodTo)}</p>
 <h1 style="font-family:Georgia,serif">Clinic Impact Estimator</h1>
 <p class="total">${_fmt(summary.totalEstimatedValue)}</p>
 <p class="label">Estimated Value of Care and Volunteer Contributions</p>
@@ -190,6 +193,12 @@ It does not represent actual revenue, Medicare reimbursement, or guaranteed heal
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
+  }
+
+  function _formatDate(value) {
+    if (!value) return "Not specified";
+    const date = new Date(`${value}T00:00:00`);
+    return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
   }
 
   return { downloadPDF, downloadExcel };

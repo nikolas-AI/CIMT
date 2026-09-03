@@ -59,12 +59,19 @@ const ImpactSummaryView = (() => {
 
     hero.innerHTML = `
       <p class="impact-hero__clinic">${_escape(summary.clinicName || "Your Clinic")}</p>
+      <p class="impact-hero__period">Reporting period: ${_formatDate(summary.reportingPeriodFrom)} - ${_formatDate(summary.reportingPeriodTo)}</p>
       <p class="impact-hero__total" aria-label="Total estimated value: ${Formatting.currency(summary.totalEstimatedValue)}">
         ${Formatting.currency(summary.totalEstimatedValue)}
       </p>
       <p class="impact-hero__label">Estimated Value of Care and Volunteer Contributions</p>
     `;
     return hero;
+  }
+
+  function _formatDate(value) {
+    if (!value) return "Not specified";
+    const date = new Date(`${value}T00:00:00`);
+    return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
   }
 
   // ---------------------------------------------------------------

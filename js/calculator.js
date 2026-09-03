@@ -7,7 +7,7 @@
  * calculations easier to test without touching the interface.
  *
  * Input shape:
- *   state.clinic      : { name: string }
+ *   state.clinic      : { name: string, reportingPeriodFrom: string, reportingPeriodTo: string }
  *   state.volunteers  : [{ roleId, hours }]
  *   state.services    : [{ serviceId, count }]
  *
@@ -39,6 +39,8 @@ const Calculator = (() => {
     /** @type {ImpactSummary} */
     return {
       clinicName:           state.clinic.name,
+      reportingPeriodFrom:  state.clinic.reportingPeriodFrom,
+      reportingPeriodTo:    state.clinic.reportingPeriodTo,
       totalEstimatedValue:  totalValue,
       volunteerValue:       volunteerValue,
       clinicalServiceValue: clinicalValue,
@@ -99,6 +101,8 @@ const Calculator = (() => {
 /**
  * @typedef {Object} ImpactSummary
  * @property {string}  clinicName
+ * @property {string}  reportingPeriodFrom
+ * @property {string}  reportingPeriodTo
  * @property {number}  totalEstimatedValue
  * @property {number}  volunteerValue
  * @property {number}  clinicalServiceValue
