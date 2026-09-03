@@ -45,7 +45,7 @@ const EntryList = (() => {
     // view receives a copy through onEntriesChange and stores the durable state.
 
     const wrapper = document.createElement("div");
-    wrapper.className = "entry-list-wrapper";
+    wrapper.className = `entry-list-wrapper${config.searchable ? " entry-list-wrapper--searchable" : ""}`;
 
     const list = document.createElement("div");
     list.className = "entry-list";

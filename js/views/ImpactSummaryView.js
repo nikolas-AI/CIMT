@@ -51,13 +51,14 @@ const ImpactSummaryView = (() => {
   // Hero — clinic name + total value
   // ---------------------------------------------------------------
   function _buildHero(summary) {
-    // The hero gives the user the headline result before the detailed tables.
-    // The hero gives the user the headline result before the detailed tables.
+    // The hero establishes the report identity and puts the headline result
+    // before the detailed tables and supporting methodology.
     const hero = document.createElement("div");
     hero.className = "impact-hero";
     hero.setAttribute("aria-label", "Impact total");
 
     hero.innerHTML = `
+      <p class="impact-hero__eyebrow">Clinic Impact Report</p>
       <p class="impact-hero__clinic">${_escape(summary.clinicName || "Your Clinic")}</p>
       <p class="impact-hero__period">Reporting period: ${_formatDate(summary.reportingPeriodFrom)} - ${_formatDate(summary.reportingPeriodTo)}</p>
       <p class="impact-hero__total" aria-label="Total estimated value: ${Formatting.currency(summary.totalEstimatedValue)}">
@@ -93,29 +94,36 @@ const ImpactSummaryView = (() => {
   // Breakdown cards — clinical value + volunteer value
   // ---------------------------------------------------------------
   function _buildBreakdown(summary) {
-    // These cards summarize the same two categories expanded in the rate tables.
-    // These cards summarize the same two categories expanded in the rate tables.
+    // These cards provide the report-at-a-glance view of the same categories
+    // expanded in the detailed rate tables below.
     const section = document.createElement("div");
     section.className = "impact-breakdown";
+
+    const heading = document.createElement("h2");
+    heading.className = "impact-breakdown__heading";
+    heading.textContent = "Report at a glance";
+    section.appendChild(heading);
 
     section.appendChild(_buildCard(
       "Clinical Service Value",
       summary.clinicalServiceValue,
-      "Based on reported service activity and applicable healthcare benchmark rates."
+      "Based on reported service activity and applicable healthcare benchmark rates.",
+      "clinical"
     ));
 
     section.appendChild(_buildCard(
       "Volunteer Contribution Value",
       summary.volunteerValue,
-      "Based on reported volunteer hours and applicable benchmark hourly values."
+      "Based on reported volunteer hours and applicable benchmark hourly values.",
+      "volunteer"
     ));
 
     return section;
   }
 
-  function _buildCard(label, value, note) {
+  function _buildCard(label, value, note, variant) {
     const card = document.createElement("div");
-    card.className = "impact-card";
+    card.className = `impact-card impact-card--${variant}`;
     card.innerHTML = `
       <p class="impact-card__label">${label}</p>
       <p class="impact-card__value">${Formatting.currency(value)}</p>

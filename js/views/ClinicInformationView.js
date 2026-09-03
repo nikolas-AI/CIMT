@@ -38,6 +38,12 @@ const ClinicInformationView = (() => {
         healthcare savings.
       </div>
 
+      <section class="clinic-snapshot" aria-labelledby="clinic-snapshot-heading">
+        <div class="clinic-snapshot__header">
+          <h2 id="clinic-snapshot-heading">Clinic snapshot</h2>
+          <p>Set the organization and dates this report represents.</p>
+        </div>
+
       <div class="field">
         <label class="field__label" for="clinic-name">
           Clinic name <span class="required-mark" aria-hidden="true">*</span>
@@ -83,6 +89,7 @@ const ClinicInformationView = (() => {
         </div>
         <span id="reporting-period-error" class="field__error" role="alert"></span>
       </div>
+      </section>
     `;
 
     // Navigation

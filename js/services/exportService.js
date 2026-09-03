@@ -202,18 +202,20 @@ const ExportService = (() => {
 <html lang="en"><head><meta charset="UTF-8">
 <title>Impact Summary — ${summary.clinicName}</title>
 <style>
+  @page { margin: 0; }
   body { font-family: Arial, sans-serif; max-width: 720px; margin: 40px auto; color: #1A2340; font-size: 13px; }
   h1 { font-size: 1.6em; margin-bottom: 4px; }
   h2 { font-size: 1em; text-transform: uppercase; letter-spacing: 0.06em; color: #8492B0; margin: 24px 0 8px; border-bottom: 1px solid #DDE2EE; padding-bottom: 4px; }
   .total { font-size: 2.5em; font-weight: bold; color: #1A2340; margin: 8px 0 4px; }
   .label { color: #475C8A; margin-bottom: 4px; }
+  .clinic-name { color: #C27A2B; font-size: 1.25em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 6px; }
   .disclaimer { font-size: 0.85em; color: #8492B0; border: 1px solid #DDE2EE; padding: 10px 14px; border-radius: 6px; margin: 12px 0; }
   table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
   th { text-align: left; padding: 6px 8px; background: #F8F9FC; font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #DDE2EE; }
   td { padding: 6px 8px; border-bottom: 1px solid #F0F2F7; }
   @media print { body { margin: 20px; } }
 </style></head><body>
-<p style="color:#C27A2B;font-size:0.75em;font-weight:600;text-transform:uppercase;letter-spacing:0.08em">${summary.clinicName}</p>
+<p class="clinic-name">${_escapeHTML(summary.clinicName)}</p>
 <p style="color:#475C8A;margin:0 0 12px">Reporting period: ${_formatDate(summary.reportingPeriodFrom)} - ${_formatDate(summary.reportingPeriodTo)}</p>
 <h1 style="font-family:Georgia,serif">Clinic Impact Estimator</h1>
 <p class="total">${_fmt(summary.totalEstimatedValue)}</p>
