@@ -12,27 +12,27 @@
    --------------------------------------------------------- */
 :root {
   /* Palette: page, surfaces, text, actions, status, and summary colors. */
-  --color-bg:            #F8F9FC;
+  --color-bg:            #F5F7F6;
   --color-surface:       #FFFFFF;
-  --color-border:        #DDE2EE;
-  --color-border-focus:  #4A6CF7;
+  --color-border:        #D8E1DE;
+  --color-border-focus:  #176B87;
 
-  --color-navy:          #1A2340;        /* primary text */
-  --color-slate:         #475C8A;        /* secondary text */
-  --color-muted:         #8492B0;        /* placeholder / hint */
+  --color-navy:          #17324D;        /* primary text */
+  --color-slate:         #496174;        /* secondary text */
+  --color-muted:         #71828C;        /* placeholder / hint */
 
-  --color-accent:        #4A6CF7;        /* brand blue — CTAs, links */
-  --color-accent-hover:  #3558E8;
-  --color-impact:        #C27A2B;        /* amber — impact totals */
-  --color-impact-bg:     #FFF8EE;
+  --color-accent:        #176B87;        /* teal — CTAs, links */
+  --color-accent-hover:  #0F536A;
+  --color-impact:        #B86B2D;        /* amber — impact totals */
+  --color-impact-bg:     #EAF5F0;        /* sage — impact summary surface */
 
-  --color-error:         #C0392B;
-  --color-error-bg:      #FEF0EE;
-  --color-success:       #1E7E5A;
+  --color-error:         #B94A48;
+  --color-error-bg:      #FCEFED;
+  --color-success:       #267A62;
 
   --color-step-done:     var(--color-success);
   --color-step-active:   var(--color-accent);
-  --color-step-future:   #DDE2EE;
+  --color-step-future:   #D8E1DE;
 
   /* Typography: display is used for large results; body is used for controls. */
   --font-display:        'DM Serif Display', Georgia, serif;
@@ -64,8 +64,8 @@
   --radius-lg: 12px;
 
   /* Shadow: the card shadow and keyboard-focus ring are shared by components. */
-  --shadow-card: 0 1px 3px rgba(26,35,64,0.08), 0 4px 16px rgba(26,35,64,0.06);
-  --shadow-focus: 0 0 0 3px rgba(74,108,247,0.25);
+  --shadow-card: 0 1px 3px rgba(23,50,77,0.08), 0 4px 16px rgba(23,50,77,0.06);
+  --shadow-focus: 0 0 0 3px rgba(23,107,135,0.25);
 }
 
 /* ---------------------------------------------------------
@@ -219,12 +219,12 @@ body {
 .progress-step--done + .progress-step .progress-step__connector,
 .progress-step--done .progress-step__connector { background: var(--color-step-done); }
 
-/* Active: blue identifies the screen whose form is currently visible. */
+/* Active: teal identifies the screen whose form is currently visible. */
 .progress-step--active .progress-step__dot {
   background: var(--color-step-active);
   border-color: var(--color-step-active);
   color: #fff;
-  box-shadow: 0 0 0 5px rgba(74,108,247,0.12);
+  box-shadow: 0 0 0 5px rgba(23,107,135,0.12);
 }
 .progress-step--active .progress-step__text { color: var(--color-step-active); font-weight: 600; }
 
@@ -337,7 +337,7 @@ body {
 .field__select {
   /* The native arrow is hidden so the custom arrow has the same appearance in
      every browser. The extra right padding keeps text away from that arrow. */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238492B0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2371828C' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
   padding-right: 36px;
@@ -591,7 +591,7 @@ body {
   padding: var(--space-3) var(--space-4);
   margin-top: var(--space-2);
 }
-.btn--add:hover { background: rgba(74,108,247,0.05); }
+.btn--add:hover { background: rgba(23,107,135,0.05); }
 
 /* Download: full-width actions on the summary screen. */
 .btn--download {
@@ -624,7 +624,7 @@ body {
    --------------------------------------------------------- */
 .impact-hero {
   background: var(--color-impact-bg);
-  border: 1px solid rgba(194,122,43,0.25);
+  border: 1px solid rgba(38,122,98,0.28);
   border-radius: var(--radius-lg);
   padding: var(--space-8) var(--space-8);
   text-align: center;
@@ -707,7 +707,8 @@ body {
   animation: summaryCardIn 0.3s ease both;
 }
 
-.impact-card--clinical { border-top-color: var(--color-success); }
+/* Use one accent line so the two impact categories have equal visual weight. */
+.impact-card--clinical,
 .impact-card--volunteer { border-top-color: var(--color-accent); }
 
 .impact-card--volunteer { animation-delay: 0.06s; }
