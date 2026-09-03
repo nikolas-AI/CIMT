@@ -2,12 +2,11 @@
  * exportService.js — Export service
  *
  * Provides PDF and Excel download interfaces.
- * Currently implemented as stubs that produce a basic CSV download
- * so the download button is immediately functional.
+ * The Excel export uses xlsx-js-style to generate a real XLSX workbook with
+ * basic formatting such as bold titles, headers, and section labels.
  *
- * FUTURE: Replace the stub bodies with real PDF/Excel libraries
- * (e.g. jsPDF + html2canvas for PDF, SheetJS for Excel) without
- * changing any call sites in the UI layer.
+ * The PDF path uses the browser print dialog, while the Excel path creates
+ * XLSX bytes directly in the browser.
  */
 
 "use strict";
@@ -33,46 +32,105 @@ const ExportService = (() => {
   }
 
   /**
-   * Download an Excel (CSV) breakdown of the impact data.
+  * Download an Excel-formatted breakdown of the impact data.
    * @param {ImpactSummary} summary
    */
   function downloadExcel(summary) {
-    // --- Stub: generate a CSV file ---
-    // Replace with SheetJS (xlsx) when ready.
-    const rows = [];
+    if (typeof XLSX === "undefined") {
+      alert("The Excel export library could not be loaded. Please check your internet connection and try again.");
+      return;
+    }
 
-    rows.push(["Clinic Impact Estimator — Data Export"]);
-    rows.push(["Clinic", summary.clinicName]);
-    rows.push(["Reporting Period From", summary.reportingPeriodFrom]);
-    rows.push(["Reporting Period To", summary.reportingPeriodTo]);
-    rows.push(["Total Estimated Value", _fmt(summary.totalEstimatedValue)]);
-    rows.push([]);
-
-    rows.push(["CLINICAL SERVICES"]);
+    const rows = [
+      ["Clinic Impact Estimator"],
+      ["Clinic", summary.clinicName],
+      ["Reporting Period From", summary.reportingPeriodFrom],
+      ["Reporting Period To", summary.reportingPeriodTo],
+      ["Total Estimated Value", summary.totalEstimatedValue],
+      [],
+    ];
+    const clinicalSectionRow = rows.length;
+    rows.push(["Clinical Services"]);
+    const clinicalHeaderRow = rows.length;
     rows.push(["Service", "CPT/HCPCS Code", "Visits", "Benchmark Rate", "Estimated Value"]);
-    summary.serviceBreakdown.forEach(r => {
-      rows.push([r.serviceName, r.code, r.count, _fmt(r.benchmarkRate), _fmt(r.estimatedValue)]);
-    });
-    rows.push(["", "", "", "Clinical Total", _fmt(summary.clinicalServiceValue)]);
+    rows.push(...summary.serviceBreakdown.map(row => [
+        row.serviceName, row.code, row.count, row.benchmarkRate, row.estimatedValue,
+      ]));
+    const clinicalTotalRow = rows.length;
+    rows.push(["", "", "", "Clinical Total", summary.clinicalServiceValue]);
     rows.push([]);
-
-    rows.push(["VOLUNTEER HOURS"]);
+    const volunteerSectionRow = rows.length;
+    rows.push(["Volunteer Hours"]);
+    const volunteerHeaderRow = rows.length;
     rows.push(["Role", "Hours", "Benchmark Rate / Hour", "Estimated Value"]);
-    summary.volunteerBreakdown.forEach(r => {
-      rows.push([r.roleName, r.hours, _fmt(r.benchmarkRate), _fmt(r.estimatedValue)]);
-    });
-    rows.push(["", "", "Volunteer Total", _fmt(summary.volunteerValue)]);
+    rows.push(...summary.volunteerBreakdown.map(row => [
+        row.roleName, row.hours, row.benchmarkRate, row.estimatedValue,
+      ]));
+    const volunteerTotalRow = rows.length;
+    rows.push(["", "", "Volunteer Total", summary.volunteerValue]);
     rows.push([]);
+    const disclaimerSectionRow = rows.length;
+    rows.push(["Disclaimer"]);
+    const disclaimerRow = rows.length;
+    rows.push(["These figures are benchmark-based estimates of the value of services and volunteer contributions. They do not represent actual revenue, Medicare reimbursement, or guaranteed healthcare savings."]);
 
-    rows.push(["DISCLAIMER"]);
-    rows.push([
-      "These figures are benchmark-based estimates of the value of services and volunteer " +
-      "contributions. They do not represent actual revenue, Medicare reimbursement, or " +
-      "guaranteed healthcare savings."
-    ]);
+    const sheet = XLSX.utils.aoa_to_sheet(rows);
+    sheet["!cols"] = [
+      { wch: 34 }, { wch: 22 }, { wch: 14 }, { wch: 20 }, { wch: 20 },
+    ];
+    sheet["!merges"] = [
+      ...[0, clinicalSectionRow, volunteerSectionRow, disclaimerSectionRow, disclaimerRow]
+        .map(row => ({ s: { r: row, c: 0 }, e: { r: row, c: 4 } })),
+    ];
 
-    const csv = rows.map(r => r.map(_csvCell).join(",")).join("\r\n");
-    _triggerDownload(csv, `${_safeFilename(summary.clinicName)}-impact-breakdown.csv`, "text/csv");
+    const boldRows = [0, clinicalSectionRow, clinicalHeaderRow, clinicalTotalRow,
+      volunteerSectionRow, volunteerHeaderRow, volunteerTotalRow, disclaimerSectionRow];
+    const styleRow = (rowIndex, style) => {
+      for (let columnIndex = 0; columnIndex < 5; columnIndex += 1) {
+        const cell = sheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })];
+        if (cell) cell.s = style;
+      }
+    };
+    boldRows.forEach(rowIndex => styleRow(rowIndex, { font: { bold: true } }));
+    [1, 2, 3, 4].forEach(rowIndex => {
+      const cell = sheet[XLSX.utils.encode_cell({ r: rowIndex, c: 0 })];
+      if (cell) cell.s = { font: { bold: true } };
+    });
+    sheet["A1"].s = { font: { bold: true, sz: 16 }, alignment: { horizontal: "left" } };
+    sheet[XLSX.utils.encode_cell({ r: disclaimerRow, c: 0 })].s = {
+      font: { italic: true, color: { rgb: "475C8A" } },
+      alignment: { wrapText: true },
+    };
+
+    // Keep monetary cells numeric for Excel calculations while displaying them
+    // with a dollar sign and two decimal places in the downloaded workbook.
+    const currencyFormat = "$#,##0.00";
+    const formatCurrency = (rowIndex, columnIndex) => {
+      const cell = sheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })];
+      if (cell) {
+        cell.s = { ...(cell.s || {}), numFmt: currencyFormat };
+      }
+    };
+    formatCurrency(4, 1);
+    for (let rowIndex = clinicalHeaderRow + 1; rowIndex < clinicalTotalRow; rowIndex += 1) {
+      formatCurrency(rowIndex, 3);
+      formatCurrency(rowIndex, 4);
+    }
+    formatCurrency(clinicalTotalRow, 4);
+    for (let rowIndex = volunteerHeaderRow + 1; rowIndex < volunteerTotalRow; rowIndex += 1) {
+      formatCurrency(rowIndex, 2);
+      formatCurrency(rowIndex, 3);
+    }
+    formatCurrency(volunteerTotalRow, 3);
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, sheet, "Impact Breakdown");
+    const xlsxData = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    _triggerDownload(
+      xlsxData,
+      `${_safeFilename(summary.clinicName)}-impact-breakdown.xlsx`,
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
   }
 
   // ---------------------------------------------------------------
@@ -86,17 +144,6 @@ const ExportService = (() => {
     return typeof value === "number"
       ? value.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 })
       : value;
-  }
-
-  function _csvCell(val) {
-    // Quote cells containing commas, quotes, or line breaks so CSV columns stay aligned.
-    // Quote cells containing CSV control characters so commas in names or
-    // descriptions do not shift values into the wrong columns.
-    const str = String(val === null || val === undefined ? "" : val);
-    if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-      return `"${str.replace(/"/g, '""')}"`;
-    }
-    return str;
   }
 
   function _triggerDownload(content, filename, mimeType) {
