@@ -131,9 +131,10 @@ body {
 
 .app-logo { display: flex; align-items: center; }
 
-.app-logo {
-  color: var(--color-impact);
-  transform: rotate(-6deg);
+.app-logo img {
+  width: 28px;
+  height: 28px;
+  display: block;
 }
 
 .app-title {
