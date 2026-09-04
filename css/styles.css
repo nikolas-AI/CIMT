@@ -632,7 +632,7 @@ body {
 }
 
 .impact-hero__eyebrow {
-  color: var(--color-impact);
+  color: var(--color-slate);
   font-size: var(--text-xs);
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -641,8 +641,9 @@ body {
 }
 
 .impact-hero__clinic {
+  font-family: var(--font-display);
   font-size: var(--text-lg);
-  font-weight: 600;
+  font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--color-impact);
