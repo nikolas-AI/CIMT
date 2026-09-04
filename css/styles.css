@@ -637,6 +637,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  text-decoration: underline;
   margin-bottom: var(--space-3);
 }
 
