@@ -12,27 +12,27 @@
    --------------------------------------------------------- */
 :root {
   /* Palette: page, surfaces, text, actions, status, and summary colors. */
-  --color-bg:            #F5F7F6;
-  --color-surface:       #FFFFFF;
-  --color-border:        #D8E1DE;
-  --color-border-focus:  #176B87;
+  --color-bg:            #F6F3EA;
+  --color-surface:       #FFFDF8;
+  --color-border:        #D8D2C3;
+  --color-border-focus:  #1E6B63;
 
-  --color-navy:          #17324D;        /* primary text */
-  --color-slate:         #496174;        /* secondary text */
-  --color-muted:         #71828C;        /* placeholder / hint */
+  --color-navy:          #193832;        /* primary text */
+  --color-slate:         #536963;        /* secondary text */
+  --color-muted:         #7B8880;        /* placeholder / hint */
 
-  --color-accent:        #176B87;        /* teal — CTAs, links */
-  --color-accent-hover:  #0F536A;
-  --color-impact:        #B86B2D;        /* amber — impact totals */
-  --color-impact-bg:     #EAF5F0;        /* sage — impact summary surface */
+  --color-accent:        #1E6B63;        /* forest teal — CTAs, links */
+  --color-accent-hover:  #15524C;
+  --color-impact:        #C65B38;        /* coral — impact totals */
+  --color-impact-bg:     #E1F0E7;        /* mint — impact summary surface */
 
-  --color-error:         #B94A48;
-  --color-error-bg:      #FCEFED;
-  --color-success:       #267A62;
+  --color-error:         #B54842;
+  --color-error-bg:      #FCEAE4;
+  --color-success:       #397D5C;
 
   --color-step-done:     var(--color-success);
-  --color-step-active:   var(--color-accent);
-  --color-step-future:   #D8E1DE;
+  --color-step-active:   var(--color-impact);
+  --color-step-future:   #D8D2C3;
 
   /* Typography: display is used for large results; body is used for controls. */
   --font-display:        'DM Serif Display', Georgia, serif;
@@ -64,8 +64,8 @@
   --radius-lg: 12px;
 
   /* Shadow: the card shadow and keyboard-focus ring are shared by components. */
-  --shadow-card: 0 1px 3px rgba(23,50,77,0.08), 0 4px 16px rgba(23,50,77,0.06);
-  --shadow-focus: 0 0 0 3px rgba(23,107,135,0.25);
+  --shadow-card: 0 2px 0 rgba(25,56,50,0.05);
+  --shadow-focus: 0 0 0 3px rgba(30,107,99,0.22);
 }
 
 /* ---------------------------------------------------------
@@ -82,7 +82,10 @@ body {
   font-family: var(--font-body);
   font-size: var(--text-base);
   color: var(--color-navy);
-  background: var(--color-bg);
+  background:
+    linear-gradient(rgba(255,253,248,0.34) 1px, transparent 1px),
+    var(--color-bg);
+  background-size: 100% 34px;
   line-height: 1.6;
   min-height: 100vh;
 }
@@ -107,18 +110,19 @@ body {
 }
 
 .app-header {
-  background: var(--color-surface);
+  background: rgba(255,253,248,0.92);
   border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
   z-index: 100;
+  backdrop-filter: blur(10px);
 }
 
 .header-inner {
   /* Match the body width so the header logo and title line up with the form. */
   max-width: 720px;
   margin: 0 auto;
-  padding: var(--space-4) var(--space-6);
+  padding: var(--space-5) var(--space-6);
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -127,12 +131,19 @@ body {
 
 .app-logo { display: flex; align-items: center; }
 
+.app-logo {
+  color: var(--color-impact);
+  transform: rotate(-6deg);
+}
+
 .app-title {
   font-family: var(--font-body);
   font-weight: 600;
   font-size: var(--text-base);
   color: var(--color-navy);
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: var(--text-sm);
 }
 
 .app-body {
@@ -142,7 +153,7 @@ body {
   max-width: 720px;
   width: 100%;
   margin: 0 auto;
-  padding: var(--space-8) var(--space-6) var(--space-12);
+  padding: var(--space-10) var(--space-6) var(--space-12);
 }
 
 /* ---------------------------------------------------------
@@ -155,7 +166,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0;
-  margin-bottom: var(--space-10);
+  margin-bottom: var(--space-12);
   padding: 0;
 }
 
@@ -178,17 +189,17 @@ body {
      a checkmark after the user completes a screen. */
   width: 28px;
   height: 28px;
-  border-radius: 50%;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: var(--text-xs);
   font-weight: 600;
   transition: background 0.2s, border-color 0.2s;
-  border: 2px solid var(--color-step-future);
+  border: 1px solid var(--color-step-future);
   background: var(--color-surface);
   color: var(--color-muted);
-  box-shadow: 0 0 0 5px transparent;
+  box-shadow: 3px 3px 0 rgba(25,56,50,0.06);
 }
 
 .progress-step__text {
@@ -196,17 +207,17 @@ body {
   font-weight: 500;
   color: var(--color-muted);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
   white-space: nowrap;
 }
 
 .progress-step__connector {
   /* Flex makes each line fill the space between neighboring step dots. */
-  height: 2px;
+  height: 1px;
   flex: 1;
   background: var(--color-step-future);
   transition: background 0.2s;
-  margin-bottom: 20px; /* align with dot center */
+  margin-bottom: 22px; /* align with dot center */
 }
 
 /* Done: green indicates a screen the user has already completed. */
@@ -224,7 +235,7 @@ body {
   background: var(--color-step-active);
   border-color: var(--color-step-active);
   color: #fff;
-  box-shadow: 0 0 0 5px rgba(23,107,135,0.12);
+  box-shadow: 4px 4px 0 rgba(198,91,56,0.2);
 }
 .progress-step--active .progress-step__text { color: var(--color-step-active); font-weight: 600; }
 
@@ -243,37 +254,38 @@ body {
 
 .view-heading {
   font-family: var(--font-display);
-  font-size: var(--text-2xl);
+  font-size: 3rem;
   color: var(--color-navy);
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-3);
   line-height: 1.25;
 }
 
 .view-intro {
   color: var(--color-slate);
   font-size: var(--text-base);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-8);
   max-width: 56ch;
 }
 
 .view-disclaimer {
   font-size: var(--text-sm);
   color: var(--color-muted);
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  background: #FFF1C7;
+  border: 1px solid #E8D39B;
+  border-left: 4px solid #D89A2B;
+  border-radius: var(--radius-sm);
   padding: var(--space-4);
   margin-bottom: var(--space-6);
   line-height: 1.5;
 }
 
 .clinic-snapshot {
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-8);
   padding: var(--space-6);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-left: 3px solid var(--color-accent);
-  border-radius: var(--radius-lg);
+  border-top: 3px solid var(--color-accent);
+  border-radius: var(--radius-sm);
   box-shadow: var(--shadow-card);
 }
 
@@ -284,6 +296,8 @@ body {
   font-size: var(--text-lg);
   line-height: 1.3;
   margin-bottom: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
 }
 
 .clinic-snapshot__header p {
@@ -311,6 +325,7 @@ body {
   font-weight: 600;
   color: var(--color-navy);
   margin-bottom: var(--space-2);
+  letter-spacing: 0.02em;
 }
 
 .field__label .required-mark {
@@ -326,9 +341,9 @@ body {
   font-family: var(--font-body);
   font-size: var(--text-base);
   color: var(--color-navy);
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-md);
+  background: rgba(255,253,248,0.8);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   transition: border-color 0.15s, box-shadow 0.15s;
   appearance: none;
   -webkit-appearance: none;
@@ -479,11 +494,12 @@ body {
   grid-template-columns: minmax(0, 1fr) minmax(140px, 180px) auto;
   gap: var(--space-3);
   align-items: start;
-  background: var(--color-surface);
+  background: rgba(255,253,248,0.82);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-sm);
   padding: var(--space-4);
   box-shadow: var(--shadow-card);
+  border-left: 3px solid var(--color-impact);
 }
 
 .entry-row .field {
@@ -498,7 +514,7 @@ body {
      the X is red; the neutral border keeps the button visually lightweight. */
   padding: var(--space-3);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--color-error);
   cursor: pointer;
@@ -550,13 +566,14 @@ body {
   font-family: var(--font-body);
   font-size: var(--text-sm);
   font-weight: 600;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
   border: 1.5px solid transparent;
   text-decoration: none;
   line-height: 1;
   white-space: nowrap;
+  min-height: 44px;
 }
 
 .btn:focus-visible {
@@ -570,6 +587,7 @@ body {
   background: var(--color-accent);
   color: #fff;
   border-color: var(--color-accent);
+  box-shadow: 3px 3px 0 rgba(25,56,50,0.12);
 }
 .btn--primary:hover { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
 
@@ -578,6 +596,7 @@ body {
   background: transparent;
   color: var(--color-slate);
   border-color: var(--color-border);
+  background: var(--color-surface);
 }
 .btn--secondary:hover { background: var(--color-bg); color: var(--color-navy); }
 
@@ -585,7 +604,7 @@ body {
 .btn--add {
   background: transparent;
   color: var(--color-accent);
-  border: 1.5px dashed var(--color-accent);
+  border: 1px dashed var(--color-accent);
   width: 100%;
   justify-content: center;
   padding: var(--space-3) var(--space-4);
@@ -610,7 +629,9 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: var(--space-10);
+  margin-top: var(--space-12);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
   gap: var(--space-4);
 }
 
@@ -624,11 +645,12 @@ body {
    --------------------------------------------------------- */
 .impact-hero {
   background: var(--color-impact-bg);
-  border: 1px solid rgba(38,122,98,0.28);
-  border-radius: var(--radius-lg);
-  padding: var(--space-8) var(--space-8);
+  border: 1px solid rgba(57,125,92,0.32);
+  border-radius: var(--radius-sm);
+  padding: var(--space-10) var(--space-8);
   text-align: center;
   margin-bottom: var(--space-6);
+  box-shadow: 6px 6px 0 rgba(198,91,56,0.12);
 }
 
 .impact-hero__eyebrow {
@@ -638,17 +660,19 @@ body {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   text-decoration: underline;
+  text-underline-offset: 4px;
   margin-bottom: var(--space-3);
 }
 
 .impact-hero__clinic {
   font-family: var(--font-display);
-  font-size: var(--text-lg);
+  font-size: var(--text-2xl);
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--color-impact);
   margin-bottom: var(--space-4);
+  overflow-wrap: anywhere;
 }
 
 .impact-hero__period {
@@ -659,7 +683,7 @@ body {
 
 .impact-hero__total {
   font-family: var(--font-display);
-  font-size: var(--text-hero);
+  font-size: 4rem;
   color: var(--color-navy);
   line-height: 1;
   margin-bottom: var(--space-3);
@@ -687,22 +711,33 @@ body {
 .impact-breakdown {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
+  grid-template-rows: auto auto;
+  gap: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
   margin-bottom: var(--space-8);
 }
 
 .impact-breakdown__heading {
   grid-column: 1 / -1;
+  grid-row: 1;
+  align-self: stretch;
+  padding: var(--space-5) var(--space-6);
+  background: var(--color-surface);
   color: var(--color-navy);
   font-size: var(--text-lg);
   line-height: 1.3;
-  margin-bottom: calc(var(--space-2) * -1);
+  margin: 0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .impact-card {
+  grid-row: 2;
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: 0;
+  border-right: 1px solid var(--color-border);
+  border-radius: 0;
   padding: var(--space-6);
   box-shadow: var(--shadow-card);
   border-top: 3px solid var(--color-accent);
@@ -712,6 +747,8 @@ body {
 /* Use one accent line so the two impact categories have equal visual weight. */
 .impact-card--clinical,
 .impact-card--volunteer { border-top-color: var(--color-accent); }
+
+.impact-card--volunteer { border-right: 0; }
 
 .impact-card--volunteer { animation-delay: 0.06s; }
 
@@ -757,6 +794,7 @@ body {
   margin-bottom: var(--space-4);
   padding-bottom: var(--space-3);
   border-bottom: 1px solid var(--color-border);
+  font-family: var(--font-body);
 }
 
 .summary-section__intro {
@@ -783,7 +821,7 @@ body {
 .rate-table th {
   font-weight: 600;
   color: var(--color-navy);
-  background: var(--color-bg);
+  background: #E9E4D7;
   font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -797,8 +835,8 @@ body {
 .rate-source-box {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-left: 3px solid var(--color-accent);
-  border-radius: var(--radius-md);
+  border-left: 4px solid var(--color-accent);
+  border-radius: var(--radius-sm);
   padding: var(--space-5);
   font-size: var(--text-sm);
   color: var(--color-slate);
@@ -858,6 +896,7 @@ body {
 @media (max-width: 600px) {
   .app-body { padding: var(--space-6) var(--space-4) var(--space-10); }
 
+  .view-heading { font-size: 2.25rem; }
   .clinic-snapshot { padding: var(--space-4); }
   .reporting-period-fields__inputs { grid-template-columns: 1fr; }
   .impact-hero { padding: var(--space-6) var(--space-4); }
