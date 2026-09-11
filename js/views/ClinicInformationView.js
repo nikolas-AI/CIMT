@@ -110,7 +110,7 @@ const ClinicInformationView = (() => {
               type="text"
               maxlength="2"
               autocomplete="address-level1"
-              placeholder="e.g. NC"
+              placeholder="e.g. TX"
               aria-required="true"
               aria-describedby="clinic-state-error"
               value="${_escape(clinic.state)}"
@@ -130,7 +130,7 @@ const ClinicInformationView = (() => {
             inputmode="numeric"
             maxlength="10"
             autocomplete="postal-code"
-            placeholder="27601"
+            placeholder="78601"
             aria-required="true"
             aria-describedby="clinic-zip-code-error"
             value="${_escape(clinic.zipCode)}"
@@ -170,7 +170,7 @@ const ClinicInformationView = (() => {
 
       <div class="field">
         <label class="field__label" for="reporting-period-clinic-cost">
-          Total clinic cost for this reporting period <span class="field__optional">(optional)</span>
+          Total clinic operating cost for this reporting period <span class="field__optional">(optional)</span>
         </label>
         <p class="field__help" id="reporting-period-clinic-cost-help">
           Include staffing, supplies, facilities, technology, administration, and other operating expenses for the dates above.
