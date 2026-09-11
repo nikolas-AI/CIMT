@@ -36,7 +36,7 @@
     /** @type {ImpactSummary|null} */
     impact: null,
 
-    /** @type {number} 0=Clinic, 1=Volunteers, 2=Services, 3=Impact */
+    /** @type {number} 0=Welcome, 1=Clinic, 2=Volunteers, 3=Services, 4=Impact */
     currentStep: 0,
   };
 
@@ -77,18 +77,22 @@
     // callbacks for only the buttons that belong to that screen.
     switch (state.currentStep) {
       case 0:
-        ClinicInformationView.render(state, { onNext: advance });
+        WelcomeView.render({ onNext: advance });
         break;
 
       case 1:
-        VolunteerHoursView.render(state, { onBack: retreat, onNext: advance });
+        ClinicInformationView.render(state, { onBack: retreat, onNext: advance });
         break;
 
       case 2:
-        ClinicalServicesView.render(state, { onBack: retreat, onNext: _computeAndShowImpact });
+        VolunteerHoursView.render(state, { onBack: retreat, onNext: advance });
         break;
 
       case 3:
+        ClinicalServicesView.render(state, { onBack: retreat, onNext: _computeAndShowImpact });
+        break;
+
+      case 4:
         ImpactSummaryView.render(state.impact, { onBack: retreat, onStartOver: startOver });
         break;
 
@@ -102,7 +106,7 @@
 
   // -----------------------------------------------------------------
   // IMPACT COMPUTATION
-  // Called when the user clicks "See Impact" on View 3.
+  // Called when the user clicks "See Impact" on View 4.
   // Runs the calculator and then navigates to View 4.
   // -----------------------------------------------------------------
   // Calculate once, save the result, and then show the summary screen. Keeping

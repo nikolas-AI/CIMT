@@ -1,5 +1,5 @@
 /**
- * VolunteerHoursView.js — View 2
+ * VolunteerHoursView.js — View 3
  *
  * Dynamic list of volunteer role + hours entries.
  * Uses EntryList component; reads/writes app state.

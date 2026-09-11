@@ -244,7 +244,7 @@ body {
   VIEWS - SHARED WRAPPER
   Every screen renderer creates a .view element. The animation applies once
   when a new screen is inserted, while the typography rules keep headings and
-  explanatory text consistent across all four steps.
+  explanatory text consistent across all five steps.
    --------------------------------------------------------- */
 .view { animation: fadeSlideIn 0.22s ease; }
 
@@ -266,6 +266,86 @@ body {
   font-size: var(--text-base);
   margin-bottom: var(--space-8);
   max-width: 56ch;
+}
+
+/* ---------------------------------------------------------
+  WELCOME VIEW
+  The opening screen explains the purpose and boundaries of the estimator
+  before asking for clinic-specific information.
+   --------------------------------------------------------- */
+.welcome-hero {
+  padding: var(--space-8) 0 var(--space-6);
+  border-bottom: 3px solid var(--color-impact);
+  margin-bottom: var(--space-8);
+}
+
+.welcome-hero .view-heading {
+  max-width: 16ch;
+  font-size: 3rem;
+}
+
+.welcome-hero .view-intro {
+  max-width: 48ch;
+  font-size: var(--text-lg);
+  margin-bottom: var(--space-4);
+}
+
+.welcome-hero__eyebrow {
+  color: var(--color-impact);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-4);
+}
+
+.welcome-hero__note {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.welcome-details {
+  margin-bottom: var(--space-8);
+}
+
+.welcome-details__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--color-border);
+  border-left: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.welcome-detail {
+  min-height: 150px;
+  padding: var(--space-5);
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.welcome-detail__number {
+  display: block;
+  color: var(--color-impact);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: 1;
+  margin-bottom: var(--space-4);
+}
+
+.welcome-detail h3 {
+  color: var(--color-navy);
+  font-size: var(--text-base);
+  margin-bottom: var(--space-2);
+}
+
+.welcome-detail p {
+  color: var(--color-slate);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.welcome-disclaimer {
+  margin-bottom: 0;
 }
 
 .view-disclaimer {
@@ -949,6 +1029,8 @@ body {
   .app-body { padding: var(--space-6) var(--space-4) var(--space-10); }
 
   .view-heading { font-size: 2.25rem; }
+  .welcome-hero .view-heading { font-size: 2.25rem; }
+  .welcome-details__grid { grid-template-columns: 1fr; }
   .clinic-snapshot { padding: var(--space-4); }
   .reporting-period-fields__inputs { grid-template-columns: 1fr; }
   .impact-hero { padding: var(--space-6) var(--space-4); }

@@ -1,5 +1,5 @@
 /**
- * ClinicInformationView.js — View 1
+ * ClinicInformationView.js — View 2
  *
  * Renders the clinic name input and tool introduction.
  * Validates before advancing; writes to app state on success.
@@ -9,7 +9,7 @@
 
 const ClinicInformationView = (() => {
 
-  function render(state, { onNext }) {
+  function render(state, { onBack, onNext }) {
     // This first screen asks for the clinic name and reporting dates. The
     // inputs are rebuilt from state whenever the user returns here, so saved
     // values are not lost.
@@ -115,6 +115,8 @@ const ClinicInformationView = (() => {
 
     // Navigation
     const nav = NavigationButtons.create({
+      backLabel: "Back",
+      onBack,
       nextLabel: "Next",
       onNext: () => _handleNext(state, onNext),
     });

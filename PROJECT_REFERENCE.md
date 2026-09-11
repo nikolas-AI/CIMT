@@ -32,7 +32,7 @@ The application currently provides:
 - Volunteer contribution valuation
 - Reporting-period clinic cost comparison
 - Benchmark-value ratio and ROI metrics when a budget is supplied
-- Four-step single-page workflow
+- Five-step single-page workflow with a welcome screen
 - Validation and state preservation during navigation
 - Impact summary dashboard
 - Benchmark rate tables
@@ -107,6 +107,7 @@ js/
     services/
         exportService.js
     views/
+        WelcomeView.js
         ClinicInformationView.js
         ClinicalServicesView.js
         ImpactSummaryView.js
@@ -351,6 +352,7 @@ When adding or changing a feature:
 ### 2026-09-11
 
 - Created initial project reference document.
+- Added a welcome screen before clinic data collection.
 - Documented current benchmark-value functionality.
 - Added optional reporting-period clinic cost input.
 - Added benchmark-value ratio and benchmark-value ROI metrics to the summary and exports.

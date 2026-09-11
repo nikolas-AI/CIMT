@@ -1,5 +1,5 @@
 /**
- * ClinicalServicesView.js — View 3
+ * ClinicalServicesView.js — View 4
  *
  * Dynamic list of clinical service + visit-count entries.
  * Uses EntryList component; reads/writes app state.

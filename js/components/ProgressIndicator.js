@@ -1,7 +1,7 @@
 /**
  * ProgressIndicator.js — Step progress nav component
  *
- * Draws the four-step progress bar at the top of the page.
+ * Draws the five-step progress bar at the top of the page.
  * It receives the current step number from app.js and does not store its own
  * copy, so the bar always follows the screen currently being displayed.
  */
@@ -11,10 +11,11 @@
 const ProgressIndicator = (() => {
 
   const STEPS = [
-    { label: "Clinic",     index: 0 },
-    { label: "Volunteers", index: 1 },
-    { label: "Services",   index: 2 },
-    { label: "Impact",     index: 3 },
+    { label: "Welcome",    index: 0 },
+    { label: "Clinic",     index: 1 },
+    { label: "Volunteers", index: 2 },
+    { label: "Services",   index: 3 },
+    { label: "Impact",     index: 4 },
   ];
 
   /**
@@ -24,7 +25,7 @@ const ProgressIndicator = (() => {
   * aria-current so screen readers can announce the user's position. Rebuilding
   * this small component is simpler than updating each dot and line separately.
    *
-  * @param {number} currentStep Zero-based index: 0 is Clinic and 3 is Impact.
+  * @param {number} currentStep Zero-based index: 0 is Welcome and 4 is Impact.
    */
   function render(currentStep) {
     const container = document.getElementById("progress-indicator");
