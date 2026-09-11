@@ -42,6 +42,20 @@ const Validation = (() => {
     return null; // valid
   }
 
+  /** Validate a required clinic address field. */
+  function clinicAddressField(value, label) {
+    if (!(value || "").trim()) return `Please enter the clinic's ${label}.`;
+    return null;
+  }
+
+  /** Validate a required US ZIP code without collecting patient location data. */
+  function zipCode(value) {
+    if (!/^\d{5}(?:-\d{4})?$/.test((value || "").trim())) {
+      return "Please enter a valid 5-digit ZIP code.";
+    }
+    return null;
+  }
+
   /** Validate the start and end dates for the impact estimate. */
   function reportingPeriod(from, to) {
     if (!from) return "Please select a start date.";
@@ -79,7 +93,7 @@ const Validation = (() => {
     return null;
   }
 
-  return { clinicName, reportingPeriod, reportingPeriodClinicCost, volunteerEntry, serviceEntry };
+  return { clinicName, clinicAddressField, zipCode, reportingPeriod, reportingPeriodClinicCost, volunteerEntry, serviceEntry };
 })();
 
 // -----------------------------------------------------------------

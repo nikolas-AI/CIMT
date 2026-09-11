@@ -63,6 +63,7 @@ const ImpactSummaryView = (() => {
     hero.innerHTML = `
       <p class="impact-hero__eyebrow">Clinic Impact Report</p>
       <p class="impact-hero__clinic">${_escape(summary.clinicName || "Your Clinic")}</p>
+      <p class="impact-hero__address">${_escape(summary.streetAddress)}, ${_escape(summary.city)}, ${_escape(summary.state)} ${_escape(summary.zipCode)}</p>
       <p class="impact-hero__period">Reporting period: ${_formatDate(summary.reportingPeriodFrom)} - ${_formatDate(summary.reportingPeriodTo)}</p>
       <p class="impact-hero__total" aria-label="Total estimated value: ${Formatting.currency(summary.totalEstimatedValue)}">
         ${Formatting.currency(summary.totalEstimatedValue)}

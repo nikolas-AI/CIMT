@@ -66,6 +66,79 @@ const ClinicInformationView = (() => {
         <span id="clinic-name-error" class="field__error" role="alert"></span>
       </div>
 
+      <div class="clinic-address-fields">
+        <div class="field">
+          <label class="field__label" for="clinic-street-address">
+            Street address <span class="required-mark" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="clinic-street-address"
+            class="field__input"
+            type="text"
+            autocomplete="street-address"
+            placeholder="123 Main Street"
+            aria-required="true"
+            aria-describedby="clinic-street-address-error"
+            value="${_escape(clinic.streetAddress)}"
+          >
+          <span id="clinic-street-address-error" class="field__error" role="alert"></span>
+        </div>
+
+        <div class="clinic-address-fields__city-state">
+          <div class="field">
+            <label class="field__label" for="clinic-city">
+              City <span class="required-mark" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="clinic-city"
+              class="field__input"
+              type="text"
+              autocomplete="address-level2"
+              aria-required="true"
+              aria-describedby="clinic-city-error"
+              value="${_escape(clinic.city)}"
+            >
+            <span id="clinic-city-error" class="field__error" role="alert"></span>
+          </div>
+          <div class="field">
+            <label class="field__label" for="clinic-state">
+              State <span class="required-mark" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="clinic-state"
+              class="field__input"
+              type="text"
+              maxlength="2"
+              autocomplete="address-level1"
+              placeholder="e.g. NC"
+              aria-required="true"
+              aria-describedby="clinic-state-error"
+              value="${_escape(clinic.state)}"
+            >
+            <span id="clinic-state-error" class="field__error" role="alert"></span>
+          </div>
+        </div>
+
+        <div class="field clinic-address-fields__zip">
+          <label class="field__label" for="clinic-zip-code">
+            ZIP code <span class="required-mark" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="clinic-zip-code"
+            class="field__input"
+            type="text"
+            inputmode="numeric"
+            maxlength="10"
+            autocomplete="postal-code"
+            placeholder="27601"
+            aria-required="true"
+            aria-describedby="clinic-zip-code-error"
+            value="${_escape(clinic.zipCode)}"
+          >
+          <span id="clinic-zip-code-error" class="field__error" role="alert"></span>
+        </div>
+      </div>
+
       <div class="field reporting-period-fields">
         <span class="field__label">Reporting period <span class="required-mark" aria-hidden="true">*</span></span>
         <div class="reporting-period-fields__inputs">
@@ -131,6 +204,10 @@ const ClinicInformationView = (() => {
 
     // Allow Enter key to advance
     const input = view.querySelector("#clinic-name");
+    const streetAddress = view.querySelector("#clinic-street-address");
+    const city = view.querySelector("#clinic-city");
+    const clinicState = view.querySelector("#clinic-state");
+    const zipCode = view.querySelector("#clinic-zip-code");
     const reportingPeriodFrom = view.querySelector("#reporting-period-from");
     const reportingPeriodTo = view.querySelector("#reporting-period-to");
     const reportingPeriodClinicCost = view.querySelector("#reporting-period-clinic-cost");
@@ -139,6 +216,27 @@ const ClinicInformationView = (() => {
       if (!Validation.clinicName(input.value)) {
         DOM.clearError(input, view.querySelector("#clinic-name-error"));
       }
+    });
+    const syncAddress = () => {
+      state.clinic.streetAddress = streetAddress.value;
+      state.clinic.city = city.value;
+      state.clinic.state = clinicState.value.toUpperCase();
+      state.clinic.zipCode = zipCode.value;
+      clinicState.value = state.clinic.state;
+      [[streetAddress, "street address", "clinic-street-address-error"],
+        [city, "city", "clinic-city-error"],
+        [clinicState, "state", "clinic-state-error"]].forEach(([field, label, errorId]) => {
+          if (!Validation.clinicAddressField(field.value, label)) {
+            DOM.clearError(field, view.querySelector(`#${errorId}`));
+          }
+        });
+      if (!Validation.zipCode(zipCode.value)) {
+        DOM.clearError(zipCode, view.querySelector("#clinic-zip-code-error"));
+      }
+    };
+    [streetAddress, city, clinicState, zipCode].forEach(addressInput => {
+      addressInput.addEventListener("input", syncAddress);
+      addressInput.addEventListener("change", syncAddress);
     });
     input.addEventListener("keydown", e => {
       if (e.key === "Enter") _handleNext(state, onNext);
@@ -177,6 +275,10 @@ const ClinicInformationView = (() => {
     // validator reject whitespace-only input while the saved value is trimmed.
     const input    = document.getElementById("clinic-name");
     const errorEl  = document.getElementById("clinic-name-error");
+    const streetAddress = document.getElementById("clinic-street-address");
+    const city = document.getElementById("clinic-city");
+    const clinicState = document.getElementById("clinic-state");
+    const zipCode = document.getElementById("clinic-zip-code");
     const reportingPeriodFrom = document.getElementById("reporting-period-from");
     const reportingPeriodTo = document.getElementById("reporting-period-to");
     const reportingPeriodError = document.getElementById("reporting-period-error");
@@ -188,6 +290,26 @@ const ClinicInformationView = (() => {
     if (error) {
       DOM.showError(input, errorEl, error);
       input.focus();
+      return;
+    }
+
+    const addressFields = [
+      [streetAddress, "street address", "clinic-street-address-error"],
+      [city, "city", "clinic-city-error"],
+      [clinicState, "state", "clinic-state-error"],
+    ];
+    for (const [field, label, errorId] of addressFields) {
+      const addressError = Validation.clinicAddressField(field.value, label);
+      if (addressError) {
+        DOM.showError(field, document.getElementById(errorId), addressError);
+        field.focus();
+        return;
+      }
+    }
+    const zipError = Validation.zipCode(zipCode.value);
+    if (zipError) {
+      DOM.showError(zipCode, document.getElementById("clinic-zip-code-error"), zipError);
+      zipCode.focus();
       return;
     }
 
@@ -217,12 +339,20 @@ const ClinicInformationView = (() => {
   function _saveDraft(state = _activeState) {
     if (!state || !state.clinic) return;
     const input = document.getElementById("clinic-name");
+    const streetAddress = document.getElementById("clinic-street-address");
+    const city = document.getElementById("clinic-city");
+    const clinicState = document.getElementById("clinic-state");
+    const zipCode = document.getElementById("clinic-zip-code");
     const reportingPeriodFrom = document.getElementById("reporting-period-from");
     const reportingPeriodTo = document.getElementById("reporting-period-to");
     const reportingPeriodClinicCost = document.getElementById("reporting-period-clinic-cost");
-    if (!input || !reportingPeriodFrom || !reportingPeriodTo || !reportingPeriodClinicCost) return;
+    if (!input || !streetAddress || !city || !clinicState || !zipCode || !reportingPeriodFrom || !reportingPeriodTo || !reportingPeriodClinicCost) return;
 
     state.clinic.name = input.value.trim();
+    state.clinic.streetAddress = streetAddress.value.trim();
+    state.clinic.city = city.value.trim();
+    state.clinic.state = clinicState.value.trim().toUpperCase();
+    state.clinic.zipCode = zipCode.value.trim();
     state.clinic.reportingPeriodFrom = reportingPeriodFrom.value;
     state.clinic.reportingPeriodTo = reportingPeriodTo.value;
     state.clinic.reportingPeriodClinicCost = reportingPeriodClinicCost.value === ""

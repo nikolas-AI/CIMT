@@ -44,6 +44,10 @@ const Calculator = (() => {
     /** @type {ImpactSummary} */
     return {
       clinicName:           state.clinic.name,
+      streetAddress:        state.clinic.streetAddress,
+      city:                 state.clinic.city,
+      state:                state.clinic.state,
+      zipCode:              state.clinic.zipCode,
       reportingPeriodFrom:  state.clinic.reportingPeriodFrom,
       reportingPeriodTo:    state.clinic.reportingPeriodTo,
       totalEstimatedValue:  totalValue,
@@ -124,6 +128,10 @@ const Calculator = (() => {
 /**
  * @typedef {Object} ImpactSummary
  * @property {string}  clinicName
+ * @property {string}  streetAddress
+ * @property {string}  city
+ * @property {string}  state
+ * @property {string}  zipCode
  * @property {string}  reportingPeriodFrom
  * @property {string}  reportingPeriodTo
  * @property {number}  totalEstimatedValue

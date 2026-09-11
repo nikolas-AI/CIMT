@@ -18,8 +18,8 @@
   // reads values from it when it is drawn, and writes new values back into it.
   // -----------------------------------------------------------------
   const state = {
-    /** @type {{ name: string, reportingPeriodFrom: string, reportingPeriodTo: string, reportingPeriodClinicCost: number|null }} */
-    clinic: { name: "", reportingPeriodFrom: "", reportingPeriodTo: "", reportingPeriodClinicCost: null },
+    /** @type {{ name: string, streetAddress: string, city: string, state: string, zipCode: string, reportingPeriodFrom: string, reportingPeriodTo: string, reportingPeriodClinicCost: number|null }} */
+    clinic: { name: "", streetAddress: "", city: "", state: "", zipCode: "", reportingPeriodFrom: "", reportingPeriodTo: "", reportingPeriodClinicCost: null },
 
     /** @type {Array<{ id: string, roleId: string, hours: number }>} */
     volunteers: [],
@@ -78,7 +78,7 @@
   // Start Over clears every answer and checkbox, then draws the first screen.
   // Replacing the arrays removes the old rows, not just their displayed text.
   function startOver() {
-    state.clinic = { name: "", reportingPeriodFrom: "", reportingPeriodTo: "", reportingPeriodClinicCost: null };
+    state.clinic = { name: "", streetAddress: "", city: "", state: "", zipCode: "", reportingPeriodFrom: "", reportingPeriodTo: "", reportingPeriodClinicCost: null };
     state.volunteers = [];
     state.services = [];
     state.noVolunteerHours = false;
@@ -134,6 +134,10 @@
 
   function _clinicDetailsComplete() {
     return !Validation.clinicName(state.clinic.name) &&
+      !Validation.clinicAddressField(state.clinic.streetAddress, "street address") &&
+      !Validation.clinicAddressField(state.clinic.city, "city") &&
+      !Validation.clinicAddressField(state.clinic.state, "state") &&
+      !Validation.zipCode(state.clinic.zipCode) &&
       !Validation.reportingPeriod(state.clinic.reportingPeriodFrom, state.clinic.reportingPeriodTo);
   }
 

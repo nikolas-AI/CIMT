@@ -44,11 +44,16 @@ const ExportService = (() => {
     const rows = [
       ["Clinic Impact Estimator"],
       ["Clinic", summary.clinicName],
+      ["Street Address", summary.streetAddress],
+      ["City", summary.city],
+      ["State", summary.state],
+      ["ZIP Code", summary.zipCode],
       ["Reporting Period From", summary.reportingPeriodFrom],
       ["Reporting Period To", summary.reportingPeriodTo],
-      ["Total Estimated Value", summary.totalEstimatedValue],
-      [],
     ];
+    const totalEstimatedValueRow = rows.length;
+    rows.push(["Total Estimated Value", summary.totalEstimatedValue]);
+    rows.push([]);
     let budgetSectionRow = null;
     let budgetRows = [];
     if (summary.reportingPeriodClinicCost !== null) {
@@ -128,7 +133,7 @@ const ExportService = (() => {
         cell.s = { ...(cell.s || {}), numFmt: currencyFormat };
       }
     };
-    formatCurrency(4, 1);
+    formatCurrency(totalEstimatedValueRow, 1);
     if (budgetSectionRow !== null) {
       formatCurrency(budgetSectionRow + 1, 1);
       formatCurrency(budgetSectionRow + 3, 1);
@@ -250,6 +255,7 @@ const ExportService = (() => {
   @media print { body { margin: 20px; } }
 </style></head><body>
 <p class="clinic-name">${_escapeHTML(summary.clinicName)}</p>
+<p style="color:#475C8A;margin:0 0 4px">${_escapeHTML(summary.streetAddress)}, ${_escapeHTML(summary.city)}, ${_escapeHTML(summary.state)} ${_escapeHTML(summary.zipCode)}</p>
 <p style="color:#475C8A;margin:0 0 12px">Reporting period: ${_formatDate(summary.reportingPeriodFrom)} - ${_formatDate(summary.reportingPeriodTo)}</p>
 <h1 style="font-family:Georgia,serif">Clinic Impact Estimator</h1>
 <p class="total">${_fmt(summary.totalEstimatedValue)}</p>

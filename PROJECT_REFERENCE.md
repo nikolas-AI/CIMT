@@ -24,6 +24,7 @@ The tool must prioritize ease of use, EMR independence, non-PHI inputs, transpar
 The application currently provides:
 
 - Clinic name input
+- Required clinic street address, city, state, and ZIP code
 - Reporting period input
 - Optional total clinic cost input for the reporting period
 - Volunteer hours by role
@@ -31,7 +32,7 @@ The application currently provides:
 - Benchmark-based service valuation
 - Volunteer contribution valuation
 - Reporting-period clinic cost comparison
-- Benchmark-value ratio and ROI metrics when a budget is supplied
+- Benchmark-value ratio and ROI metrics when clinic cost is supplied
 - Five-step single-page workflow with a welcome screen
 - Clickable progress navigation with required-step guards
 - Validation and state preservation during navigation
@@ -168,7 +169,6 @@ Contains layout, design tokens, responsive styling, accessibility states, and an
 
 The following requirements from the broader product vision are not currently implemented:
 
-- Primary ZIP code input
 - Chronic condition management counts
 - Mammogram and Pap smear-specific activity
 - Localized cost or benchmark data
@@ -250,6 +250,9 @@ Every calculated result should identify:
 {
   clinic: {
     name: "",
+    streetAddress: "",
+    city: "",
+    state: "",
     zipCode: "",
     reportingPeriodFrom: "",
     reportingPeriodTo: "",
@@ -362,7 +365,8 @@ When adding or changing a feature:
 - Documented current benchmark-value functionality.
 - Added optional reporting-period clinic cost input.
 - Added estimated value per $1 invested and benchmark-value ROI metrics to the summary and exports.
-- Documented remaining missing savings, ZIP, chronic-condition, and productivity features.
+- Documented remaining missing savings, chronic-condition, and productivity features.
+- Added required clinic address and ZIP code collection to the Clinic step and reports.
 - Documented data privacy and calculation principles.
 
 ## Open Questions
