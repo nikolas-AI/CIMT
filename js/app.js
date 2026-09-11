@@ -18,8 +18,8 @@
   // reads values from it when it is drawn, and writes new values back into it.
   // -----------------------------------------------------------------
   const state = {
-    /** @type {{ name: string, reportingPeriodFrom: string, reportingPeriodTo: string }} */
-    clinic: { name: "", reportingPeriodFrom: "", reportingPeriodTo: "" },
+    /** @type {{ name: string, reportingPeriodFrom: string, reportingPeriodTo: string, reportingPeriodClinicCost: number|null }} */
+    clinic: { name: "", reportingPeriodFrom: "", reportingPeriodTo: "", reportingPeriodClinicCost: null },
 
     /** @type {Array<{ id: string, roleId: string, hours: number }>} */
     volunteers: [],
@@ -57,7 +57,7 @@
   // Start Over clears every answer and checkbox, then draws the first screen.
   // Replacing the arrays removes the old rows, not just their displayed text.
   function startOver() {
-    state.clinic = { name: "", reportingPeriodFrom: "", reportingPeriodTo: "" };
+    state.clinic = { name: "", reportingPeriodFrom: "", reportingPeriodTo: "", reportingPeriodClinicCost: null };
     state.volunteers = [];
     state.services = [];
     state.noVolunteerHours = false;

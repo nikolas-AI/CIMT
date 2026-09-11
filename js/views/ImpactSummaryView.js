@@ -26,6 +26,9 @@ const ImpactSummaryView = (() => {
     view.appendChild(_buildHero(summary));
     view.appendChild(_buildDisclaimer());
     view.appendChild(_buildBreakdown(summary));
+    if (summary.reportingPeriodClinicCost !== null) {
+      view.appendChild(_buildBudgetMetrics(summary));
+    }
     const rateTable = _buildRateTable(summary);
     if (rateTable) view.appendChild(rateTable);
     if (summary.volunteerBreakdown.length > 0) {
@@ -130,6 +133,37 @@ const ImpactSummaryView = (() => {
       <p class="impact-card__note">${note}</p>
     `;
     return card;
+  }
+
+  function _buildBudgetMetrics(summary) {
+    const section = document.createElement("section");
+    section.className = "summary-section budget-metrics";
+    section.setAttribute("aria-labelledby", "budget-metrics-heading");
+
+    section.innerHTML = `
+      <h2 class="summary-section__heading" id="budget-metrics-heading">Benchmark Value Compared With Budget</h2>
+      <p class="summary-section__intro">
+        These metrics compare estimated benchmark value with the total clinic cost reported for this period.
+        They are not actual financial ROI or guaranteed savings.
+      </p>
+      <div class="budget-metrics__grid">
+        ${_buildMetric("Total clinic cost", Formatting.currency(summary.reportingPeriodClinicCost), "User-reported cost for this reporting period.")}
+        ${_buildMetric("Estimated service value", Formatting.currency(summary.totalEstimatedValue), "Clinical service value plus volunteer contribution value.")}
+        ${_buildMetric("Value-to-cost ratio", `${summary.valueToCostRatio.toFixed(2)}x`, "Estimated benchmark value divided by total clinic cost.")}
+        ${_buildMetric("Benchmark-value ROI", `${summary.benchmarkValueROI.toFixed(1)}%`, "Estimated benchmark value less clinic cost, divided by clinic cost.")}
+      </div>
+    `;
+    return section;
+  }
+
+  function _buildMetric(label, value, note) {
+    return `
+      <div class="budget-metric">
+        <p class="budget-metric__label">${label}</p>
+        <p class="budget-metric__value">${value}</p>
+        <p class="budget-metric__note">${note}</p>
+      </div>
+    `;
   }
 
   // ---------------------------------------------------------------

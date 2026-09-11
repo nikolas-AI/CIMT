@@ -89,6 +89,27 @@ const ClinicInformationView = (() => {
         </div>
         <span id="reporting-period-error" class="field__error" role="alert"></span>
       </div>
+
+      <div class="field">
+        <label class="field__label" for="reporting-period-clinic-cost">
+          Total clinic cost for this reporting period <span class="field__optional">(optional)</span>
+        </label>
+        <p class="field__help" id="reporting-period-clinic-cost-help">
+          Include staffing, supplies, facilities, technology, administration, and other operating expenses for the dates above.
+        </p>
+        <input
+          id="reporting-period-clinic-cost"
+          class="field__input"
+          type="number"
+          min="0.01"
+          step="0.01"
+          inputmode="decimal"
+          placeholder="e.g. 125000"
+          aria-describedby="reporting-period-clinic-cost-help reporting-period-clinic-cost-error"
+          value="${_escape(state.clinic.reportingPeriodClinicCost)}"
+        >
+        <span id="reporting-period-clinic-cost-error" class="field__error" role="alert"></span>
+      </div>
       </section>
     `;
 
@@ -105,6 +126,7 @@ const ClinicInformationView = (() => {
     const input = view.querySelector("#clinic-name");
     const reportingPeriodFrom = view.querySelector("#reporting-period-from");
     const reportingPeriodTo = view.querySelector("#reporting-period-to");
+    const reportingPeriodClinicCost = view.querySelector("#reporting-period-clinic-cost");
     input.addEventListener("input", () => {
       if (!Validation.clinicName(input.value)) {
         DOM.clearError(input, view.querySelector("#clinic-name-error"));
@@ -118,6 +140,11 @@ const ClinicInformationView = (() => {
         DOM.clearError(input, view.querySelector("#reporting-period-error"));
       }
     }));
+    reportingPeriodClinicCost.addEventListener("input", () => {
+      if (!Validation.reportingPeriodClinicCost(reportingPeriodClinicCost.value)) {
+        DOM.clearError(reportingPeriodClinicCost, view.querySelector("#reporting-period-clinic-cost-error"));
+      }
+    });
 
     // Auto-focus
     input.focus();
@@ -133,6 +160,8 @@ const ClinicInformationView = (() => {
     const reportingPeriodFrom = document.getElementById("reporting-period-from");
     const reportingPeriodTo = document.getElementById("reporting-period-to");
     const reportingPeriodError = document.getElementById("reporting-period-error");
+    const reportingPeriodClinicCost = document.getElementById("reporting-period-clinic-cost");
+    const reportingPeriodClinicCostError = document.getElementById("reporting-period-clinic-cost-error");
     const rawValue = input.value;
     const error    = Validation.clinicName(rawValue);
 
@@ -153,12 +182,22 @@ const ClinicInformationView = (() => {
       return;
     }
 
+    const clinicCostValidation = Validation.reportingPeriodClinicCost(reportingPeriodClinicCost.value);
+    if (clinicCostValidation) {
+      DOM.showError(reportingPeriodClinicCost, reportingPeriodClinicCostError, clinicCostValidation);
+      reportingPeriodClinicCost.focus();
+      return;
+    }
+
     DOM.clearError(input, errorEl);
     state.clinic.name = rawValue.trim();
     DOM.clearError(reportingPeriodFrom, reportingPeriodError);
     DOM.clearError(reportingPeriodTo, reportingPeriodError);
     state.clinic.reportingPeriodFrom = reportingPeriodFrom.value;
     state.clinic.reportingPeriodTo = reportingPeriodTo.value;
+    state.clinic.reportingPeriodClinicCost = reportingPeriodClinicCost.value === ""
+      ? null
+      : Number(reportingPeriodClinicCost.value);
     onNext();
   }
 

@@ -35,6 +35,11 @@ const Calculator = (() => {
     const volunteerValue     = volunteerBreakdown.reduce((sum, r) => sum + r.estimatedValue, 0);
     const clinicalValue      = serviceBreakdown.reduce((sum, r) => sum + r.estimatedValue, 0);
     const totalValue         = volunteerValue + clinicalValue;
+    const clinicCost         = _optionalPositiveNumber(state.clinic.reportingPeriodClinicCost);
+    const valueToCostRatio   = clinicCost > 0 ? totalValue / clinicCost : null;
+    const benchmarkValueROI  = clinicCost > 0
+      ? (totalValue - clinicCost) / clinicCost * 100
+      : null;
 
     /** @type {ImpactSummary} */
     return {
@@ -44,10 +49,28 @@ const Calculator = (() => {
       totalEstimatedValue:  totalValue,
       volunteerValue:       volunteerValue,
       clinicalServiceValue: clinicalValue,
+      reportingPeriodClinicCost: clinicCost,
+      reportingPeriodDays:       _periodDays(state.clinic.reportingPeriodFrom, state.clinic.reportingPeriodTo),
+      valueToCostRatio:      valueToCostRatio,
+      benchmarkValueROI:     benchmarkValueROI,
       volunteerBreakdown:   volunteerBreakdown,
       serviceBreakdown:     serviceBreakdown,
       rateSources:          [VOLUNTEER_RATE_SOURCE],
     };
+  }
+
+  function _optionalPositiveNumber(value) {
+    if (value === "" || value === null || value === undefined) return null;
+    const number = Number(value);
+    return Number.isFinite(number) && number > 0 ? number : null;
+  }
+
+  function _periodDays(from, to) {
+    if (!from || !to || from > to) return null;
+    const start = new Date(`${from}T00:00:00Z`);
+    const end = new Date(`${to}T00:00:00Z`);
+    const days = Math.round((end - start) / 86400000) + 1;
+    return Number.isFinite(days) && days > 0 ? days : null;
   }
 
   // ---------------------------------------------------------------
@@ -106,6 +129,10 @@ const Calculator = (() => {
  * @property {number}  totalEstimatedValue
  * @property {number}  volunteerValue
  * @property {number}  clinicalServiceValue
+ * @property {number|null} reportingPeriodClinicCost
+ * @property {number|null} reportingPeriodDays
+ * @property {number|null} valueToCostRatio
+ * @property {number|null} benchmarkValueROI
  * @property {Array}   volunteerBreakdown
  * @property {Array}   serviceBreakdown
  * @property {Array}   rateSources

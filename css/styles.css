@@ -334,6 +334,18 @@ body {
   margin-left: 2px;
 }
 
+.field__optional {
+  color: var(--color-muted);
+  font-weight: 400;
+}
+
+.field__help {
+  color: var(--color-slate);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  margin: 0 0 var(--space-2);
+}
+
 .field__input,
 .field__select {
   /* Shared control sizing makes text inputs and dropdowns line up. */
@@ -803,6 +815,45 @@ body {
   color: var(--color-slate);
   margin-bottom: var(--space-4);
   line-height: 1.6;
+}
+
+.budget-metrics__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.budget-metric {
+  padding: var(--space-5);
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.budget-metric:nth-child(2n) { border-right: 0; }
+.budget-metric:nth-last-child(-n + 2) { border-bottom: 0; }
+
+.budget-metric__label {
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-2);
+}
+
+.budget-metric__value {
+  color: var(--color-navy);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: 1.1;
+  margin-bottom: var(--space-2);
+}
+
+.budget-metric__note {
+  color: var(--color-slate);
+  font-size: var(--text-sm);
+  line-height: 1.5;
 }
 
 /* Rate table: compact tabular data with right-aligned numeric values. */

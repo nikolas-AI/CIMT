@@ -50,6 +50,15 @@ const Validation = (() => {
     return null; // valid
   }
 
+  /** Validate an optional total clinic cost for the reporting period. */
+  function reportingPeriodClinicCost(value) {
+    if (value === "" || value === null || value === undefined) return null;
+    const cost = Number(value);
+    if (!Number.isFinite(cost)) return "Please enter a valid clinic cost.";
+    if (cost <= 0) return "The total clinic cost must be greater than zero.";
+    return null;
+  }
+
   /** Validate one volunteer role and its reported hours. */
   function volunteerEntry(roleId, hours) {
     if (!roleId) return "Please select a volunteer role.";
@@ -70,7 +79,7 @@ const Validation = (() => {
     return null;
   }
 
-  return { clinicName, reportingPeriod, volunteerEntry, serviceEntry };
+  return { clinicName, reportingPeriod, reportingPeriodClinicCost, volunteerEntry, serviceEntry };
 })();
 
 // -----------------------------------------------------------------

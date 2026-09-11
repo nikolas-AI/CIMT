@@ -49,6 +49,22 @@ const ExportService = (() => {
       ["Total Estimated Value", summary.totalEstimatedValue],
       [],
     ];
+    let budgetSectionRow = null;
+    let budgetRows = [];
+    if (summary.reportingPeriodClinicCost !== null) {
+      budgetSectionRow = rows.length;
+      rows.push(["Clinic Cost and Benchmark Value Metrics"]);
+      budgetRows = [
+        ["Reporting Period Clinic Cost", summary.reportingPeriodClinicCost],
+        ["Reporting Period Days", summary.reportingPeriodDays],
+        ["Estimated Service Value", summary.totalEstimatedValue],
+        ["Value-to-Cost Ratio", summary.valueToCostRatio],
+        ["Benchmark-Value ROI (%)", summary.benchmarkValueROI],
+      ];
+      rows.push(...budgetRows);
+      rows.push(["Cost Note", "These metrics compare benchmark value with the reported total clinic cost for this period. They are not actual financial ROI or guaranteed healthcare savings."]);
+      rows.push([]);
+    }
     const clinicalSectionRow = rows.length;
     rows.push(["Clinical Services"]);
     const clinicalHeaderRow = rows.length;
@@ -79,12 +95,13 @@ const ExportService = (() => {
       { wch: 34 }, { wch: 22 }, { wch: 14 }, { wch: 20 }, { wch: 20 },
     ];
     sheet["!merges"] = [
-      ...[0, clinicalSectionRow, volunteerSectionRow, disclaimerSectionRow, disclaimerRow]
+      ...[0, ...(budgetSectionRow === null ? [] : [budgetSectionRow]), clinicalSectionRow, volunteerSectionRow, disclaimerSectionRow, disclaimerRow]
         .map(row => ({ s: { r: row, c: 0 }, e: { r: row, c: 4 } })),
     ];
 
     const boldRows = [0, clinicalSectionRow, clinicalHeaderRow, clinicalTotalRow,
       volunteerSectionRow, volunteerHeaderRow, volunteerTotalRow, disclaimerSectionRow];
+    if (budgetSectionRow !== null) boldRows.push(budgetSectionRow);
     const styleRow = (rowIndex, style) => {
       for (let columnIndex = 0; columnIndex < 5; columnIndex += 1) {
         const cell = sheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })];
@@ -112,6 +129,10 @@ const ExportService = (() => {
       }
     };
     formatCurrency(4, 1);
+    if (budgetSectionRow !== null) {
+      formatCurrency(budgetSectionRow + 1, 1);
+      formatCurrency(budgetSectionRow + 3, 1);
+    }
     for (let rowIndex = clinicalHeaderRow + 1; rowIndex < clinicalTotalRow; rowIndex += 1) {
       formatCurrency(rowIndex, 3);
       formatCurrency(rowIndex, 4);
@@ -198,6 +219,19 @@ const ExportService = (() => {
       </li>
     `).join("");
 
+    const budgetHTML = summary.reportingPeriodClinicCost !== null ? `
+      <h2>Clinic Cost and Benchmark Value Metrics</h2>
+      <table>
+        <tbody>
+          <tr><th>Total clinic cost</th><td style="text-align:right">${_fmt(summary.reportingPeriodClinicCost)}</td></tr>
+          <tr><th>Estimated service value</th><td style="text-align:right">${_fmt(summary.totalEstimatedValue)}</td></tr>
+          <tr><th>Value-to-cost ratio</th><td style="text-align:right">${summary.valueToCostRatio.toFixed(2)}x</td></tr>
+          <tr><th>Benchmark-value ROI</th><td style="text-align:right">${summary.benchmarkValueROI.toFixed(1)}%</td></tr>
+        </tbody>
+      </table>
+      <p class="disclaimer">These metrics compare estimated benchmark value with the reported total clinic cost for this period. They are not actual financial ROI or guaranteed healthcare savings.</p>
+    ` : "";
+
     return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8">
 <title>Impact Summary — ${summary.clinicName}</title>
@@ -222,6 +256,7 @@ const ExportService = (() => {
 <p class="label">Estimated Value of Care and Volunteer Contributions</p>
 <p class="disclaimer">This is a benchmark-based estimate of the value of services and volunteer contributions.
 It does not represent actual revenue, Medicare reimbursement, or guaranteed healthcare savings.</p>
+${budgetHTML}
 <h2>Clinical Services</h2>
 <table><thead><tr><th>Service</th><th>Code</th><th style="text-align:right">Visits</th><th style="text-align:right">Rate</th><th style="text-align:right">Est. Value</th></tr></thead>
 <tbody>${svcRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Clinical Total</th><th style="text-align:right">${_fmt(summary.clinicalServiceValue)}</th></tr></tfoot></table>
