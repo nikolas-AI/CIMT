@@ -33,6 +33,7 @@ The application currently provides:
 - Reporting-period clinic cost comparison
 - Benchmark-value ratio and ROI metrics when a budget is supplied
 - Five-step single-page workflow with a welcome screen
+- Clickable progress navigation with required-step guards
 - Validation and state preservation during navigation
 - Impact summary dashboard
 - Benchmark rate tables
@@ -42,6 +43,11 @@ The application currently provides:
 - Responsive styling
 - Reduced-motion support
 - No patient-level data collection
+
+Progress steps can be clicked to revisit completed or earlier screens. Backward
+navigation is always available. Forward jumps are allowed only when the required
+previous steps are complete; otherwise an accessible warning identifies the first
+step that must be completed.
 
 ## Current Calculation Model
 
@@ -55,7 +61,7 @@ Volunteer contribution value = volunteer hours x benchmark hourly rate
 Total estimated value =
 clinical service value + volunteer contribution value
 
-Value-to-cost ratio =
+Estimated value per $1 invested =
 total estimated value / total clinic cost for the reporting period
 
 Benchmark-value ROI =
@@ -70,7 +76,7 @@ These values represent estimated benchmark value. They do not represent:
 - Actual profit
 - Confirmed avoided emergency-room visits
 
-The benchmark-value ratio and ROI are comparison metrics, not actual financial ROI.
+Estimated value per $1 invested and benchmark-value ROI are comparison metrics, not actual financial ROI.
 They are shown only when a positive reporting-period clinic cost is supplied. A missing
 or zero cost does not produce a ratio or ROI result.
 
@@ -355,7 +361,7 @@ When adding or changing a feature:
 - Added a welcome screen before clinic data collection.
 - Documented current benchmark-value functionality.
 - Added optional reporting-period clinic cost input.
-- Added benchmark-value ratio and benchmark-value ROI metrics to the summary and exports.
+- Added estimated value per $1 invested and benchmark-value ROI metrics to the summary and exports.
 - Documented remaining missing savings, ZIP, chronic-condition, and productivity features.
 - Documented data privacy and calculation principles.
 

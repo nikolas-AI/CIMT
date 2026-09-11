@@ -27,7 +27,7 @@ const ProgressIndicator = (() => {
    *
   * @param {number} currentStep Zero-based index: 0 is Welcome and 4 is Impact.
    */
-  function render(currentStep) {
+  function render(currentStep, onStep) {
     const container = document.getElementById("progress-indicator");
     if (!container) return;
 
@@ -59,15 +59,35 @@ const ProgressIndicator = (() => {
 
       container.insertAdjacentHTML("beforeend", `
         ${connector}
-        <div class="progress-step ${statusClass}" ${ariaCurrent}>
+        <button class="progress-step ${statusClass}" type="button" data-step="${step.index}" ${ariaCurrent}>
           <div class="progress-step__label-wrap">
             <div class="progress-step__dot" aria-hidden="true">${dotContent}</div>
             <span class="progress-step__text">${step.label}</span>
           </div>
-        </div>
+        </button>
       `);
     });
+
+    container.querySelectorAll("[data-step]").forEach(button => {
+      button.addEventListener("click", () => {
+        if (typeof onStep === "function") onStep(Number(button.dataset.step));
+      });
+    });
+
+    const warning = document.createElement("p");
+    warning.id = "progress-warning";
+    warning.className = "progress-warning";
+    warning.setAttribute("role", "alert");
+    warning.hidden = true;
+    container.appendChild(warning);
   }
 
-  return { render };
+  function showWarning(message) {
+    const warning = document.getElementById("progress-warning");
+    if (!warning) return;
+    warning.textContent = message;
+    warning.hidden = false;
+  }
+
+  return { render, showWarning };
 })();

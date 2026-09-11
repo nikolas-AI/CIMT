@@ -58,7 +58,7 @@ const ExportService = (() => {
         ["Reporting Period Clinic Cost", summary.reportingPeriodClinicCost],
         ["Reporting Period Days", summary.reportingPeriodDays],
         ["Estimated Service Value", summary.totalEstimatedValue],
-        ["Value-to-Cost Ratio", summary.valueToCostRatio],
+        ["Estimated Value per $1 Invested", summary.valueToCostRatio],
         ["Benchmark-Value ROI (%)", summary.benchmarkValueROI],
       ];
       rows.push(...budgetRows);
@@ -225,7 +225,7 @@ const ExportService = (() => {
         <tbody>
           <tr><th>Total clinic cost</th><td style="text-align:right">${_fmt(summary.reportingPeriodClinicCost)}</td></tr>
           <tr><th>Estimated service value</th><td style="text-align:right">${_fmt(summary.totalEstimatedValue)}</td></tr>
-          <tr><th>Value-to-cost ratio</th><td style="text-align:right">${summary.valueToCostRatio.toFixed(2)}x</td></tr>
+          <tr><th>Estimated value per $1 invested</th><td style="text-align:right">$${summary.valueToCostRatio.toFixed(2)}</td></tr>
           <tr><th>Benchmark-value ROI</th><td style="text-align:right">${summary.benchmarkValueROI.toFixed(1)}%</td></tr>
         </tbody>
       </table>

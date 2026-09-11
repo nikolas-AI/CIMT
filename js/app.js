@@ -45,8 +45,29 @@
   // -----------------------------------------------------------------
   // Change the active step and rebuild the progress indicator and view.
   function goTo(step) {
+    if (state.currentStep === 1) ClinicInformationView.saveDraft(state);
     state.currentStep = step;
     _render();
+  }
+
+  function requestStep(step) {
+    if (state.currentStep === 1) ClinicInformationView.saveDraft(state);
+
+    if (step <= state.currentStep) {
+      goTo(step);
+      return;
+    }
+
+    const incompleteStep = _firstIncompleteStep(step);
+    if (incompleteStep !== null) {
+      const labels = ["Welcome", "Clinic", "Volunteers", "Services", "Impact"];
+      ProgressIndicator.showWarning(
+        `Complete the ${labels[incompleteStep]} step before continuing to ${labels[step]}.`
+      );
+      return;
+    }
+
+    goTo(step);
   }
 
   // Views do not need to know how the whole app is organized. They call these
@@ -71,7 +92,7 @@
   // Decides which view to show and refreshes the progress indicator.
   // -----------------------------------------------------------------
   function _render() {
-    ProgressIndicator.render(state.currentStep);
+    ProgressIndicator.render(state.currentStep, requestStep);
 
     // A screen is rebuilt when the step changes. It reads saved answers and gets
     // callbacks for only the buttons that belong to that screen.
@@ -102,6 +123,32 @@
 
     // Scroll to top of content area on each step change
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function _firstIncompleteStep(targetStep) {
+    if (targetStep >= 2 && !_clinicDetailsComplete()) return 1;
+    if (targetStep >= 3 && !_volunteerDetailsComplete()) return 2;
+    if (targetStep >= 4 && !_serviceDetailsComplete()) return 3;
+    return null;
+  }
+
+  function _clinicDetailsComplete() {
+    return !Validation.clinicName(state.clinic.name) &&
+      !Validation.reportingPeriod(state.clinic.reportingPeriodFrom, state.clinic.reportingPeriodTo);
+  }
+
+  function _volunteerDetailsComplete() {
+    if (state.noVolunteerHours) return true;
+    return state.volunteers.length > 0 && state.volunteers.every(entry =>
+      entry.roleId && Number.isFinite(Number(entry.hours)) && Number(entry.hours) >= 0
+    );
+  }
+
+  function _serviceDetailsComplete() {
+    if (state.noServicesProvided) return true;
+    return state.services.length > 0 && state.services.every(entry =>
+      entry.serviceId && Number.isFinite(Number(entry.count)) && Number(entry.count) >= 0
+    );
   }
 
   // -----------------------------------------------------------------

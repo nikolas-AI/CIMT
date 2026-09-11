@@ -9,7 +9,10 @@
 
 const ClinicInformationView = (() => {
 
+  let _activeState = null;
+
   function render(state, { onBack, onNext }) {
+    _activeState = state;
     // This first screen asks for the clinic name and reporting dates. The
     // inputs are rebuilt from state whenever the user returns here, so saved
     // values are not lost.
@@ -22,6 +25,8 @@ const ClinicInformationView = (() => {
     view.className = "view";
     view.setAttribute("role", "region");
     view.setAttribute("aria-label", "Clinic Information");
+
+    const clinic = state.clinic || {};
 
     view.innerHTML = `
       <h1 class="view-heading">Estimate Your Clinic's Impact</h1>
@@ -56,7 +61,7 @@ const ClinicInformationView = (() => {
           autocomplete="organization"
           aria-required="true"
           aria-describedby="clinic-name-error"
-          value="${_escape(state.clinic.name)}"
+          value="${_escape(clinic.name)}"
         >
         <span id="clinic-name-error" class="field__error" role="alert"></span>
       </div>
@@ -72,7 +77,7 @@ const ClinicInformationView = (() => {
               type="date"
               aria-required="true"
               aria-describedby="reporting-period-error"
-              value="${_escape(state.clinic.reportingPeriodFrom)}"
+              value="${_escape(clinic.reportingPeriodFrom)}"
             >
           </div>
           <div>
@@ -83,7 +88,7 @@ const ClinicInformationView = (() => {
               type="date"
               aria-required="true"
               aria-describedby="reporting-period-error"
-              value="${_escape(state.clinic.reportingPeriodTo)}"
+              value="${_escape(clinic.reportingPeriodTo)}"
             >
           </div>
         </div>
@@ -106,7 +111,7 @@ const ClinicInformationView = (() => {
           inputmode="decimal"
           placeholder="e.g. 125000"
           aria-describedby="reporting-period-clinic-cost-help reporting-period-clinic-cost-error"
-          value="${_escape(state.clinic.reportingPeriodClinicCost)}"
+          value="${_escape(clinic.reportingPeriodClinicCost)}"
         >
         <span id="reporting-period-clinic-cost-error" class="field__error" role="alert"></span>
       </div>
@@ -130,6 +135,7 @@ const ClinicInformationView = (() => {
     const reportingPeriodTo = view.querySelector("#reporting-period-to");
     const reportingPeriodClinicCost = view.querySelector("#reporting-period-clinic-cost");
     input.addEventListener("input", () => {
+      state.clinic.name = input.value;
       if (!Validation.clinicName(input.value)) {
         DOM.clearError(input, view.querySelector("#clinic-name-error"));
       }
@@ -137,16 +143,28 @@ const ClinicInformationView = (() => {
     input.addEventListener("keydown", e => {
       if (e.key === "Enter") _handleNext(state, onNext);
     });
-    [reportingPeriodFrom, reportingPeriodTo].forEach(input => input.addEventListener("change", () => {
+    const syncReportingPeriod = () => {
+      state.clinic.reportingPeriodFrom = reportingPeriodFrom.value;
+      state.clinic.reportingPeriodTo = reportingPeriodTo.value;
       if (!Validation.reportingPeriod(reportingPeriodFrom.value, reportingPeriodTo.value)) {
-        DOM.clearError(input, view.querySelector("#reporting-period-error"));
+        DOM.clearError(reportingPeriodFrom, view.querySelector("#reporting-period-error"));
+        DOM.clearError(reportingPeriodTo, view.querySelector("#reporting-period-error"));
       }
-    }));
-    reportingPeriodClinicCost.addEventListener("input", () => {
+    };
+    [reportingPeriodFrom, reportingPeriodTo].forEach(periodInput => {
+      periodInput.addEventListener("input", syncReportingPeriod);
+      periodInput.addEventListener("change", syncReportingPeriod);
+    });
+    const syncClinicCost = () => {
+      state.clinic.reportingPeriodClinicCost = reportingPeriodClinicCost.value === ""
+        ? null
+        : Number(reportingPeriodClinicCost.value);
       if (!Validation.reportingPeriodClinicCost(reportingPeriodClinicCost.value)) {
         DOM.clearError(reportingPeriodClinicCost, view.querySelector("#reporting-period-clinic-cost-error"));
       }
-    });
+    };
+    reportingPeriodClinicCost.addEventListener("input", syncClinicCost);
+    reportingPeriodClinicCost.addEventListener("change", syncClinicCost);
 
     // Auto-focus
     input.focus();
@@ -192,20 +210,33 @@ const ClinicInformationView = (() => {
     }
 
     DOM.clearError(input, errorEl);
-    state.clinic.name = rawValue.trim();
-    DOM.clearError(reportingPeriodFrom, reportingPeriodError);
-    DOM.clearError(reportingPeriodTo, reportingPeriodError);
+    _saveDraft(state);
+    onNext();
+  }
+
+  function _saveDraft(state = _activeState) {
+    if (!state || !state.clinic) return;
+    const input = document.getElementById("clinic-name");
+    const reportingPeriodFrom = document.getElementById("reporting-period-from");
+    const reportingPeriodTo = document.getElementById("reporting-period-to");
+    const reportingPeriodClinicCost = document.getElementById("reporting-period-clinic-cost");
+    if (!input || !reportingPeriodFrom || !reportingPeriodTo || !reportingPeriodClinicCost) return;
+
+    state.clinic.name = input.value.trim();
     state.clinic.reportingPeriodFrom = reportingPeriodFrom.value;
     state.clinic.reportingPeriodTo = reportingPeriodTo.value;
     state.clinic.reportingPeriodClinicCost = reportingPeriodClinicCost.value === ""
       ? null
       : Number(reportingPeriodClinicCost.value);
-    onNext();
   }
 
   function _escape(str) {
-    return (str || "").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    return String(str === null || str === undefined ? "" : str)
+      .replace(/&/g,"&amp;")
+      .replace(/"/g,"&quot;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;");
   }
 
-  return { render };
+  return { render, saveDraft: _saveDraft };
 })();

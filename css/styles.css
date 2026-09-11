@@ -81,7 +81,7 @@ html { font-size: 16px; scroll-behavior: smooth; }
 body {
   font-family: var(--font-body);
   font-size: var(--text-base);
-  color: var(--color-navy);
+  color: var(--color-impact);
   background:
     linear-gradient(rgba(255,253,248,0.34) 1px, transparent 1px),
     var(--color-bg);
@@ -141,7 +141,7 @@ body {
   font-family: var(--font-body);
   font-weight: 600;
   font-size: var(--text-base);
-  color: var(--color-navy);
+  color: var(--color-impact);
   letter-spacing: 0.02em;
   text-transform: uppercase;
   font-size: var(--text-sm);
@@ -165,6 +165,7 @@ body {
    --------------------------------------------------------- */
 #progress-indicator {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0;
   margin-bottom: var(--space-12);
@@ -175,7 +176,21 @@ body {
   display: flex;
   align-items: center;
   flex: 1;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
 }
+
+.progress-step:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-radius: var(--radius-sm);
+}
+
+.progress-step:hover .progress-step__text { color: var(--color-navy); }
 
 .progress-step__label-wrap {
   display: flex;
@@ -240,6 +255,17 @@ body {
 }
 .progress-step--active .progress-step__text { color: var(--color-step-active); font-weight: 600; }
 
+.progress-warning {
+  flex-basis: 100%;
+  width: 100%;
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-error);
+  background: var(--color-error-bg);
+  border-left: 3px solid var(--color-error);
+  font-size: var(--text-sm);
+}
+
 /* ---------------------------------------------------------
   VIEWS - SHARED WRAPPER
   Every screen renderer creates a .view element. The animation applies once
@@ -280,7 +306,7 @@ body {
 }
 
 .welcome-hero .view-heading {
-  max-width: 16ch;
+  max-width: none;
   font-size: 3rem;
 }
 
@@ -302,46 +328,6 @@ body {
 .welcome-hero__note {
   color: var(--color-muted);
   font-size: var(--text-sm);
-}
-
-.welcome-details {
-  margin-bottom: var(--space-8);
-}
-
-.welcome-details__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  border-top: 1px solid var(--color-border);
-  border-left: 1px solid var(--color-border);
-  background: var(--color-surface);
-}
-
-.welcome-detail {
-  min-height: 150px;
-  padding: var(--space-5);
-  border-right: 1px solid var(--color-border);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.welcome-detail__number {
-  display: block;
-  color: var(--color-impact);
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-  line-height: 1;
-  margin-bottom: var(--space-4);
-}
-
-.welcome-detail h3 {
-  color: var(--color-navy);
-  font-size: var(--text-base);
-  margin-bottom: var(--space-2);
-}
-
-.welcome-detail p {
-  color: var(--color-slate);
-  font-size: var(--text-sm);
-  line-height: 1.5;
 }
 
 .welcome-disclaimer {
@@ -1030,7 +1016,6 @@ body {
 
   .view-heading { font-size: 2.25rem; }
   .welcome-hero .view-heading { font-size: 2.25rem; }
-  .welcome-details__grid { grid-template-columns: 1fr; }
   .clinic-snapshot { padding: var(--space-4); }
   .reporting-period-fields__inputs { grid-template-columns: 1fr; }
   .impact-hero { padding: var(--space-6) var(--space-4); }

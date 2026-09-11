@@ -149,7 +149,7 @@ const ImpactSummaryView = (() => {
       <div class="budget-metrics__grid">
         ${_buildMetric("Total clinic cost", Formatting.currency(summary.reportingPeriodClinicCost), "User-reported cost for this reporting period.")}
         ${_buildMetric("Estimated service value", Formatting.currency(summary.totalEstimatedValue), "Clinical service value plus volunteer contribution value.")}
-        ${_buildMetric("Value-to-cost ratio", `${summary.valueToCostRatio.toFixed(2)}x`, "Estimated benchmark value divided by total clinic cost.")}
+        ${_buildMetric("Estimated Value per $1 Invested", `$${summary.valueToCostRatio.toFixed(2)}`, "Estimated benchmark value generated for each dollar of reported clinic cost.")}
         ${_buildMetric("Benchmark-value ROI", `${summary.benchmarkValueROI.toFixed(1)}%`, "Estimated benchmark value less clinic cost, divided by clinic cost.")}
       </div>
     `;
