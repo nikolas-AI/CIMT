@@ -31,6 +31,14 @@ const Calculator = (() => {
 
     const volunteerBreakdown = _computeVolunteerBreakdown(volunteerEntries);
     const serviceBreakdown   = _computeServiceBreakdown(serviceEntries);
+    const mostImpactfulService = serviceBreakdown
+      .filter(service => service.count > 0)
+      .slice()
+      .sort((a, b) =>
+        b.estimatedValue - a.estimatedValue ||
+        b.count - a.count ||
+        a.serviceName.localeCompare(b.serviceName)
+      )[0] || null;
 
     const volunteerValue     = volunteerBreakdown.reduce((sum, r) => sum + r.estimatedValue, 0);
     const clinicalValue      = serviceBreakdown.reduce((sum, r) => sum + r.estimatedValue, 0);
@@ -59,6 +67,7 @@ const Calculator = (() => {
       benchmarkValueROI:     benchmarkValueROI,
       volunteerBreakdown:   volunteerBreakdown,
       serviceBreakdown:     serviceBreakdown,
+      mostImpactfulService: mostImpactfulService,
       rateSources:          [VOLUNTEER_RATE_SOURCE],
     };
   }
@@ -143,5 +152,6 @@ const Calculator = (() => {
  * @property {number|null} benchmarkValueROI
  * @property {Array}   volunteerBreakdown
  * @property {Array}   serviceBreakdown
+ * @property {Object|null} mostImpactfulService
  * @property {Array}   rateSources
  */

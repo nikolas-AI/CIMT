@@ -67,6 +67,9 @@ total estimated value / total clinic cost for the reporting period
 
 Benchmark-value ROI =
 (total estimated value - total clinic cost) / total clinic cost x 100
+
+Most impactful service =
+service with the highest (reported count x benchmark rate)
 ```
 
 These values represent estimated benchmark value. They do not represent:
@@ -80,6 +83,9 @@ These values represent estimated benchmark value. They do not represent:
 Estimated value per $1 invested and benchmark-value ROI are comparison metrics, not actual financial ROI.
 They are shown only when a positive reporting-period clinic cost is supplied. A missing
 or zero cost does not produce a ratio or ROI result.
+
+The most impactful service is ranked by total estimated benchmark value. Positive-count
+ties are resolved by visit count and then service name so the report is deterministic.
 
 ## Current Data Sources
 
@@ -170,13 +176,12 @@ Contains layout, design tokens, responsive styling, accessibility states, and an
 The following requirements from the broader product vision are not currently implemented:
 
 - Chronic condition management counts
-- Mammogram and Pap smear-specific activity
 - Localized cost or benchmark data
 - Evidence-backed financial ROI calculation
 - Net benefit calculation
 - Diverted emergency-room visits
 - Saved productivity
-- Service-specific ROI ranking
+- Service-specific impact ranking by total estimated benchmark value
 - Percentage of total ROI by service
 - Service cost as a percentage of total clinic cost
 - Uncertainty ranges or confidence levels
@@ -368,6 +373,11 @@ When adding or changing a feature:
 - Documented remaining missing savings, chronic-condition, and productivity features.
 - Added required clinic address and ZIP code collection to the Clinic step and reports.
 - Documented data privacy and calculation principles.
+
+### 2026-09-14
+
+- Added service-specific impact ranking based on total estimated benchmark value.
+- Added the most impactful service narrative to the summary, PDF, and Excel exports.
 
 ## Open Questions
 

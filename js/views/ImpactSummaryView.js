@@ -26,6 +26,7 @@ const ImpactSummaryView = (() => {
     view.appendChild(_buildHero(summary));
     view.appendChild(_buildDisclaimer());
     view.appendChild(_buildBreakdown(summary));
+    view.appendChild(_buildServiceImpact(summary));
     if (summary.reportingPeriodClinicCost !== null) {
       view.appendChild(_buildBudgetMetrics(summary));
     }
@@ -136,6 +137,30 @@ const ImpactSummaryView = (() => {
     return card;
   }
 
+  function _buildServiceImpact(summary) {
+    const section = document.createElement("section");
+    section.className = "summary-section service-impact";
+    section.setAttribute("aria-labelledby", "service-impact-heading");
+
+    const service = summary.mostImpactfulService;
+    section.innerHTML = service
+      ? `
+        <h2 class="summary-section__heading" id="service-impact-heading">Service Impact</h2>
+        <p class="service-impact__statement">
+          The most impactful service offered by this clinic was
+          <strong>${_escape(service.serviceName)}</strong>, generating an estimated benchmark value of
+          <strong>${Formatting.currency(service.estimatedValue)}</strong> from
+          <strong>${Formatting.number(service.count, 0)} ${service.count === 1 ? "visit" : "visits"}</strong>.
+        </p>
+        <p class="summary-section__intro">Ranked by total estimated benchmark value: reported visits multiplied by the applicable benchmark rate.</p>
+      `
+      : `
+        <h2 class="summary-section__heading" id="service-impact-heading">Service Impact</h2>
+        <p class="summary-section__intro">No clinical services were reported for this period.</p>
+      `;
+    return section;
+  }
+
   function _buildBudgetMetrics(summary) {
     const section = document.createElement("section");
     section.className = "summary-section budget-metrics";
@@ -150,7 +175,7 @@ const ImpactSummaryView = (() => {
       <div class="budget-metrics__grid">
         ${_buildMetric("Total clinic cost", Formatting.currency(summary.reportingPeriodClinicCost), "User-reported cost for this reporting period.")}
         ${_buildMetric("Estimated service value", Formatting.currency(summary.totalEstimatedValue), "Clinical service value plus volunteer contribution value.")}
-        ${_buildMetric("Estimated Value per $1 Invested", `$${summary.valueToCostRatio.toFixed(2)}`, "Estimated benchmark value generated for each dollar of reported clinic cost.")}
+        ${_buildMetric("Estimated Value per $1 Invested", `$${summary.valueToCostRatio.toFixed(3)}`, "Estimated benchmark value generated for each dollar of reported clinic cost.")}
         ${_buildMetric("Benchmark-value ROI", `${summary.benchmarkValueROI.toFixed(1)}%`, "Estimated benchmark value less clinic cost, divided by clinic cost.")}
       </div>
     `;

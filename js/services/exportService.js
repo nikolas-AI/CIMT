@@ -70,6 +70,12 @@ const ExportService = (() => {
       rows.push(["Cost Note", "These metrics compare benchmark value with the reported total clinic cost for this period. They are not actual financial ROI or guaranteed healthcare savings."]);
       rows.push([]);
     }
+    rows.push(["Most Impactful Service"]);
+    rows.push(summary.mostImpactfulService
+      ? ["Service", summary.mostImpactfulService.serviceName, "Visits", summary.mostImpactfulService.count, summary.mostImpactfulService.estimatedValue]
+      : ["No clinical services were reported for this period."]);
+    rows.push(["Ranking Note", "Ranked by total estimated benchmark value: reported visits multiplied by the applicable benchmark rate."]);
+    rows.push([]);
     const clinicalSectionRow = rows.length;
     rows.push(["Clinical Services"]);
     const clinicalHeaderRow = rows.length;
@@ -99,12 +105,15 @@ const ExportService = (() => {
     sheet["!cols"] = [
       { wch: 34 }, { wch: 22 }, { wch: 14 }, { wch: 20 }, { wch: 20 },
     ];
+    const serviceImpactSectionRow = budgetSectionRow === null
+      ? rows.findIndex(row => row[0] === "Most Impactful Service")
+      : budgetSectionRow + budgetRows.length + 3;
     sheet["!merges"] = [
-      ...[0, ...(budgetSectionRow === null ? [] : [budgetSectionRow]), clinicalSectionRow, volunteerSectionRow, disclaimerSectionRow, disclaimerRow]
+      ...[0, ...(budgetSectionRow === null ? [] : [budgetSectionRow]), serviceImpactSectionRow, clinicalSectionRow, volunteerSectionRow, disclaimerSectionRow, disclaimerRow]
         .map(row => ({ s: { r: row, c: 0 }, e: { r: row, c: 4 } })),
     ];
 
-    const boldRows = [0, clinicalSectionRow, clinicalHeaderRow, clinicalTotalRow,
+    const boldRows = [0, serviceImpactSectionRow, clinicalSectionRow, clinicalHeaderRow, clinicalTotalRow,
       volunteerSectionRow, volunteerHeaderRow, volunteerTotalRow, disclaimerSectionRow];
     if (budgetSectionRow !== null) boldRows.push(budgetSectionRow);
     const styleRow = (rowIndex, style) => {
@@ -230,12 +239,16 @@ const ExportService = (() => {
         <tbody>
           <tr><th>Total clinic cost</th><td style="text-align:right">${_fmt(summary.reportingPeriodClinicCost)}</td></tr>
           <tr><th>Estimated service value</th><td style="text-align:right">${_fmt(summary.totalEstimatedValue)}</td></tr>
-          <tr><th>Estimated value per $1 invested</th><td style="text-align:right">$${summary.valueToCostRatio.toFixed(2)}</td></tr>
+          <tr><th>Estimated value per $1 invested</th><td style="text-align:right">$${summary.valueToCostRatio.toFixed(3)}</td></tr>
           <tr><th>Benchmark-value ROI</th><td style="text-align:right">${summary.benchmarkValueROI.toFixed(1)}%</td></tr>
         </tbody>
       </table>
       <p class="disclaimer">These metrics compare estimated benchmark value with the reported total clinic cost for this period. They are not actual financial ROI or guaranteed healthcare savings.</p>
     ` : "";
+
+    const serviceImpactHTML = summary.mostImpactfulService
+      ? `<h2>Service Impact</h2><p>The most impactful service offered by this clinic was <strong>${_escapeHTML(summary.mostImpactfulService.serviceName)}</strong>, generating an estimated benchmark value of <strong>${_fmt(summary.mostImpactfulService.estimatedValue)}</strong> from <strong>${summary.mostImpactfulService.count.toLocaleString("en-US")} ${summary.mostImpactfulService.count === 1 ? "visit" : "visits"}</strong>.</p><p class="disclaimer">Ranked by total estimated benchmark value: reported visits multiplied by the applicable benchmark rate.</p>`
+      : `<h2>Service Impact</h2><p>No clinical services were reported for this period.</p>`;
 
     return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8">
@@ -263,6 +276,7 @@ const ExportService = (() => {
 <p class="disclaimer">This is a benchmark-based estimate of the value of services and volunteer contributions.
 It does not represent actual revenue, Medicare reimbursement, or guaranteed healthcare savings.</p>
 ${budgetHTML}
+${serviceImpactHTML}
 <h2>Clinical Services</h2>
 <table><thead><tr><th>Service</th><th>Code</th><th style="text-align:right">Visits</th><th style="text-align:right">Rate</th><th style="text-align:right">Est. Value</th></tr></thead>
 <tbody>${svcRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Clinical Total</th><th style="text-align:right">${_fmt(summary.clinicalServiceValue)}</th></tr></tfoot></table>
