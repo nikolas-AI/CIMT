@@ -136,22 +136,25 @@
     return !Validation.clinicName(state.clinic.name) &&
       !Validation.clinicAddressField(state.clinic.streetAddress, "street address") &&
       !Validation.clinicAddressField(state.clinic.city, "city") &&
-      !Validation.clinicAddressField(state.clinic.state, "state") &&
+      !Validation.stateCode(state.clinic.state) &&
       !Validation.zipCode(state.clinic.zipCode) &&
-      !Validation.reportingPeriod(state.clinic.reportingPeriodFrom, state.clinic.reportingPeriodTo);
+      !Validation.reportingPeriod(state.clinic.reportingPeriodFrom, state.clinic.reportingPeriodTo) &&
+      !Validation.reportingPeriodClinicCost(state.clinic.reportingPeriodClinicCost);
   }
 
   function _volunteerDetailsComplete() {
     if (state.noVolunteerHours) return true;
     return state.volunteers.length > 0 && state.volunteers.every(entry =>
-      entry.roleId && Number.isFinite(Number(entry.hours)) && Number(entry.hours) >= 0
+      entry.roleId && Number.isFinite(Number(entry.hours)) && Number(entry.hours) >= 0 &&
+      Number.isInteger(Number(entry.hours) * 2)
     );
   }
 
   function _serviceDetailsComplete() {
     if (state.noServicesProvided) return true;
     return state.services.length > 0 && state.services.every(entry =>
-      entry.serviceId && Number.isFinite(Number(entry.count)) && Number(entry.count) >= 0
+      entry.serviceId && Number.isFinite(Number(entry.count)) &&
+      Number.isInteger(Number(entry.count)) && Number(entry.count) >= 0
     );
   }
 

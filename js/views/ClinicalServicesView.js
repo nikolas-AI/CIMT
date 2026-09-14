@@ -116,7 +116,7 @@ const ClinicalServicesView = (() => {
     state.services = entries.map(e => ({
       id:        e.id,
       serviceId: e.selectValue,
-      count:     parseInt(e.countValue, 10) || 0,
+      count:     Number(e.countValue) || 0,
     }));
   }
 

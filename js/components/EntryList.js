@@ -93,13 +93,15 @@ const EntryList = (() => {
           DOM.clearError(selControl, selErr);
         }
 
-        const numVal = parseFloat(inp.value);
-        if (inp.value === "" || isNaN(numVal)) {
-          entry.countError = "Please enter a number.";
-          DOM.showError(inp, inpErr, entry.countError);
-          rowValid = false;
-        } else if (numVal < 0) {
-          entry.countError = "Value cannot be negative.";
+        const countError = _validateCount(inp.value, config.countStep);
+        if (countError) {
+          entry.countError = countError === "empty" || countError === "format"
+            ? "Please enter a number."
+            : countError === "step"
+              ? config.countStep === 1
+                ? "Please enter a whole number of visits."
+                : `Please enter a value in increments of ${config.countStep}.`
+              : "Value cannot be negative.";
           DOM.showError(inp, inpErr, entry.countError);
           rowValid = false;
         } else {
@@ -111,6 +113,16 @@ const EntryList = (() => {
       });
       return errors;
     };
+
+    function _validateCount(value, step) {
+      const rawValue = String(value || "").trim();
+      if (!rawValue) return "empty";
+      if (!/^-?(?:\d+(?:\.\d*)?|\.\d+)$/.test(rawValue)) return "format";
+      const numericValue = Number(rawValue);
+      if (!Number.isFinite(numericValue) || numericValue < 0) return "range";
+      const remainder = numericValue / step;
+      return Math.abs(remainder - Math.round(remainder)) < Number.EPSILON * 10 ? null : "step";
+    }
 
     // Public: return the current row values. They stay as strings here because
     // they come directly from HTML select and input controls.
@@ -317,8 +329,7 @@ const EntryList = (() => {
 
       countInput.addEventListener("input", () => {
         entries[index].countValue = countInput.value;
-        const count = parseFloat(countInput.value);
-        if (countInput.value !== "" && !isNaN(count) && count >= 0) {
+        if (!_validateCount(countInput.value, config.countStep)) {
           delete entries[index].countError;
           DOM.clearError(countInput, countError);
         }

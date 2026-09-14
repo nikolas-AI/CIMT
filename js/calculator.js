@@ -75,7 +75,9 @@ const Calculator = (() => {
   function _optionalPositiveNumber(value) {
     if (value === "" || value === null || value === undefined) return null;
     const number = Number(value);
-    return Number.isFinite(number) && number > 0 ? number : null;
+    return Number.isFinite(number) && number > 0 && number <= 1_000_000_000_000
+      ? number
+      : null;
   }
 
   function _periodDays(from, to) {

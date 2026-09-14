@@ -180,9 +180,10 @@ const ClinicInformationView = (() => {
           class="field__input"
           type="number"
           min="0"
-          step="100"
+          max="1000000000000"
+          step="0.01"
           inputmode="decimal"
-          placeholder="e.g. 125000"
+          placeholder="e.g. 95600"
           aria-describedby="reporting-period-clinic-cost-help reporting-period-clinic-cost-error"
           value="${_escape(clinic.reportingPeriodClinicCost)}"
         >
@@ -224,12 +225,14 @@ const ClinicInformationView = (() => {
       state.clinic.zipCode = zipCode.value;
       clinicState.value = state.clinic.state;
       [[streetAddress, "street address", "clinic-street-address-error"],
-        [city, "city", "clinic-city-error"],
-        [clinicState, "state", "clinic-state-error"]].forEach(([field, label, errorId]) => {
+        [city, "city", "clinic-city-error"]].forEach(([field, label, errorId]) => {
           if (!Validation.clinicAddressField(field.value, label)) {
             DOM.clearError(field, view.querySelector(`#${errorId}`));
           }
         });
+      if (!Validation.stateCode(clinicState.value)) {
+        DOM.clearError(clinicState, view.querySelector("#clinic-state-error"));
+      }
       if (!Validation.zipCode(zipCode.value)) {
         DOM.clearError(zipCode, view.querySelector("#clinic-zip-code-error"));
       }
@@ -310,6 +313,12 @@ const ClinicInformationView = (() => {
     if (zipError) {
       DOM.showError(zipCode, document.getElementById("clinic-zip-code-error"), zipError);
       zipCode.focus();
+      return;
+    }
+    const stateError = Validation.stateCode(clinicState.value);
+    if (stateError) {
+      DOM.showError(clinicState, document.getElementById("clinic-state-error"), stateError);
+      clinicState.focus();
       return;
     }
 

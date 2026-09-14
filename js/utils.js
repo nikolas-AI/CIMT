@@ -52,15 +52,38 @@ const Validation = (() => {
   /** Validate a required US ZIP code without collecting patient location data. */
   function zipCode(value) {
     if (!/^\d{5}(?:-\d{4})?$/.test((value || "").trim())) {
-      return "Please enter a valid 5-digit ZIP code.";
+      return "Please enter a valid 5-digit ZIP code or ZIP+4.";
     }
     return null;
+  }
+
+  /** Validate a two-letter US state or District of Columbia abbreviation. */
+  function stateCode(value) {
+    const state = (value || "").trim().toUpperCase();
+    const validStates = new Set([
+      "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA",
+      "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+      "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT",
+      "VA", "WA", "WV", "WI", "WY", "DC",
+    ]);
+    return validStates.has(state) ? null : "Please enter a valid two-letter US state abbreviation.";
   }
 
   /** Validate the start and end dates for the impact estimate. */
   function reportingPeriod(from, to) {
     if (!from) return "Please select a start date.";
     if (!to) return "Please select an end date.";
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) {
+      return "Please enter valid reporting dates.";
+    }
+    const start = new Date(`${from}T00:00:00Z`);
+    const end = new Date(`${to}T00:00:00Z`);
+    const isRealDate = (value, date) =>
+      !Number.isNaN(date.getTime()) &&
+      date.toISOString().slice(0, 10) === value;
+    if (!isRealDate(from, start) || !isRealDate(to, end)) {
+      return "Please enter valid reporting dates.";
+    }
     if (from > to) return "The start date must be before the end date.";
     return null; // valid
   }
@@ -68,17 +91,25 @@ const Validation = (() => {
   /** Validate an optional total clinic cost for the reporting period. */
   function reportingPeriodClinicCost(value) {
     if (value === "" || value === null || value === undefined) return null;
-    const cost = Number(value);
+    const rawCost = String(value).trim();
+    if (!/^\d+(?:\.\d{1,2})?$/.test(rawCost)) {
+      return "Please enter a valid clinic cost using dollars and cents only.";
+    }
+    const cost = Number(rawCost);
     if (!Number.isFinite(cost)) return "Please enter a valid clinic cost.";
     if (cost <= 0) return "The total clinic cost must be greater than zero.";
+    if (cost > 1_000_000_000_000) {
+      return "The total clinic cost cannot exceed $1,000,000,000,000.";
+    }
     return null;
   }
 
   /** Validate one volunteer role and its reported hours. */
   function volunteerEntry(roleId, hours) {
     if (!roleId) return "Please select a volunteer role.";
-    const h = parseFloat(hours);
-    if (hours === "" || hours === null || hours === undefined || isNaN(h))
+    const rawHours = String(hours === null || hours === undefined ? "" : hours).trim();
+    const h = Number(rawHours);
+    if (!rawHours || !/^-?(?:\d+(?:\.\d*)?|\.\d+)$/.test(rawHours) || !Number.isFinite(h))
       return "Please enter the number of volunteer hours.";
     if (h < 0) return "Hours cannot be negative.";
     return null;
@@ -87,14 +118,15 @@ const Validation = (() => {
   /** Validate one clinical service and its reported visit count. */
   function serviceEntry(serviceId, count) {
     if (!serviceId) return "Please select a clinical service.";
-    const c = parseInt(count, 10);
-    if (count === "" || count === null || count === undefined || isNaN(c))
+    const rawCount = String(count === null || count === undefined ? "" : count).trim();
+    const c = Number(rawCount);
+    if (!rawCount || !/^-?\d+$/.test(rawCount) || !Number.isFinite(c))
       return "Please enter the number of visits.";
     if (c < 0) return "The count cannot be negative.";
     return null;
   }
 
-  return { clinicName, clinicAddressField, zipCode, reportingPeriod, reportingPeriodClinicCost, volunteerEntry, serviceEntry };
+  return { clinicName, clinicAddressField, stateCode, zipCode, reportingPeriod, reportingPeriodClinicCost, volunteerEntry, serviceEntry };
 })();
 
 // -----------------------------------------------------------------
