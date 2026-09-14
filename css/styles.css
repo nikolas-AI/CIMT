@@ -119,8 +119,7 @@ body {
 }
 
 .header-inner {
-  /* Match the body width so the header logo and title line up with the form. */
-  max-width: 720px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: var(--space-5) var(--space-6);
   display: flex;
@@ -147,15 +146,41 @@ body {
   font-size: var(--text-sm);
 }
 
+.header-context {
+  margin-left: auto;
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .app-body {
-  /* width: 100% plus max-width makes the layout fluid on phones but readable
-     on large screens. Padding keeps content away from the viewport edges. */
+  /* The shell uses the full canvas; ordinary views constrain themselves below. */
   flex: 1;
-  max-width: 720px;
+  max-width: 1180px;
   width: 100%;
   margin: 0 auto;
   padding: var(--space-10) var(--space-6) var(--space-12);
 }
+
+.app-footer {
+  border-top: 1px solid var(--color-border);
+  background: rgba(255,253,248,0.76);
+}
+
+.footer-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-6);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-5);
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+}
+
+.footer-inner p { max-width: 58ch; }
+.footer-inner strong { color: var(--color-slate); }
 
 /* ---------------------------------------------------------
   PROGRESS INDICATOR
@@ -272,7 +297,19 @@ body {
   when a new screen is inserted, while the typography rules keep headings and
   explanatory text consistent across all five steps.
    --------------------------------------------------------- */
-.view { animation: fadeSlideIn 0.22s ease; }
+.view {
+  max-width: 720px;
+  margin: 0 auto;
+  animation: fadeSlideIn 0.22s ease;
+}
+
+.view--impact { max-width: none; }
+
+.view--impact .impact-hero {
+  background:
+    linear-gradient(110deg, rgba(225,240,231,0.92), rgba(255,253,248,0.62)),
+    var(--color-impact-bg);
+}
 
 @keyframes fadeSlideIn {
   from { opacity: 0; transform: translateY(10px); }
@@ -919,18 +956,6 @@ body {
   padding: var(--space-6) var(--space-6) var(--space-5);
 }
 
-.service-impact__box::after {
-  content: "";
-  position: absolute;
-  width: 9rem;
-  height: 9rem;
-  right: -3rem;
-  top: -4rem;
-  border: 1px solid rgba(198,91,56,0.18);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
 .service-impact__box .summary-section__heading {
   position: relative;
   z-index: 1;
@@ -941,7 +966,8 @@ body {
 .service-impact__statement {
   position: relative;
   z-index: 1;
-  max-width: 52rem;
+  width: 100%;
+  max-width: none;
   color: var(--color-navy);
   font-family: var(--font-display);
   font-size: var(--text-xl);
@@ -1159,6 +1185,9 @@ body {
    --------------------------------------------------------- */
 @media (max-width: 600px) {
   .app-body { padding: var(--space-6) var(--space-4) var(--space-10); }
+  .header-inner { padding: var(--space-4); }
+  .header-context { display: none; }
+  .footer-inner { flex-direction: column; padding: var(--space-5) var(--space-4); }
 
   .view-heading { font-size: 2.25rem; }
   .welcome-hero .view-heading { font-size: 2.25rem; }
@@ -1188,6 +1217,13 @@ body {
     grid-template-rows: auto;
   }
   .impact-card { grid-row: auto; }
+
+  .service-ranking__header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .service-ranking__controls { align-self: flex-start; }
 
   .progress-step__text { font-size: 0.65rem; }
 }

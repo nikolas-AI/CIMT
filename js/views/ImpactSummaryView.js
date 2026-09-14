@@ -19,7 +19,7 @@ const ImpactSummaryView = (() => {
     container.innerHTML = "";
 
     const view = document.createElement("div");
-    view.className = "view";
+    view.className = "view view--impact";
     view.setAttribute("role", "region");
     view.setAttribute("aria-label", "Impact Summary");
 
