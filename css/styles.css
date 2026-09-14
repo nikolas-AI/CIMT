@@ -907,6 +907,57 @@ body {
   line-height: 1.6;
 }
 
+/* Featured service result: gives the report's clearest insight a distinct visual anchor. */
+.service-impact__box {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-impact-bg);
+  border: 1px solid rgba(198,91,56,0.28);
+  border-left: 6px solid var(--color-impact);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-6) var(--space-6) var(--space-5);
+}
+
+.service-impact__box::after {
+  content: "";
+  position: absolute;
+  width: 9rem;
+  height: 9rem;
+  right: -3rem;
+  top: -4rem;
+  border: 1px solid rgba(198,91,56,0.18);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.service-impact__box .summary-section__heading {
+  position: relative;
+  z-index: 1;
+  color: var(--color-impact);
+  border-bottom-color: rgba(198,91,56,0.25);
+}
+
+.service-impact__statement {
+  position: relative;
+  z-index: 1;
+  max-width: 52rem;
+  color: var(--color-navy);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: 1.45;
+}
+
+.service-impact__statement strong {
+  color: var(--color-impact);
+}
+
+.service-impact__box .summary-section__intro {
+  position: relative;
+  z-index: 1;
+  margin: var(--space-3) 0 0;
+}
+
 .budget-metrics__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

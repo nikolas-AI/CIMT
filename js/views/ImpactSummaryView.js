@@ -145,18 +145,22 @@ const ImpactSummaryView = (() => {
     const service = summary.mostImpactfulService;
     section.innerHTML = service
       ? `
-        <h2 class="summary-section__heading" id="service-impact-heading">Service Impact</h2>
-        <p class="service-impact__statement">
-          The most impactful service offered by this clinic was
-          <strong>${_escape(service.serviceName)}</strong>, generating an estimated benchmark value of
-          <strong>${Formatting.currency(service.estimatedValue)}</strong> from
-          <strong>${Formatting.number(service.count, 0)} ${service.count === 1 ? "visit" : "visits"}</strong>.
-        </p>
-        <p class="summary-section__intro">Ranked by total estimated benchmark value: reported visits multiplied by the applicable benchmark rate.</p>
+        <div class="service-impact__box">
+          <h2 class="summary-section__heading" id="service-impact-heading">Service Impact</h2>
+          <p class="service-impact__statement">
+            The most impactful service offered by this clinic was
+            <strong>${_escape(service.serviceName)}</strong>, generating an estimated benchmark value of
+            <strong>${Formatting.currency(service.estimatedValue)}</strong> from
+            <strong>${Formatting.number(service.count, 0)} ${service.count === 1 ? "visit" : "visits"}</strong>.
+          </p>
+          <p class="summary-section__intro">Ranked by total estimated benchmark value: reported visits multiplied by the applicable benchmark rate.</p>
+        </div>
       `
       : `
-        <h2 class="summary-section__heading" id="service-impact-heading">Service Impact</h2>
-        <p class="summary-section__intro">No clinical services were reported for this period.</p>
+        <div class="service-impact__box">
+          <h2 class="summary-section__heading" id="service-impact-heading">Service Impact</h2>
+          <p class="summary-section__intro">No clinical services were reported for this period.</p>
+        </div>
       `;
     return section;
   }
