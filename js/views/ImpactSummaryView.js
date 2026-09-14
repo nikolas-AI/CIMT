@@ -26,12 +26,12 @@ const ImpactSummaryView = (() => {
     view.appendChild(_buildHero(summary));
     view.appendChild(_buildDisclaimer());
     view.appendChild(_buildBreakdown(summary));
-    view.appendChild(_buildServiceImpact(summary));
-    const serviceRanking = _buildServiceRanking(summary);
-    if (serviceRanking) view.appendChild(serviceRanking);
     if (summary.reportingPeriodClinicCost !== null) {
       view.appendChild(_buildBudgetMetrics(summary));
     }
+    view.appendChild(_buildServiceImpact(summary));
+    const serviceRanking = _buildServiceRanking(summary);
+    if (serviceRanking) view.appendChild(serviceRanking);
     const rateTable = _buildRateTable(summary);
     if (rateTable) view.appendChild(rateTable);
     if (summary.volunteerBreakdown.length > 0) {
