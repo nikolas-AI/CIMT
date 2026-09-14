@@ -70,6 +70,9 @@ Benchmark-value ROI =
 
 Most impactful service =
 service with the highest (reported count x benchmark rate)
+
+Service impact rankings =
+positive-count services ordered by total estimated benchmark value or visit count
 ```
 
 These values represent estimated benchmark value. They do not represent:
@@ -86,6 +89,8 @@ or zero cost does not produce a ratio or ROI result.
 
 The most impactful service is ranked by total estimated benchmark value. Positive-count
 ties are resolved by visit count and then service name so the report is deterministic.
+The impact page allows users to switch the service list between value ranking and visit
+count ranking. Each ranked service also shows its share of total clinical service value.
 
 ## Current Data Sources
 
@@ -378,6 +383,7 @@ When adding or changing a feature:
 
 - Added service-specific impact ranking based on total estimated benchmark value.
 - Added the most impactful service narrative to the summary, PDF, and Excel exports.
+- Added value and visit-count ranking modes to the impact page and exports.
 
 ## Open Questions
 

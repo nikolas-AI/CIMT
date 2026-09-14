@@ -31,17 +31,11 @@ const Calculator = (() => {
 
     const volunteerBreakdown = _computeVolunteerBreakdown(volunteerEntries);
     const serviceBreakdown   = _computeServiceBreakdown(serviceEntries);
-    const mostImpactfulService = serviceBreakdown
-      .filter(service => service.count > 0)
-      .slice()
-      .sort((a, b) =>
-        b.estimatedValue - a.estimatedValue ||
-        b.count - a.count ||
-        a.serviceName.localeCompare(b.serviceName)
-      )[0] || null;
+    const clinicalValue      = serviceBreakdown.reduce((sum, r) => sum + r.estimatedValue, 0);
+    const serviceImpactRanking = _rankServices(serviceBreakdown, clinicalValue);
+    const mostImpactfulService = serviceImpactRanking.byValue[0] || null;
 
     const volunteerValue     = volunteerBreakdown.reduce((sum, r) => sum + r.estimatedValue, 0);
-    const clinicalValue      = serviceBreakdown.reduce((sum, r) => sum + r.estimatedValue, 0);
     const totalValue         = volunteerValue + clinicalValue;
     const clinicCost         = _optionalPositiveNumber(state.clinic.reportingPeriodClinicCost);
     const valueToCostRatio   = clinicCost > 0 ? totalValue / clinicCost : null;
@@ -68,8 +62,34 @@ const Calculator = (() => {
       volunteerBreakdown:   volunteerBreakdown,
       serviceBreakdown:     serviceBreakdown,
       mostImpactfulService: mostImpactfulService,
+      serviceImpactRanking: serviceImpactRanking,
       rateSources:          [VOLUNTEER_RATE_SOURCE],
     };
+  }
+
+  function _rankServices(services, clinicalValue) {
+    const activeServices = services
+      .filter(service => service.count > 0)
+      .slice()
+      .map(service => ({
+        ...service,
+        clinicalValueShare: clinicalValue > 0
+          ? service.estimatedValue / clinicalValue * 100
+          : 0,
+      }));
+
+    const byValue = activeServices.slice().sort((a, b) =>
+        b.estimatedValue - a.estimatedValue ||
+        b.count - a.count ||
+        a.serviceName.localeCompare(b.serviceName)
+      );
+    const byVisits = activeServices.slice().sort((a, b) =>
+      b.count - a.count ||
+      b.estimatedValue - a.estimatedValue ||
+      a.serviceName.localeCompare(b.serviceName)
+    );
+
+    return { byValue, byVisits };
   }
 
   function _optionalPositiveNumber(value) {
@@ -155,5 +175,6 @@ const Calculator = (() => {
  * @property {Array}   volunteerBreakdown
  * @property {Array}   serviceBreakdown
  * @property {Object|null} mostImpactfulService
+ * @property {{byValue: Array, byVisits: Array}} serviceImpactRanking
  * @property {Array}   rateSources
  */

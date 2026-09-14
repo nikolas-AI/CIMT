@@ -27,6 +27,8 @@ const ImpactSummaryView = (() => {
     view.appendChild(_buildDisclaimer());
     view.appendChild(_buildBreakdown(summary));
     view.appendChild(_buildServiceImpact(summary));
+    const serviceRanking = _buildServiceRanking(summary);
+    if (serviceRanking) view.appendChild(serviceRanking);
     if (summary.reportingPeriodClinicCost !== null) {
       view.appendChild(_buildBudgetMetrics(summary));
     }
@@ -162,6 +164,74 @@ const ImpactSummaryView = (() => {
           <p class="summary-section__intro">No clinical services were reported for this period.</p>
         </div>
       `;
+    return section;
+  }
+
+  function _buildServiceRanking(summary) {
+    const ranking = summary.serviceImpactRanking;
+    if (!ranking || ranking.byValue.length === 0) return null;
+
+    const section = document.createElement("section");
+    section.className = "summary-section service-ranking";
+    section.setAttribute("aria-labelledby", "service-ranking-heading");
+    section.innerHTML = `
+      <div class="service-ranking__header">
+        <div>
+          <h2 class="summary-section__heading" id="service-ranking-heading">Service Impact Ranking</h2>
+          <p class="summary-section__intro">Compare reported clinical services by estimated benchmark value or visit count.</p>
+        </div>
+        <div class="service-ranking__controls" role="group" aria-label="Rank services by">
+          <button type="button" class="service-ranking__toggle is-active" data-ranking-mode="value" aria-pressed="true">Rank by Value</button>
+          <button type="button" class="service-ranking__toggle" data-ranking-mode="visits" aria-pressed="false">Rank by Visits</button>
+        </div>
+      </div>
+      <div class="service-ranking__table-wrap"></div>
+    `;
+
+    const tableWrap = section.querySelector(".service-ranking__table-wrap");
+    const buttons = section.querySelectorAll("[data-ranking-mode]");
+    const renderRows = (mode) => {
+      const rows = ranking[mode === "visits" ? "byVisits" : "byValue"];
+      tableWrap.innerHTML = `
+        <table class="rate-table service-ranking__table" aria-label="Clinical service impact ranking">
+          <thead>
+            <tr>
+              <th scope="col">Rank</th>
+              <th scope="col">Service</th>
+              <th scope="col">Visits</th>
+              <th scope="col">Benchmark rate</th>
+              <th scope="col">Estimated value</th>
+              <th scope="col">Share of clinical value</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((row, index) => `
+              <tr>
+                <td class="service-ranking__rank">${index + 1}</td>
+                <td>${_escape(row.serviceName)}</td>
+                <td>${Formatting.number(row.count, 0)}</td>
+                <td>${Formatting.currency(row.benchmarkRate)}</td>
+                <td>${Formatting.currency(row.estimatedValue)}</td>
+                <td>${Formatting.number(row.clinicalValueShare, 1)}%</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    };
+
+    buttons.forEach(button => {
+      button.addEventListener("click", () => {
+        const mode = button.dataset.rankingMode;
+        buttons.forEach(control => {
+          const active = control === button;
+          control.classList.toggle("is-active", active);
+          control.setAttribute("aria-pressed", String(active));
+        });
+        renderRows(mode);
+      });
+    });
+    renderRows("value");
     return section;
   }
 

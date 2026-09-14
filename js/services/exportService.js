@@ -76,6 +76,24 @@ const ExportService = (() => {
       : ["No clinical services were reported for this period."]);
     rows.push(["Ranking Note", "Ranked by total estimated benchmark value: reported visits multiplied by the applicable benchmark rate."]);
     rows.push([]);
+    const valueRankingSectionRow = rows.length;
+    rows.push(["Service Impact Ranking by Value"]);
+    const valueRankingHeaderRow = rows.length;
+    rows.push(["Rank", "Service", "Visits", "Estimated Value", "Share of Clinical Value"]);
+    rows.push(...(summary.serviceImpactRanking?.byValue || []).map((row, index) => [
+      index + 1, row.serviceName, row.count, row.estimatedValue, row.clinicalValueShare / 100,
+    ]));
+    const valueRankingEndRow = rows.length;
+    rows.push([]);
+    const visitRankingSectionRow = rows.length;
+    rows.push(["Service Impact Ranking by Visits"]);
+    const visitRankingHeaderRow = rows.length;
+    rows.push(["Rank", "Service", "Visits", "Estimated Value", "Share of Clinical Value"]);
+    rows.push(...(summary.serviceImpactRanking?.byVisits || []).map((row, index) => [
+      index + 1, row.serviceName, row.count, row.estimatedValue, row.clinicalValueShare / 100,
+    ]));
+    const visitRankingEndRow = rows.length;
+    rows.push([]);
     const clinicalSectionRow = rows.length;
     rows.push(["Clinical Services"]);
     const clinicalHeaderRow = rows.length;
@@ -109,12 +127,15 @@ const ExportService = (() => {
       ? rows.findIndex(row => row[0] === "Most Impactful Service")
       : budgetSectionRow + budgetRows.length + 3;
     sheet["!merges"] = [
-      ...[0, ...(budgetSectionRow === null ? [] : [budgetSectionRow]), serviceImpactSectionRow, clinicalSectionRow, volunteerSectionRow, disclaimerSectionRow, disclaimerRow]
+      ...[0, ...(budgetSectionRow === null ? [] : [budgetSectionRow]), serviceImpactSectionRow,
+        valueRankingSectionRow, visitRankingSectionRow, clinicalSectionRow, volunteerSectionRow,
+        disclaimerSectionRow, disclaimerRow]
         .map(row => ({ s: { r: row, c: 0 }, e: { r: row, c: 4 } })),
     ];
 
-    const boldRows = [0, serviceImpactSectionRow, clinicalSectionRow, clinicalHeaderRow, clinicalTotalRow,
-      volunteerSectionRow, volunteerHeaderRow, volunteerTotalRow, disclaimerSectionRow];
+    const boldRows = [0, serviceImpactSectionRow, valueRankingSectionRow, valueRankingHeaderRow,
+      visitRankingSectionRow, visitRankingHeaderRow, clinicalSectionRow, clinicalHeaderRow,
+      clinicalTotalRow, volunteerSectionRow, volunteerHeaderRow, volunteerTotalRow, disclaimerSectionRow];
     if (budgetSectionRow !== null) boldRows.push(budgetSectionRow);
     const styleRow = (rowIndex, style) => {
       for (let columnIndex = 0; columnIndex < 5; columnIndex += 1) {
@@ -146,6 +167,14 @@ const ExportService = (() => {
     if (budgetSectionRow !== null) {
       formatCurrency(budgetSectionRow + 1, 1);
       formatCurrency(budgetSectionRow + 3, 1);
+    }
+    for (const [headerRow, endRow] of [
+      [valueRankingHeaderRow, valueRankingEndRow],
+      [visitRankingHeaderRow, visitRankingEndRow],
+    ]) {
+      for (let rowIndex = headerRow + 1; rowIndex < endRow; rowIndex += 1) {
+        formatCurrency(rowIndex, 3);
+      }
     }
     for (let rowIndex = clinicalHeaderRow + 1; rowIndex < clinicalTotalRow; rowIndex += 1) {
       formatCurrency(rowIndex, 3);
@@ -250,6 +279,17 @@ const ExportService = (() => {
       ? `<h2>Service Impact</h2><p>The most impactful service offered by this clinic was <strong>${_escapeHTML(summary.mostImpactfulService.serviceName)}</strong>, generating an estimated benchmark value of <strong>${_fmt(summary.mostImpactfulService.estimatedValue)}</strong> from <strong>${summary.mostImpactfulService.count.toLocaleString("en-US")} ${summary.mostImpactfulService.count === 1 ? "visit" : "visits"}</strong>.</p><p class="disclaimer">Ranked by total estimated benchmark value: reported visits multiplied by the applicable benchmark rate.</p>`
       : `<h2>Service Impact</h2><p>No clinical services were reported for this period.</p>`;
 
+    const serviceRankingHTML = summary.serviceImpactRanking?.byValue.length > 0
+      ? [
+        ["Service Impact Ranking by Value", summary.serviceImpactRanking.byValue],
+        ["Service Impact Ranking by Visits", summary.serviceImpactRanking.byVisits],
+      ].map(([heading, rows]) => `
+        <h2>${heading}</h2>
+        <table><thead><tr><th>Rank</th><th>Service</th><th style="text-align:right">Visits</th><th style="text-align:right">Estimated Value</th><th style="text-align:right">Clinical Value Share</th></tr></thead>
+        <tbody>${rows.map((row, index) => `<tr><td>${index + 1}</td><td>${_escapeHTML(row.serviceName)}</td><td style="text-align:right">${row.count.toLocaleString("en-US")}</td><td style="text-align:right">${_fmt(row.estimatedValue)}</td><td style="text-align:right">${row.clinicalValueShare.toFixed(1)}%</td></tr>`).join("")}</tbody></table>
+      `).join("")
+      : "";
+
     return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8">
 <title>Impact Summary — ${summary.clinicName}</title>
@@ -277,6 +317,7 @@ const ExportService = (() => {
 It does not represent actual revenue, Medicare reimbursement, or guaranteed healthcare savings.</p>
 ${budgetHTML}
 ${serviceImpactHTML}
+${serviceRankingHTML}
 <h2>Clinical Services</h2>
 <table><thead><tr><th>Service</th><th>Code</th><th style="text-align:right">Visits</th><th style="text-align:right">Rate</th><th style="text-align:right">Est. Value</th></tr></thead>
 <tbody>${svcRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Clinical Total</th><th style="text-align:right">${_fmt(summary.clinicalServiceValue)}</th></tr></tfoot></table>
