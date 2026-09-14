@@ -992,11 +992,15 @@ body {
   padding: var(--space-2) var(--space-3);
 }
 
-.service-ranking__toggle:hover,
-.service-ranking__toggle:focus-visible,
 .service-ranking__toggle.is-active {
   background: var(--color-accent);
   color: var(--color-surface);
+}
+
+.service-ranking__toggle:not(.is-active):hover,
+.service-ranking__toggle:not(.is-active):focus-visible {
+  background: var(--color-impact-bg);
+  color: var(--color-accent);
 }
 
 .service-ranking__table-wrap {
