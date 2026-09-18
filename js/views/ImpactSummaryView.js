@@ -138,39 +138,47 @@ const ImpactSummaryView = (() => {
   function _buildBreakdown(summary) {
     const section = document.createElement("div");
     section.className = "impact-breakdown";
+    const hasServices = _serviceCount(summary) > 0;
+    const hasVolunteerHours = _totalVolunteerHours(summary) > 0;
 
     const heading = document.createElement("h2");
     heading.className = "impact-breakdown__heading";
     heading.textContent = "Estimated impact at a glance";
     section.appendChild(heading);
 
-    section.appendChild(_buildCard(
-      AppCopy.metric.estimatedClinicalServiceValue,
-      summary.clinicalServiceValue,
-      AppCopy.metric.estimatedClinicalServiceValueNote,
-      "clinical"
-    ));
+    if (hasServices) {
+      section.appendChild(_buildCard(
+        AppCopy.metric.estimatedClinicalServiceValue,
+        summary.clinicalServiceValue,
+        AppCopy.metric.estimatedClinicalServiceValueNote,
+        "clinical"
+      ));
+    }
 
-    section.appendChild(_buildCard(
-      AppCopy.metric.estimatedVolunteerContributionValue,
-      summary.volunteerValue,
-      AppCopy.metric.estimatedVolunteerContributionValueNote,
-      "volunteer"
-    ));
+    if (hasVolunteerHours) {
+      section.appendChild(_buildCard(
+        AppCopy.metric.estimatedVolunteerContributionValue,
+        summary.volunteerValue,
+        AppCopy.metric.estimatedVolunteerContributionValueNote,
+        "volunteer"
+      ));
 
-    section.appendChild(_buildCard(
-      AppCopy.metric.estimatedNonMedicalVolunteerValue,
-      summary.nonMedicalVolunteerValue,
-      AppCopy.metric.estimatedNonMedicalVolunteerValueNote,
-      "volunteer"
-    ));
+      section.appendChild(_buildCard(
+        AppCopy.metric.estimatedNonMedicalVolunteerValue,
+        summary.nonMedicalVolunteerValue,
+        AppCopy.metric.estimatedNonMedicalVolunteerValueNote,
+        "volunteer"
+      ));
+    }
 
-    section.appendChild(_buildCard(
-      AppCopy.metric.estimatedTotalValue,
-      summary.totalEstimatedValue,
-      AppCopy.metric.totalEstimatedValueNote,
-      "total"
-    ));
+    if (hasServices || hasVolunteerHours) {
+      section.appendChild(_buildCard(
+        AppCopy.metric.estimatedTotalValue,
+        summary.totalEstimatedValue,
+        AppCopy.metric.totalEstimatedValueNote,
+        "total"
+      ));
+    }
 
     return section;
   }
@@ -226,10 +234,8 @@ const ImpactSummaryView = (() => {
     const nonMedicalVolunteerText = `${Formatting.currency(summary.nonMedicalVolunteerValue)}`;
     const periodLabel = `${_formatDate(summary.reportingPeriodFrom)} to ${_formatDate(summary.reportingPeriodTo)}`;
     const topService = summary.mostImpactfulService ? summary.mostImpactfulService.serviceName : "the top reported service";
-    const costSentence = summary.reportingPeriodClinicCost !== null
-      ? ` The clinic reported ${Formatting.currency(summary.reportingPeriodClinicCost)} in costs during the same period, providing context for the scale of activity reflected in this benchmark-value comparison.`
-      : "";
-    return `During ${periodLabel}, ${clinicName} reported delivering ${serviceCount} clinical services and benefiting from ${volunteerHours} donated volunteer hours. Using national benchmark rates, the estimated total value was ${totalText}, including ${clinicalText} in estimated clinical service value and ${nonMedicalVolunteerText} in non-medical volunteer value. The full reported volunteer contribution value was ${volunteerText}; medical-professional volunteer value is shown separately because clinical service rates already represent that work. ${topService} represented the largest share of the clinic’s reported clinical service value. These figures help describe the scale of care and community support provided by the clinic; they are benchmark-based estimates and do not represent actual revenue, reimbursement, profit, or confirmed savings.${costSentence}`;
+    const topServiceShare = summary.mostImpactfulService?.clinicalValueShare || 0;
+    return `During ${periodLabel}, ${clinicName} reported delivering ${serviceCount} clinical services and benefiting from ${volunteerHours} donated volunteer hours. Using national benchmark rates, the estimated total value was ${totalText}, including ${clinicalText} in estimated clinical service value and ${nonMedicalVolunteerText} in non-medical volunteer value. Medical-professional volunteer value is not included in the estimated total as it is included in the clinical service value. The full reported volunteer contribution value was ${volunteerText}. The standout service was ${topService}, contributing ${Formatting.number(topServiceShare, 1)}% of the clinic’s estimated clinical service value.`;
   }
 
   function _buildCard(label, value, note, variant) {

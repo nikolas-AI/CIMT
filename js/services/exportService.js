@@ -277,7 +277,6 @@ const ExportService = (() => {
         <tbody>
           <tr><th>Reported clinic cost</th><td style="text-align:right">${_fmt(summary.reportingPeriodClinicCost)}</td></tr>
           <tr><th>Estimated total value</th><td style="text-align:right">${_fmt(summary.totalEstimatedValue)}</td></tr>
-          <tr><th>Non-medical volunteer value included</th><td style="text-align:right">${_fmt(summary.nonMedicalVolunteerValue)}</td></tr>
           <tr><th>${AppCopy.summaryView.valuePerDollarLabel}</th><td style="text-align:right">$${summary.valueToCostRatio.toFixed(2)}</td></tr>
           <tr><th>${AppCopy.summaryView.benchmarkComparisonLabel}</th><td style="text-align:right">${Math.abs(summary.benchmarkValueROI || 0).toFixed(1)}% ${summary.benchmarkValueROI > 0 ? "higher" : summary.benchmarkValueROI < 0 ? "lower" : "equal"}</td></tr>
         </tbody>
@@ -332,7 +331,7 @@ ${serviceRankingHTML}
 <tbody>${svcRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Clinical total</th><th style="text-align:right">${_fmt(summary.clinicalServiceValue)}</th></tr></tfoot></table>
 <h2>Volunteer Contributions</h2>
 <table><thead><tr><th>Role</th><th>Category</th><th style="text-align:right">Volunteer hours</th><th style="text-align:right">Benchmark rate / hour</th><th style="text-align:right">Estimated contribution value</th></tr></thead>
-<tbody>${volRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Volunteer total</th><th style="text-align:right">${_fmt(summary.volunteerValue)}</th></tr><tr><th colspan="4" style="text-align:right">Non-medical value included in total</th><th style="text-align:right">${_fmt(summary.nonMedicalVolunteerValue)}</th></tr></tfoot></table>
+<tbody>${volRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Volunteer total</th><th style="text-align:right">${_fmt(summary.volunteerValue)}</th></tr></tfoot></table>
 <h2>Sources and references</h2>
 <ul style="font-size:0.85em;color:#475C8A;padding-left:20px">
   ${referenceItems}

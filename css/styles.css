@@ -877,10 +877,10 @@ body {
   line-height: 1.5;
 }
 
-/* Breakdown cards: compare the two sources of estimated impact side by side. */
+/* Breakdown cards: compare the impact categories side by side. */
 .impact-breakdown {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   grid-template-rows: auto auto;
   gap: 0;
   border: 1px solid var(--color-border);
@@ -915,7 +915,7 @@ body {
   animation: summaryCardIn 0.3s ease both;
 }
 
-/* Use one accent line so the three impact categories have equal visual weight. */
+/* Use one accent line so the impact categories have equal visual weight. */
 .impact-card--clinical,
 .impact-card--volunteer,
 .impact-card--total { border-top-color: var(--color-accent); }
