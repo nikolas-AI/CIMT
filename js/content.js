@@ -52,7 +52,7 @@ const AppCopy = (() => {
       "Aggregate volunteer hours by role",
       "Aggregate counts of clinical services provided",
     ],
-    privacy: "Do not enter patient names, medical record numbers, dates of birth, addresses, diagnoses, or other identifying details. This tool uses aggregate totals only.",
+    privacy: "No patient names, medical records, or other patient-level information is needed. Results are estimates based on benchmark rates and should not be interpreted as actual revenue, reimbursement, or guaranteed savings.",
     begin: "Begin",
   };
 

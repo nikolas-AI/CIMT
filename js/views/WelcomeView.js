@@ -20,11 +20,9 @@ const WelcomeView = (() => {
 
     view.innerHTML = `
       <section class="welcome-hero" aria-labelledby="welcome-heading">
-        <p class="welcome-hero__eyebrow">${AppCopy.welcome.eyebrow}</p>
         <h1 class="view-heading" id="welcome-heading">${AppCopy.welcome.heading}</h1>
         <p class="view-intro">${AppCopy.welcome.intro}</p>
-        <p class="welcome-hero__note">${AppCopy.welcome.description}</p>
-        <p class="welcome-hero__note">${AppCopy.welcome.note}</p>
+        <p class="welcome-hero__note">${AppCopy.welcome.description} ${AppCopy.welcome.note}</p>
 
         <h2 class="welcome-section-heading">${AppCopy.welcome.whatYouNeedTitle}</h2>
         <ul class="welcome-list">
@@ -33,7 +31,7 @@ const WelcomeView = (() => {
       </section>
 
       <div class="view-disclaimer welcome-disclaimer" role="note">
-        <strong>Privacy:</strong> ${AppCopy.welcome.privacy}
+        <strong>Privacy and interpretation:</strong> ${AppCopy.welcome.privacy}
       </div>
     `;
 
