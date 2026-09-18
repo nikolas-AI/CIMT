@@ -22,19 +22,16 @@ const VolunteerHoursView = (() => {
     const view = document.createElement("div");
     view.className = "view";
     view.setAttribute("role", "region");
-    view.setAttribute("aria-label", "Volunteer Hours");
+    view.setAttribute("aria-label", AppCopy.volunteer.ariaLabel);
 
     const heading = document.createElement("h1");
     heading.className = "view-heading";
-    heading.textContent = "Volunteer Hours";
+    heading.textContent = AppCopy.volunteer.heading;
     view.appendChild(heading);
 
     const intro = document.createElement("p");
     intro.className = "view-intro";
-    intro.textContent =
-      "Many clinics rely on donated time from healthcare professionals, students, and " +
-      "community volunteers. Enter the estimated number of volunteer hours contributed " +
-      "by each role over your reporting period.";
+    intro.textContent = `${AppCopy.volunteer.intro} ${AppCopy.volunteer.note}`;
     view.appendChild(intro);
 
     // Map persisted state to EntryList entries format
@@ -46,12 +43,12 @@ const VolunteerHoursView = (() => {
 
     _entryListEl = EntryList.create({
       options:          VOLUNTEER_ROLES.filter(r => r.active),
-      selectLabel:      "Volunteer role",
-      countLabel:       "Volunteer hours",
+      selectLabel:      AppCopy.volunteer.roleLabel,
+      countLabel:       AppCopy.volunteer.hoursLabel,
       countPlaceholder: "e.g. 125",
       countMin:         0,
       countStep:        0.5,
-      addLabel:         "Add another role",
+      addLabel:         AppCopy.volunteer.addLabel,
       allowDuplicates:  false,
       entries:          savedEntries,
       onEntriesChange:  (entries) => _syncToState(state, entries),
@@ -72,7 +69,7 @@ const VolunteerHoursView = (() => {
     });
 
     const noHoursText = document.createElement("span");
-    noHoursText.textContent = "No volunteer hours to report";
+    noHoursText.textContent = AppCopy.volunteer.emptyState;
     noHoursToggle.append(noHoursCheckbox, noHoursText);
     view.appendChild(noHoursToggle);
 

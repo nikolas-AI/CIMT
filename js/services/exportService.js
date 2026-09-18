@@ -22,7 +22,7 @@ const ExportService = (() => {
     // the same report details, references, and links the user sees in the app.
     const win = window.open("", "_blank");
     if (!win) {
-      alert("Please allow pop-ups to download the PDF summary.");
+      alert("Please allow pop-up windows to download the PDF summary.");
       return;
     }
     win.document.write(_buildPrintHTML(summary));
@@ -42,7 +42,7 @@ const ExportService = (() => {
     }
 
     const rows = [
-      ["Clinic Impact Estimator"],
+      [AppCopy.exportCopy.pdfTitle],
       ["Clinic", summary.clinicName],
       ["Street Address", summary.streetAddress],
       ["City", summary.city],
@@ -58,37 +58,37 @@ const ExportService = (() => {
     let budgetRows = [];
     if (summary.reportingPeriodClinicCost !== null) {
       budgetSectionRow = rows.length;
-      rows.push(["Clinic Cost and Benchmark Value Metrics"]);
+      rows.push(["Reported Investment and Estimated Benchmark Value"]);
       budgetRows = [
-        ["Reporting Period Clinic Cost", summary.reportingPeriodClinicCost],
+        ["Reported Clinic Cost", summary.reportingPeriodClinicCost],
         ["Reporting Period Days", summary.reportingPeriodDays],
-        ["Estimated Service Value", summary.totalEstimatedValue],
-        ["Estimated Value per $1 Invested", summary.valueToCostRatio],
-        ["Benchmark-Value ROI (%)", summary.benchmarkValueROI],
+        ["Estimated Total Value", summary.totalEstimatedValue],
+        ["Estimated Benchmark Value per $1 of Reported Clinic Cost", summary.valueToCostRatio],
+        ["Benchmark-Value Comparison (%)", summary.benchmarkValueROI],
       ];
       rows.push(...budgetRows);
-      rows.push(["Cost Note", "These metrics compare benchmark value with the reported total clinic cost for this period. They are not actual financial ROI or guaranteed healthcare savings."]);
+      rows.push(["Cost Note", AppCopy.summary.costComparisonNote]);
       rows.push([]);
     }
-    rows.push(["Most Impactful Service"]);
+    rows.push(["Most Impactful Reported Service"]);
     rows.push(summary.mostImpactfulService
-      ? ["Service", summary.mostImpactfulService.serviceName, "Visits", summary.mostImpactfulService.count, summary.mostImpactfulService.estimatedValue]
+      ? ["Service", summary.mostImpactfulService.serviceName, "Reported Count", summary.mostImpactfulService.count, summary.mostImpactfulService.estimatedValue]
       : ["No clinical services were reported for this period."]);
-    rows.push(["Ranking Note", "Ranked by total estimated benchmark value: reported visits multiplied by the applicable benchmark rate."]);
+    rows.push(["Ranking Note", AppCopy.summary.rankingNote]);
     rows.push([]);
     const valueRankingSectionRow = rows.length;
-    rows.push(["Service Impact Ranking by Value"]);
+    rows.push(["Service Ranking by Estimated Benchmark Value"]);
     const valueRankingHeaderRow = rows.length;
-    rows.push(["Rank", "Service", "Visits", "Estimated Value", "Share of Clinical Value"]);
+    rows.push(["Rank", "Service", "Reported Count", "Estimated Benchmark Value", "Share of Total Estimated Clinical Value"]);
     rows.push(...(summary.serviceImpactRanking?.byValue || []).map((row, index) => [
       index + 1, row.serviceName, row.count, row.estimatedValue, row.clinicalValueShare / 100,
     ]));
     const valueRankingEndRow = rows.length;
     rows.push([]);
     const visitRankingSectionRow = rows.length;
-    rows.push(["Service Impact Ranking by Visits"]);
+    rows.push(["Service Ranking by Reported Count"]);
     const visitRankingHeaderRow = rows.length;
-    rows.push(["Rank", "Service", "Visits", "Estimated Value", "Share of Clinical Value"]);
+    rows.push(["Rank", "Service", "Reported Count", "Estimated Benchmark Value", "Share of Total Estimated Clinical Value"]);
     rows.push(...(summary.serviceImpactRanking?.byVisits || []).map((row, index) => [
       index + 1, row.serviceName, row.count, row.estimatedValue, row.clinicalValueShare / 100,
     ]));
@@ -97,7 +97,7 @@ const ExportService = (() => {
     const clinicalSectionRow = rows.length;
     rows.push(["Clinical Services"]);
     const clinicalHeaderRow = rows.length;
-    rows.push(["Service", "CPT/HCPCS Code", "Visits", "Benchmark Rate", "Estimated Value"]);
+    rows.push(["Service", "CPT/HCPCS Code", "Reported Service Count", "Benchmark Rate", "Estimated Benchmark Value"]);
     rows.push(...summary.serviceBreakdown.map(row => [
         row.serviceName, row.code, row.count, row.benchmarkRate, row.estimatedValue,
       ]));
@@ -105,9 +105,9 @@ const ExportService = (() => {
     rows.push(["", "", "", "Clinical Total", summary.clinicalServiceValue]);
     rows.push([]);
     const volunteerSectionRow = rows.length;
-    rows.push(["Volunteer Hours"]);
+    rows.push(["Volunteer Contributions"]);
     const volunteerHeaderRow = rows.length;
-    rows.push(["Role", "Hours", "Benchmark Rate / Hour", "Estimated Value"]);
+    rows.push(["Role", "Volunteer Hours", "Benchmark Rate / Hour", "Estimated Volunteer Contribution Value"]);
     rows.push(...summary.volunteerBreakdown.map(row => [
         row.roleName, row.hours, row.benchmarkRate, row.estimatedValue,
       ]));
@@ -117,14 +117,14 @@ const ExportService = (() => {
     const disclaimerSectionRow = rows.length;
     rows.push(["Disclaimer"]);
     const disclaimerRow = rows.length;
-    rows.push(["These figures are benchmark-based estimates of the value of services and volunteer contributions. They do not represent actual revenue, Medicare reimbursement, or guaranteed healthcare savings."]);
+    rows.push([AppCopy.summary.shortDisclaimer]);
 
     const sheet = XLSX.utils.aoa_to_sheet(rows);
     sheet["!cols"] = [
       { wch: 34 }, { wch: 22 }, { wch: 14 }, { wch: 20 }, { wch: 20 },
     ];
     const serviceImpactSectionRow = budgetSectionRow === null
-      ? rows.findIndex(row => row[0] === "Most Impactful Service")
+      ? rows.findIndex(row => row[0] === "Most Impactful Reported Service")
       : budgetSectionRow + budgetRows.length + 3;
     sheet["!merges"] = [
       ...[0, ...(budgetSectionRow === null ? [] : [budgetSectionRow]), serviceImpactSectionRow,
@@ -188,7 +188,7 @@ const ExportService = (() => {
     formatCurrency(volunteerTotalRow, 3);
 
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, sheet, "Impact Breakdown");
+    XLSX.utils.book_append_sheet(workbook, sheet, AppCopy.exportCopy.workbookSummary);
     const xlsxData = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     _triggerDownload(
       xlsxData,
@@ -263,29 +263,29 @@ const ExportService = (() => {
     `).join("");
 
     const budgetHTML = summary.reportingPeriodClinicCost !== null ? `
-      <h2>Clinic Cost and Benchmark Value Metrics</h2>
+      <h2>${AppCopy.summaryView.costHeading}</h2>
       <table>
         <tbody>
-          <tr><th>Total clinic cost</th><td style="text-align:right">${_fmt(summary.reportingPeriodClinicCost)}</td></tr>
-          <tr><th>Estimated service value</th><td style="text-align:right">${_fmt(summary.totalEstimatedValue)}</td></tr>
-          <tr><th>Estimated value per $1 invested</th><td style="text-align:right">$${summary.valueToCostRatio.toFixed(3)}</td></tr>
-          <tr><th>Benchmark-value ROI</th><td style="text-align:right">${summary.benchmarkValueROI.toFixed(1)}%</td></tr>
+          <tr><th>Reported clinic cost</th><td style="text-align:right">${_fmt(summary.reportingPeriodClinicCost)}</td></tr>
+          <tr><th>Estimated total value</th><td style="text-align:right">${_fmt(summary.totalEstimatedValue)}</td></tr>
+          <tr><th>${AppCopy.summaryView.valuePerDollarLabel}</th><td style="text-align:right">$${summary.valueToCostRatio.toFixed(2)}</td></tr>
+          <tr><th>${AppCopy.summaryView.benchmarkComparisonLabel}</th><td style="text-align:right">${Math.abs(summary.benchmarkValueROI || 0).toFixed(1)}% ${summary.benchmarkValueROI > 0 ? "higher" : summary.benchmarkValueROI < 0 ? "lower" : "equal"}</td></tr>
         </tbody>
       </table>
-      <p class="disclaimer">These metrics compare estimated benchmark value with the reported total clinic cost for this period. They are not actual financial ROI or guaranteed healthcare savings.</p>
+      <p class="disclaimer">${AppCopy.summary.costComparisonNote}</p>
     ` : "";
 
     const serviceImpactHTML = summary.mostImpactfulService
-      ? `<h2>Service Impact</h2><p>The most impactful service offered by this clinic was <strong>${_escapeHTML(summary.mostImpactfulService.serviceName)}</strong>, generating an estimated benchmark value of <strong>${_fmt(summary.mostImpactfulService.estimatedValue)}</strong> from <strong>${summary.mostImpactfulService.count.toLocaleString("en-US")} ${summary.mostImpactfulService.count === 1 ? "visit" : "visits"}</strong>.</p><p class="disclaimer">Ranked by total estimated benchmark value: reported visits multiplied by the applicable benchmark rate.</p>`
-      : `<h2>Service Impact</h2><p>No clinical services were reported for this period.</p>`;
+      ? `<h2>${AppCopy.metric.mostImpactful}</h2><p><strong>${_escapeHTML(summary.mostImpactfulService.serviceName)}</strong> represented the largest share of reported clinical service value, with <strong>${summary.mostImpactfulService.count.toLocaleString("en-US")} services</strong> and an estimated benchmark value of <strong>${_fmt(summary.mostImpactfulService.estimatedValue)}</strong>.</p><p class="disclaimer">This service accounted for ${summary.mostImpactfulService.clinicalValueShare.toFixed(1)}% of the estimated clinical service value reported for this period.</p>`
+      : `<h2>${AppCopy.metric.mostImpactful}</h2><p>${AppCopy.summary.emptyState}</p>`;
 
     const serviceRankingHTML = summary.serviceImpactRanking?.byValue.length > 0
       ? [
-        ["Service Impact Ranking by Value", summary.serviceImpactRanking.byValue],
-        ["Service Impact Ranking by Visits", summary.serviceImpactRanking.byVisits],
+        ["Service ranking by estimated benchmark value", summary.serviceImpactRanking.byValue],
+        ["Service ranking by reported count", summary.serviceImpactRanking.byVisits],
       ].map(([heading, rows]) => `
         <h2>${heading}</h2>
-        <table><thead><tr><th>Rank</th><th>Service</th><th style="text-align:right">Visits</th><th style="text-align:right">Estimated Value</th><th style="text-align:right">Clinical Value Share</th></tr></thead>
+        <table><thead><tr><th>Rank</th><th>Service</th><th style="text-align:right">Reported count</th><th style="text-align:right">Estimated benchmark value</th><th style="text-align:right">Share of total estimated clinical value</th></tr></thead>
         <tbody>${rows.map((row, index) => `<tr><td>${index + 1}</td><td>${_escapeHTML(row.serviceName)}</td><td style="text-align:right">${row.count.toLocaleString("en-US")}</td><td style="text-align:right">${_fmt(row.estimatedValue)}</td><td style="text-align:right">${row.clinicalValueShare.toFixed(1)}%</td></tr>`).join("")}</tbody></table>
       `).join("")
       : "";
@@ -310,21 +310,20 @@ const ExportService = (() => {
 <p class="clinic-name">${_escapeHTML(summary.clinicName)}</p>
 <p style="color:#475C8A;margin:0 0 4px">${_escapeHTML(summary.streetAddress)}, ${_escapeHTML(summary.city)}, ${_escapeHTML(summary.state)} ${_escapeHTML(summary.zipCode)}</p>
 <p style="color:#475C8A;margin:0 0 12px">Reporting period: ${_formatDate(summary.reportingPeriodFrom)} - ${_formatDate(summary.reportingPeriodTo)}</p>
-<h1 style="font-family:Georgia,serif">Clinic Impact Estimator</h1>
+<h1 style="font-family:Georgia,serif">${AppCopy.exportCopy.pdfTitle}</h1>
 <p class="total">${_fmt(summary.totalEstimatedValue)}</p>
-<p class="label">Estimated Value of Care and Volunteer Contributions</p>
-<p class="disclaimer">This is a benchmark-based estimate of the value of services and volunteer contributions.
-It does not represent actual revenue, Medicare reimbursement, or guaranteed healthcare savings.</p>
+<p class="label">${AppCopy.metric.estimatedTotalValue}</p>
+<p class="disclaimer">${AppCopy.summary.shortDisclaimer}</p>
 ${budgetHTML}
 ${serviceImpactHTML}
 ${serviceRankingHTML}
 <h2>Clinical Services</h2>
-<table><thead><tr><th>Service</th><th>Code</th><th style="text-align:right">Visits</th><th style="text-align:right">Rate</th><th style="text-align:right">Est. Value</th></tr></thead>
-<tbody>${svcRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Clinical Total</th><th style="text-align:right">${_fmt(summary.clinicalServiceValue)}</th></tr></tfoot></table>
-<h2>Volunteer Hours</h2>
-<table><thead><tr><th>Role</th><th style="text-align:right">Hours</th><th style="text-align:right">Rate/Hr</th><th style="text-align:right">Est. Value</th></tr></thead>
-<tbody>${volRows}</tbody><tfoot><tr><th colspan="3" style="text-align:right">Volunteer Total</th><th style="text-align:right">${_fmt(summary.volunteerValue)}</th></tr></tfoot></table>
-<h2>References</h2>
+<table><thead><tr><th>Service</th><th>Code</th><th style="text-align:right">Reported count</th><th style="text-align:right">Benchmark rate</th><th style="text-align:right">Estimated benchmark value</th></tr></thead>
+<tbody>${svcRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Clinical total</th><th style="text-align:right">${_fmt(summary.clinicalServiceValue)}</th></tr></tfoot></table>
+<h2>Volunteer Contributions</h2>
+<table><thead><tr><th>Role</th><th style="text-align:right">Volunteer hours</th><th style="text-align:right">Benchmark rate / hour</th><th style="text-align:right">Estimated contribution value</th></tr></thead>
+<tbody>${volRows}</tbody><tfoot><tr><th colspan="3" style="text-align:right">Volunteer total</th><th style="text-align:right">${_fmt(summary.volunteerValue)}</th></tr></tfoot></table>
+<h2>Sources and references</h2>
 <ul style="font-size:0.85em;color:#475C8A;padding-left:20px">
   ${referenceItems}
 </ul>

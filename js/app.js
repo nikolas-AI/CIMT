@@ -60,10 +60,7 @@
 
     const incompleteStep = _firstIncompleteStep(step);
     if (incompleteStep !== null) {
-      const labels = ["Welcome", "Clinic", "Volunteers", "Services", "Impact"];
-      ProgressIndicator.showWarning(
-        `Complete the ${labels[incompleteStep]} step before continuing to ${labels[step]}.`
-      );
+      ProgressIndicator.showWarning(AppCopy.progress.stepWarning(incompleteStep, step));
       return;
     }
 

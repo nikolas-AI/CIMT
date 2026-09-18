@@ -22,18 +22,16 @@ const ClinicalServicesView = (() => {
     const view = document.createElement("div");
     view.className = "view";
     view.setAttribute("role", "region");
-    view.setAttribute("aria-label", "Clinical Services");
+    view.setAttribute("aria-label", AppCopy.services.ariaLabel);
 
     const heading = document.createElement("h1");
     heading.className = "view-heading";
-    heading.textContent = "Clinical Services";
+    heading.textContent = AppCopy.services.heading;
     view.appendChild(heading);
 
     const intro = document.createElement("p");
     intro.className = "view-intro";
-    intro.textContent =
-      "Tell us about the clinical services your clinic provided. Select each service and " +
-      "enter the number of visits associated with that service.";
+    intro.textContent = `${AppCopy.services.intro} ${AppCopy.services.note}`;
     view.appendChild(intro);
 
     // Map persisted state to EntryList entries format
@@ -45,12 +43,12 @@ const ClinicalServicesView = (() => {
 
     _entryListEl = EntryList.create({
       options:          CLINICAL_SERVICES.filter(s => s.active),
-      selectLabel:      "Clinical service",
-      countLabel:       "Number of visits",
+      selectLabel:      AppCopy.services.label,
+      countLabel:       AppCopy.services.countLabel,
       countPlaceholder: "e.g. 500",
       countMin:         0,
       countStep:        1,
-      addLabel:         "Add another service",
+      addLabel:         AppCopy.services.addLabel,
       allowDuplicates:  false,
       // Enable the EntryList combobox for this catalog only. Volunteer roles
       // continue to use the standard native select because their list is short.
@@ -74,14 +72,14 @@ const ClinicalServicesView = (() => {
     });
 
     const noServicesText = document.createElement("span");
-    noServicesText.textContent = "No services provided";
+    noServicesText.textContent = AppCopy.services.emptyState;
     noServicesToggle.append(noServicesCheckbox, noServicesText);
     view.appendChild(noServicesToggle);
 
     // Navigation
     const nav = NavigationButtons.create({
-      backLabel: "Back",
-      nextLabel: "See Impact",
+      backLabel: AppCopy.services.back,
+      nextLabel: AppCopy.services.next,
       onBack,
       onNext: () => _handleNext(state, onNext),
     });

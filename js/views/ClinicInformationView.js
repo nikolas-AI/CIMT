@@ -29,29 +29,23 @@ const ClinicInformationView = (() => {
     const clinic = state.clinic || {};
 
     view.innerHTML = `
-      <h1 class="view-heading">Estimate Your Clinic's Impact</h1>
+      <h1 class="view-heading">${AppCopy.clinic.heading}</h1>
 
-      <p class="view-intro">
-        The Clinic Impact Estimator helps you communicate the value of the care and volunteer
-        support your clinic provides. Enter a few simple details to create an estimated
-        impact summary.
-      </p>
+      <p class="view-intro">${AppCopy.clinic.intro}</p>
 
       <div class="view-disclaimer" role="note">
-        <strong>A note on these estimates:</strong> This tool provides benchmark-based estimates
-        of service value. It does not calculate actual revenue, reimbursement, or guaranteed
-        healthcare savings.
+        <strong>Why this matters:</strong> ${AppCopy.clinic.disclaimer}
       </div>
 
       <section class="clinic-snapshot" aria-labelledby="clinic-snapshot-heading">
         <div class="clinic-snapshot__header">
-          <h2 id="clinic-snapshot-heading">Clinic snapshot</h2>
-          <p>Set the organization and dates this report represents.</p>
+          <h2 id="clinic-snapshot-heading">${AppCopy.clinic.snapshotHeading}</h2>
+          <p>${AppCopy.clinic.snapshotIntro}</p>
         </div>
 
       <div class="field">
         <label class="field__label" for="clinic-name">
-          Clinic name <span class="required-mark" aria-hidden="true">*</span>
+          ${AppCopy.clinic.nameLabel} <span class="required-mark" aria-hidden="true">*</span>
         </label>
         <input
           id="clinic-name"
@@ -69,7 +63,7 @@ const ClinicInformationView = (() => {
       <div class="clinic-address-fields">
         <div class="field">
           <label class="field__label" for="clinic-street-address">
-            Street address <span class="required-mark" aria-hidden="true">*</span>
+            ${AppCopy.clinic.streetLabel} <span class="required-mark" aria-hidden="true">*</span>
           </label>
           <input
             id="clinic-street-address"
@@ -87,7 +81,7 @@ const ClinicInformationView = (() => {
         <div class="clinic-address-fields__city-state">
           <div class="field">
             <label class="field__label" for="clinic-city">
-              City <span class="required-mark" aria-hidden="true">*</span>
+              ${AppCopy.clinic.cityLabel} <span class="required-mark" aria-hidden="true">*</span>
             </label>
             <input
               id="clinic-city"
@@ -102,7 +96,7 @@ const ClinicInformationView = (() => {
           </div>
           <div class="field">
             <label class="field__label" for="clinic-state">
-              State <span class="required-mark" aria-hidden="true">*</span>
+              ${AppCopy.clinic.stateLabel} <span class="required-mark" aria-hidden="true">*</span>
             </label>
             <input
               id="clinic-state"
@@ -110,7 +104,7 @@ const ClinicInformationView = (() => {
               type="text"
               maxlength="2"
               autocomplete="address-level1"
-              placeholder="e.g. TX"
+              placeholder="TX"
               aria-required="true"
               aria-describedby="clinic-state-error"
               value="${_escape(clinic.state)}"
@@ -121,7 +115,7 @@ const ClinicInformationView = (() => {
 
         <div class="field clinic-address-fields__zip">
           <label class="field__label" for="clinic-zip-code">
-            ZIP code <span class="required-mark" aria-hidden="true">*</span>
+            ${AppCopy.clinic.zipLabel} <span class="required-mark" aria-hidden="true">*</span>
           </label>
           <input
             id="clinic-zip-code"
@@ -140,10 +134,10 @@ const ClinicInformationView = (() => {
       </div>
 
       <div class="field reporting-period-fields">
-        <span class="field__label">Reporting period <span class="required-mark" aria-hidden="true">*</span></span>
+        <span class="field__label">${AppCopy.clinic.reportingLabel} <span class="required-mark" aria-hidden="true">*</span></span>
         <div class="reporting-period-fields__inputs">
           <div>
-            <label class="field__sublabel" for="reporting-period-from">From</label>
+            <label class="field__sublabel" for="reporting-period-from">${AppCopy.clinic.fromLabel}</label>
             <input
               id="reporting-period-from"
               class="field__input"
@@ -154,7 +148,7 @@ const ClinicInformationView = (() => {
             >
           </div>
           <div>
-            <label class="field__sublabel" for="reporting-period-to">To</label>
+            <label class="field__sublabel" for="reporting-period-to">${AppCopy.clinic.toLabel}</label>
             <input
               id="reporting-period-to"
               class="field__input"
@@ -170,10 +164,10 @@ const ClinicInformationView = (() => {
 
       <div class="field">
         <label class="field__label" for="reporting-period-clinic-cost">
-          Total clinic operating cost for this reporting period <span class="field__optional">(optional)</span>
+          ${AppCopy.clinic.costLabel} <span class="field__optional">(optional)</span>
         </label>
         <p class="field__help" id="reporting-period-clinic-cost-help">
-          Include staffing, supplies, facilities, technology, administration, and other operating expenses for the dates above.
+          ${AppCopy.clinic.costHelp}
         </p>
         <input
           id="reporting-period-clinic-cost"

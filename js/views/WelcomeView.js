@@ -20,26 +20,25 @@ const WelcomeView = (() => {
 
     view.innerHTML = `
       <section class="welcome-hero" aria-labelledby="welcome-heading">
-        <p class="welcome-hero__eyebrow">Clinic Impact Estimator</p>
-        <h1 class="view-heading" id="welcome-heading">Make the value of your clinic visible.</h1>
-        <p class="view-intro">
-          Build a clear, benchmark-based picture of the care, services, and volunteer support
-          your clinic provides.
-        </p>
-        <p class="welcome-hero__note">
-          The process takes a few minutes and uses aggregate clinic information only.
-        </p>
+        <p class="welcome-hero__eyebrow">${AppCopy.welcome.eyebrow}</p>
+        <h1 class="view-heading" id="welcome-heading">${AppCopy.welcome.heading}</h1>
+        <p class="view-intro">${AppCopy.welcome.intro}</p>
+        <p class="welcome-hero__note">${AppCopy.welcome.description}</p>
+        <p class="welcome-hero__note">${AppCopy.welcome.note}</p>
+
+        <h2 class="welcome-section-heading">${AppCopy.welcome.whatYouNeedTitle}</h2>
+        <ul class="welcome-list">
+          ${AppCopy.welcome.list.map(item => `<li>${item}</li>`).join("")}
+        </ul>
       </section>
 
       <div class="view-disclaimer welcome-disclaimer" role="note">
-        <strong>Privacy and interpretation:</strong> No patient names, medical records, or
-        other patient-level information is needed. Results are estimates based on benchmark
-        rates and should not be interpreted as actual revenue, reimbursement, or guaranteed savings.
+        <strong>Privacy:</strong> ${AppCopy.welcome.privacy}
       </div>
     `;
 
     const nav = NavigationButtons.create({
-      nextLabel: "Begin",
+      nextLabel: AppCopy.welcome.begin,
       onNext,
     });
     view.appendChild(nav);

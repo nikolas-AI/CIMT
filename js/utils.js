@@ -39,20 +39,20 @@ const Validation = (() => {
   /** Return an error message when the clinic name is blank, otherwise null. */
   function clinicName(value) {
     const trimmed = (value || "").trim();
-    if (!trimmed) return "Please enter your clinic name.";
+    if (!trimmed) return AppCopy.validation.clinicNameRequired;
     return null; // valid
   }
 
   /** Validate a required clinic address field. */
   function clinicAddressField(value, label) {
-    if (!(value || "").trim()) return `Please enter the clinic's ${label}.`;
+    if (!(value || "").trim()) return AppCopy.validation.clinicAddressRequired(label);
     return null;
   }
 
   /** Validate a required US ZIP code without collecting patient location data. */
   function zipCode(value) {
     if (!/^\d{5}(?:-\d{4})?$/.test((value || "").trim())) {
-      return "Please enter a valid 5-digit ZIP code or ZIP+4.";
+      return AppCopy.validation.zipCode;
     }
     return null;
   }
@@ -66,15 +66,15 @@ const Validation = (() => {
       "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT",
       "VA", "WA", "WV", "WI", "WY", "DC",
     ]);
-    return validStates.has(state) ? null : "Please enter a valid two-letter US state abbreviation.";
+    return validStates.has(state) ? null : AppCopy.validation.stateCode;
   }
 
   /** Validate the start and end dates for the impact estimate. */
   function reportingPeriod(from, to) {
-    if (!from) return "Please select a start date.";
-    if (!to) return "Please select an end date.";
+    if (!from) return AppCopy.validation.reportingStartRequired;
+    if (!to) return AppCopy.validation.reportingEndRequired;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) {
-      return "Please enter valid reporting dates.";
+      return AppCopy.validation.reportingDatesInvalid;
     }
     const start = new Date(`${from}T00:00:00Z`);
     const end = new Date(`${to}T00:00:00Z`);
@@ -82,9 +82,9 @@ const Validation = (() => {
       !Number.isNaN(date.getTime()) &&
       date.toISOString().slice(0, 10) === value;
     if (!isRealDate(from, start) || !isRealDate(to, end)) {
-      return "Please enter valid reporting dates.";
+      return AppCopy.validation.reportingDatesInvalid;
     }
-    if (from > to) return "The start date must be before the end date.";
+    if (from > to) return AppCopy.validation.reportingDateOrder;
     return null; // valid
   }
 
@@ -93,11 +93,11 @@ const Validation = (() => {
     if (value === "" || value === null || value === undefined) return null;
     const rawCost = String(value).trim();
     if (!/^\d+(?:\.\d{1,2})?$/.test(rawCost)) {
-      return "Please enter a valid clinic cost using dollars and cents only.";
+      return AppCopy.validation.clinicCostInvalid;
     }
     const cost = Number(rawCost);
-    if (!Number.isFinite(cost)) return "Please enter a valid clinic cost.";
-    if (cost <= 0) return "The total clinic cost must be greater than zero.";
+    if (!Number.isFinite(cost)) return AppCopy.validation.clinicCostInvalid;
+    if (cost <= 0) return AppCopy.validation.clinicCostPositive;
     if (cost > 1_000_000_000_000) {
       return "The total clinic cost cannot exceed $1,000,000,000,000.";
     }
@@ -106,23 +106,23 @@ const Validation = (() => {
 
   /** Validate one volunteer role and its reported hours. */
   function volunteerEntry(roleId, hours) {
-    if (!roleId) return "Please select a volunteer role.";
+    if (!roleId) return AppCopy.validation.volunteerRoleRequired;
     const rawHours = String(hours === null || hours === undefined ? "" : hours).trim();
     const h = Number(rawHours);
     if (!rawHours || !/^-?(?:\d+(?:\.\d*)?|\.\d+)$/.test(rawHours) || !Number.isFinite(h))
-      return "Please enter the number of volunteer hours.";
-    if (h < 0) return "Hours cannot be negative.";
+      return AppCopy.validation.volunteerHoursRequired;
+    if (h < 0) return AppCopy.validation.volunteerHoursNegative;
     return null;
   }
 
   /** Validate one clinical service and its reported visit count. */
   function serviceEntry(serviceId, count) {
-    if (!serviceId) return "Please select a clinical service.";
+    if (!serviceId) return AppCopy.validation.serviceRequired;
     const rawCount = String(count === null || count === undefined ? "" : count).trim();
     const c = Number(rawCount);
     if (!rawCount || !/^-?\d+$/.test(rawCount) || !Number.isFinite(c))
-      return "Please enter the number of visits.";
-    if (c < 0) return "The count cannot be negative.";
+      return AppCopy.validation.serviceCountRequired;
+    if (c < 0) return AppCopy.validation.serviceCountNegative;
     return null;
   }
 
