@@ -35,8 +35,11 @@ const Calculator = (() => {
     const serviceImpactRanking = _rankServices(serviceBreakdown, clinicalValue);
     const mostImpactfulService = serviceImpactRanking.byValue[0] || null;
 
-    const volunteerValue     = volunteerBreakdown.reduce((sum, r) => sum + r.estimatedValue, 0);
-    const totalValue         = volunteerValue + clinicalValue;
+    const volunteerValue         = volunteerBreakdown.reduce((sum, r) => sum + r.estimatedValue, 0);
+    const nonMedicalVolunteerValue = volunteerBreakdown
+      .filter(row => row.category === "nonMedical")
+      .reduce((sum, row) => sum + row.estimatedValue, 0);
+    const totalValue             = nonMedicalVolunteerValue + clinicalValue;
     const clinicCost         = _optionalPositiveNumber(state.clinic.reportingPeriodClinicCost);
     const valueToCostRatio   = clinicCost > 0 ? totalValue / clinicCost : null;
     const benchmarkValueROI  = clinicCost > 0
@@ -54,6 +57,7 @@ const Calculator = (() => {
       reportingPeriodTo:    state.clinic.reportingPeriodTo,
       totalEstimatedValue:  totalValue,
       volunteerValue:       volunteerValue,
+      nonMedicalVolunteerValue: nonMedicalVolunteerValue,
       clinicalServiceValue: clinicalValue,
       reportingPeriodClinicCost: clinicCost,
       reportingPeriodDays:       _periodDays(state.clinic.reportingPeriodFrom, state.clinic.reportingPeriodTo),
@@ -124,6 +128,7 @@ const Calculator = (() => {
         return {
           roleId:         role.id,
           roleName:       role.displayName,
+          category:       role.category,
           hours:          hours,
           benchmarkRate:  role.benchmarkRateUSD,
           estimatedValue: hours * role.benchmarkRateUSD,
@@ -167,6 +172,7 @@ const Calculator = (() => {
  * @property {string}  reportingPeriodTo
  * @property {number}  totalEstimatedValue
  * @property {number}  volunteerValue
+ * @property {number}  nonMedicalVolunteerValue
  * @property {number}  clinicalServiceValue
  * @property {number|null} reportingPeriodClinicCost
  * @property {number|null} reportingPeriodDays

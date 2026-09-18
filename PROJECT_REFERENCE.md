@@ -60,7 +60,9 @@ Clinical service value = service count x benchmark rate
 Volunteer contribution value = volunteer hours x benchmark hourly rate
 
 Total estimated value =
-clinical service value + volunteer contribution value
+clinical service value + non-medical volunteer value
+
+Medical-professional volunteer value remains visible in the detailed report but is excluded from the total because clinical service rates already represent that work.
 
 Estimated value per $1 invested =
 total estimated value / total clinic cost for the reporting period
@@ -302,6 +304,7 @@ Every calculated result should identify:
 
   totalEstimatedValue: 0,
   volunteerValue: 0,
+  nonMedicalVolunteerValue: 0,
   clinicalServiceValue: 0,
 
   estimatedSavings: 0,

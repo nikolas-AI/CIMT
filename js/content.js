@@ -23,7 +23,7 @@ const AppCopy = (() => {
   const summary = {
     emptyState: "Add reported clinical services and/or volunteer hours to create an estimated impact summary for this reporting period.",
     fiShortDisclaimer: "All dollar amounts are benchmark-based estimates derived from reported aggregate activity. They are not actual revenue, reimbursement, profit, confirmed savings, or patient-level outcomes.",
-    methodologyNote: "Reported clinical service counts are multiplied by reference benchmark rates. Reported volunteer hours are multiplied by reference hourly rates. The estimated total value combines estimated clinical service value and estimated volunteer contribution value. When clinic cost is provided, the report compares reported clinic cost with total estimated benchmark value. Benchmark rates are currently national reference values and are not adjusted for your ZIP code. This tool uses aggregate data only and does not require patient information.",
+    methodologyNote: "Reported clinical service counts are multiplied by reference benchmark rates. Reported volunteer hours are multiplied by reference hourly rates. Volunteer roles are classified as medical professional or non-medical. The estimated total combines clinical service value and non-medical volunteer value; medical-professional volunteer value is reported separately because clinical service rates already represent that work. When clinic cost is provided, the report compares reported clinic cost with total estimated benchmark value. Benchmark rates are currently national reference values and are not adjusted for your ZIP code. This tool uses aggregate data only and does not require patient information.",
     shortDisclaimer: "This is a benchmark-based estimate of the value of services and volunteer contributions. It does not represent actual revenue, reimbursement, profit, confirmed savings, or patient-level outcomes.",
     costComparisonNote: "This is not actual financial ROI, revenue, reimbursement, profit, or confirmed healthcare savings. It is a comparison between reported clinic cost and estimated benchmark value.",
     rankingNote: "Rankings show the relative estimated benchmark value of the services you reported. They do not measure clinical importance, quality of care, patient need, reimbursement, or actual savings.",
@@ -112,11 +112,13 @@ const AppCopy = (() => {
     volunteerHours: "Volunteer hours contributed",
     estimatedVolunteerContributionValue: "Estimated volunteer contribution value",
     mostImpactful: "Most impactful reported service",
-    totalEstimatedValueNote: "Estimated benchmark value of reported services and volunteer contributions.",
+    totalEstimatedValueNote: "Estimated benchmark value of reported services plus non-medical volunteer support.",
     clinicalServiceCountNote: "Total service count entered for this reporting period.",
     estimatedClinicalServiceValueNote: "Estimated benchmark value of reported clinical services.",
     volunteerHoursNote: "Total donated hours reported across volunteer roles.",
-    estimatedVolunteerContributionValueNote: "Estimated replacement value of donated volunteer time.",
+    estimatedVolunteerContributionValueNote: "Estimated replacement value of donated time across all reported volunteer roles.",
+    estimatedNonMedicalVolunteerValue: "Estimated non-medical volunteer value",
+    estimatedNonMedicalVolunteerValueNote: "Non-medical volunteer value included in the estimated total.",
     mostImpactfulNote: "Highest estimated benchmark value among reported services.",
   };
 
@@ -129,7 +131,7 @@ const AppCopy = (() => {
       return "Your clinic’s estimated community impact";
     },
     periodText: (startDate, endDate) => `Reporting period: ${startDate || "Not specified"}–${endDate || "Not specified"}`,
-    narrative: (clinicName, serviceCount, volunteerHours, clinicalValue, volunteerValue, totalValue) => {
+    narrative: (clinicName, serviceCount, volunteerHours, clinicalValue, volunteerValue, nonMedicalVolunteerValue, totalValue) => {
       const name = clinicName || "Your clinic";
       const serviceSentence = Number(serviceCount || 0) > 0
         ? `During this reporting period, ${name} reported providing ${serviceCount} clinical services`
@@ -139,11 +141,11 @@ const AppCopy = (() => {
         : ".";
 
       if (Number(volunteerHours || 0) > 0 && Number(serviceCount || 0) > 0) {
-        return `${serviceSentence}${volunteerSentence} Based on national benchmark rates, this activity represents an estimated total value of ${Formatting.currency(totalValue)}, including ${Formatting.currency(clinicalValue)} in reported clinical service value and ${Formatting.currency(volunteerValue)} in donated volunteer contribution value.`;
+        return `${serviceSentence}${volunteerSentence} Based on national benchmark rates, this activity represents an estimated total value of ${Formatting.currency(totalValue)}, including ${Formatting.currency(clinicalValue)} in reported clinical service value and ${Formatting.currency(nonMedicalVolunteerValue)} in non-medical volunteer value. Medical-professional volunteer value is not included in the estimated total as it is included in the clinical service value.`;
       }
 
       if (Number(volunteerHours || 0) > 0) {
-        return `During this reporting period, ${name} reported ${volunteerHours} volunteer hours, representing an estimated donated-time value of ${Formatting.currency(volunteerValue)} based on benchmark hourly rates.`;
+        return `During this reporting period, ${name} reported ${volunteerHours} volunteer hours, representing an estimated donated-time value of ${Formatting.currency(volunteerValue)} based on benchmark hourly rates. The estimated total includes ${Formatting.currency(nonMedicalVolunteerValue)} from non-medical volunteer roles.`;
       }
 
       if (Number(serviceCount || 0) > 0) {
@@ -156,7 +158,7 @@ const AppCopy = (() => {
     rankTitle: "Where your reported care had the greatest estimated value",
     rankIntro: "View services by estimated benchmark value or by reported service count.",
     costHeading: "Reported investment and estimated benchmark value",
-    costIntro: (cost) => `You reported ${Formatting.currency(cost)} in clinic costs for this period. The estimator compares that reported cost with the estimated benchmark value of reported services and volunteer contributions.`,
+    costIntro: (cost) => `You reported ${Formatting.currency(cost)} in clinic costs for this period. The estimator compares that reported cost with the estimated benchmark value of reported services and non-medical volunteer support.`,
     valuePerDollarLabel: "Estimated benchmark value per $1 of reported clinic cost",
     valuePerDollarText: (ratio) => `For every $1 in reported clinic cost, the activity entered in this report corresponds to ${Formatting.currency(ratio)} in estimated benchmark value.`,
     benchmarkComparisonLabel: "Benchmark-value comparison",
@@ -175,7 +177,7 @@ const AppCopy = (() => {
     methodologyBullets: [
       "Reported clinical service counts are multiplied by reference benchmark rates.",
       "Reported volunteer hours are multiplied by reference hourly rates.",
-      "The estimated total value combines estimated clinical service value and estimated volunteer contribution value.",
+      "The estimated total combines clinical service value and non-medical volunteer value. Medical-professional volunteer value is shown separately because clinical service rates already represent that work.",
       "When clinic cost is provided, the report compares reported clinic cost with total estimated benchmark value.",
       "Benchmark rates are currently national reference values and are not adjusted for your ZIP code.",
       "This tool uses aggregate data only and does not require patient information.",

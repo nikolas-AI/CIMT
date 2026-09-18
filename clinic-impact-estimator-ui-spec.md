@@ -671,9 +671,15 @@ Potential future category:
 
 Preventive Care Value
 
+Current total:
+
+> Clinical Service Value + Non-Medical Volunteer Value = Total Estimated Community Impact
+
+Medical-professional volunteer value remains visible in the volunteer breakdown but is excluded because clinical service rates already represent that work.
+
 Potential future total:
 
-> Clinical Service Value + Volunteer Contribution Value + Preventive Care Value = Total Estimated Community Impact
+> Clinical Service Value + Non-Medical Volunteer Value + Preventive Care Value = Total Estimated Community Impact
 
 The Version 1 UI should support the architecture for this expansion even if only the first two categories are initially populated.
 
@@ -689,6 +695,7 @@ interface ImpactSummary {
   clinicName: string;
   totalEstimatedValue: number;
   volunteerValue: number;
+  nonMedicalVolunteerValue: number;
   clinicalServiceValue: number;
   volunteerBreakdown: VolunteerImpactItem[];
   serviceBreakdown: ClinicalImpactItem[];
@@ -701,6 +708,7 @@ Example:
 interface VolunteerImpactItem {
   roleId: string;
   roleName: string;
+  category: "medicalProfessional" | "nonMedical";
   hours: number;
   benchmarkRate: number;
   estimatedValue: number;

@@ -95,6 +95,7 @@ const ImpactSummaryView = (() => {
       _totalVolunteerHours(summary),
       summary.clinicalServiceValue,
       summary.volunteerValue,
+      summary.nonMedicalVolunteerValue,
       summary.totalEstimatedValue
     );
     return narrative;
@@ -158,6 +159,13 @@ const ImpactSummaryView = (() => {
     ));
 
     section.appendChild(_buildCard(
+      AppCopy.metric.estimatedNonMedicalVolunteerValue,
+      summary.nonMedicalVolunteerValue,
+      AppCopy.metric.estimatedNonMedicalVolunteerValueNote,
+      "volunteer"
+    ));
+
+    section.appendChild(_buildCard(
       AppCopy.metric.estimatedTotalValue,
       summary.totalEstimatedValue,
       AppCopy.metric.totalEstimatedValueNote,
@@ -215,12 +223,13 @@ const ImpactSummaryView = (() => {
     const totalText = `${Formatting.currency(summary.totalEstimatedValue)}`;
     const clinicalText = `${Formatting.currency(summary.clinicalServiceValue)}`;
     const volunteerText = `${Formatting.currency(summary.volunteerValue)}`;
+    const nonMedicalVolunteerText = `${Formatting.currency(summary.nonMedicalVolunteerValue)}`;
     const periodLabel = `${_formatDate(summary.reportingPeriodFrom)} to ${_formatDate(summary.reportingPeriodTo)}`;
     const topService = summary.mostImpactfulService ? summary.mostImpactfulService.serviceName : "the top reported service";
     const costSentence = summary.reportingPeriodClinicCost !== null
       ? ` The clinic reported ${Formatting.currency(summary.reportingPeriodClinicCost)} in costs during the same period, providing context for the scale of activity reflected in this benchmark-value comparison.`
       : "";
-    return `During ${periodLabel}, ${clinicName} reported delivering ${serviceCount} clinical services and benefiting from ${volunteerHours} donated volunteer hours. Using national benchmark rates, the estimated value of this reported activity was ${totalText}, including ${clinicalText} in estimated clinical service value and ${volunteerText} in estimated volunteer contribution value. ${topService} represented the largest share of the clinic’s reported clinical service value. These figures help describe the scale of care and community support provided by the clinic; they are benchmark-based estimates and do not represent actual revenue, reimbursement, profit, or confirmed savings.${costSentence}`;
+    return `During ${periodLabel}, ${clinicName} reported delivering ${serviceCount} clinical services and benefiting from ${volunteerHours} donated volunteer hours. Using national benchmark rates, the estimated total value was ${totalText}, including ${clinicalText} in estimated clinical service value and ${nonMedicalVolunteerText} in non-medical volunteer value. The full reported volunteer contribution value was ${volunteerText}; medical-professional volunteer value is shown separately because clinical service rates already represent that work. ${topService} represented the largest share of the clinic’s reported clinical service value. These figures help describe the scale of care and community support provided by the clinic; they are benchmark-based estimates and do not represent actual revenue, reimbursement, profit, or confirmed savings.${costSentence}`;
   }
 
   function _buildCard(label, value, note, variant) {

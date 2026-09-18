@@ -12,7 +12,7 @@
 
 // -----------------------------------------------------------------
 // VOLUNTEER ROLES
-// Each role has an id, display label, and benchmark hourly rate.
+// Each role has an id, display label, category, and benchmark hourly rate.
 // The rate source is documented in VOLUNTEER_RATE_SOURCE below.
 // -----------------------------------------------------------------
 // Every catalog item uses a stable id for saved state, a displayName for the
@@ -20,15 +20,15 @@
 // Every catalog item has a stable id for saved answers, a display name for the
 // screen, and an active flag so an item can be retired without deleting history.
 const VOLUNTEER_ROLES = [
-  { id: "physician",        displayName: "Physician (MD/DO)",        benchmarkRateUSD: 120.00, active: true },
-  { id: "np-pa",            displayName: "Nurse Practitioner / PA",  benchmarkRateUSD: 75.00,  active: true },
-  { id: "rn",               displayName: "Registered Nurse (RN)",    benchmarkRateUSD: 45.00,  active: true },
-  { id: "pharmacist",       displayName: "Pharmacist",               benchmarkRateUSD: 65.00,  active: true },
-  { id: "medical-student",  displayName: "Medical Student",          benchmarkRateUSD: 20.00,  active: true },
-  { id: "nursing-student",  displayName: "Nursing Student",          benchmarkRateUSD: 18.00,  active: true },
-  { id: "pharmacy-student", displayName: "Pharmacy Student",         benchmarkRateUSD: 18.00,  active: true },
-  { id: "admin",            displayName: "Administrative Volunteer", benchmarkRateUSD: 16.00,  active: true },
-  { id: "other",            displayName: "Other Volunteer",          benchmarkRateUSD: 14.00,  active: true },
+  { id: "physician",        displayName: "Physician (MD/DO)",        category: "medicalProfessional", benchmarkRateUSD: 120.00, active: true },
+  { id: "np-pa",            displayName: "Nurse Practitioner / PA",  category: "medicalProfessional", benchmarkRateUSD: 75.00,  active: true },
+  { id: "rn",               displayName: "Registered Nurse (RN)",    category: "medicalProfessional", benchmarkRateUSD: 45.00,  active: true },
+  { id: "pharmacist",       displayName: "Pharmacist",               category: "medicalProfessional", benchmarkRateUSD: 65.00,  active: true },
+  { id: "medical-student",  displayName: "Medical Student",          category: "medicalProfessional", benchmarkRateUSD: 20.00,  active: true },
+  { id: "nursing-student",  displayName: "Nursing Student",          category: "medicalProfessional", benchmarkRateUSD: 18.00,  active: true },
+  { id: "pharmacy-student", displayName: "Pharmacy Student",         category: "medicalProfessional", benchmarkRateUSD: 18.00,  active: true },
+  { id: "admin",            displayName: "Administrative Volunteer", category: "nonMedical",          benchmarkRateUSD: 16.00,  active: true },
+  { id: "other",            displayName: "Other Volunteer",          category: "nonMedical",          benchmarkRateUSD: 14.00,  active: true },
 ];
 
 // -----------------------------------------------------------------

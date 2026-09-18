@@ -53,6 +53,7 @@ const ExportService = (() => {
     ];
     const totalEstimatedValueRow = rows.length;
     rows.push(["Total Estimated Value", summary.totalEstimatedValue]);
+    rows.push(["Non-Medical Volunteer Value Included", summary.nonMedicalVolunteerValue]);
     rows.push([]);
     let budgetSectionRow = null;
     let budgetRows = [];
@@ -63,6 +64,7 @@ const ExportService = (() => {
         ["Reported Clinic Cost", summary.reportingPeriodClinicCost],
         ["Reporting Period Days", summary.reportingPeriodDays],
         ["Estimated Total Value", summary.totalEstimatedValue],
+        ["Non-Medical Volunteer Value Included", summary.nonMedicalVolunteerValue],
         ["Estimated Benchmark Value per $1 of Reported Clinic Cost", summary.valueToCostRatio],
         ["Benchmark-Value Comparison (%)", summary.benchmarkValueROI],
       ];
@@ -107,12 +109,14 @@ const ExportService = (() => {
     const volunteerSectionRow = rows.length;
     rows.push(["Volunteer Contributions"]);
     const volunteerHeaderRow = rows.length;
-    rows.push(["Role", "Volunteer Hours", "Benchmark Rate / Hour", "Estimated Volunteer Contribution Value"]);
+    rows.push(["Role", "Category", "Volunteer Hours", "Benchmark Rate / Hour", "Estimated Volunteer Contribution Value"]);
     rows.push(...summary.volunteerBreakdown.map(row => [
-        row.roleName, row.hours, row.benchmarkRate, row.estimatedValue,
+        row.roleName, row.category, row.hours, row.benchmarkRate, row.estimatedValue,
       ]));
     const volunteerTotalRow = rows.length;
-    rows.push(["", "", "Volunteer Total", summary.volunteerValue]);
+    rows.push(["", "", "", "Volunteer Total", summary.volunteerValue]);
+    const nonMedicalVolunteerTotalRow = rows.length;
+    rows.push(["", "", "", "Non-Medical Volunteer Value Included", summary.nonMedicalVolunteerValue]);
     rows.push([]);
     const disclaimerSectionRow = rows.length;
     rows.push(["Disclaimer"]);
@@ -135,7 +139,8 @@ const ExportService = (() => {
 
     const boldRows = [0, serviceImpactSectionRow, valueRankingSectionRow, valueRankingHeaderRow,
       visitRankingSectionRow, visitRankingHeaderRow, clinicalSectionRow, clinicalHeaderRow,
-      clinicalTotalRow, volunteerSectionRow, volunteerHeaderRow, volunteerTotalRow, disclaimerSectionRow];
+      clinicalTotalRow, volunteerSectionRow, volunteerHeaderRow, volunteerTotalRow,
+      nonMedicalVolunteerTotalRow, disclaimerSectionRow];
     if (budgetSectionRow !== null) boldRows.push(budgetSectionRow);
     const styleRow = (rowIndex, style) => {
       for (let columnIndex = 0; columnIndex < 5; columnIndex += 1) {
@@ -167,6 +172,7 @@ const ExportService = (() => {
     if (budgetSectionRow !== null) {
       formatCurrency(budgetSectionRow + 1, 1);
       formatCurrency(budgetSectionRow + 3, 1);
+      formatCurrency(budgetSectionRow + 4, 1);
     }
     for (const [headerRow, endRow] of [
       [valueRankingHeaderRow, valueRankingEndRow],
@@ -184,8 +190,10 @@ const ExportService = (() => {
     for (let rowIndex = volunteerHeaderRow + 1; rowIndex < volunteerTotalRow; rowIndex += 1) {
       formatCurrency(rowIndex, 2);
       formatCurrency(rowIndex, 3);
+      formatCurrency(rowIndex, 4);
     }
-    formatCurrency(volunteerTotalRow, 3);
+    formatCurrency(volunteerTotalRow, 4);
+    formatCurrency(nonMedicalVolunteerTotalRow, 4);
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, sheet, AppCopy.exportCopy.workbookSummary);
@@ -248,6 +256,7 @@ const ExportService = (() => {
     const volRows = summary.volunteerBreakdown.map(r => `
       <tr>
         <td>${r.roleName}</td>
+        <td>${r.category}</td>
         <td style="text-align:right">${r.hours.toFixed(1)}</td>
         <td style="text-align:right">${_fmt(r.benchmarkRate)}</td>
         <td style="text-align:right">${_fmt(r.estimatedValue)}</td>
@@ -268,6 +277,7 @@ const ExportService = (() => {
         <tbody>
           <tr><th>Reported clinic cost</th><td style="text-align:right">${_fmt(summary.reportingPeriodClinicCost)}</td></tr>
           <tr><th>Estimated total value</th><td style="text-align:right">${_fmt(summary.totalEstimatedValue)}</td></tr>
+          <tr><th>Non-medical volunteer value included</th><td style="text-align:right">${_fmt(summary.nonMedicalVolunteerValue)}</td></tr>
           <tr><th>${AppCopy.summaryView.valuePerDollarLabel}</th><td style="text-align:right">$${summary.valueToCostRatio.toFixed(2)}</td></tr>
           <tr><th>${AppCopy.summaryView.benchmarkComparisonLabel}</th><td style="text-align:right">${Math.abs(summary.benchmarkValueROI || 0).toFixed(1)}% ${summary.benchmarkValueROI > 0 ? "higher" : summary.benchmarkValueROI < 0 ? "lower" : "equal"}</td></tr>
         </tbody>
@@ -321,8 +331,8 @@ ${serviceRankingHTML}
 <table><thead><tr><th>Service</th><th>Code</th><th style="text-align:right">Reported count</th><th style="text-align:right">Benchmark rate</th><th style="text-align:right">Estimated benchmark value</th></tr></thead>
 <tbody>${svcRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Clinical total</th><th style="text-align:right">${_fmt(summary.clinicalServiceValue)}</th></tr></tfoot></table>
 <h2>Volunteer Contributions</h2>
-<table><thead><tr><th>Role</th><th style="text-align:right">Volunteer hours</th><th style="text-align:right">Benchmark rate / hour</th><th style="text-align:right">Estimated contribution value</th></tr></thead>
-<tbody>${volRows}</tbody><tfoot><tr><th colspan="3" style="text-align:right">Volunteer total</th><th style="text-align:right">${_fmt(summary.volunteerValue)}</th></tr></tfoot></table>
+<table><thead><tr><th>Role</th><th>Category</th><th style="text-align:right">Volunteer hours</th><th style="text-align:right">Benchmark rate / hour</th><th style="text-align:right">Estimated contribution value</th></tr></thead>
+<tbody>${volRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Volunteer total</th><th style="text-align:right">${_fmt(summary.volunteerValue)}</th></tr><tr><th colspan="4" style="text-align:right">Non-medical value included in total</th><th style="text-align:right">${_fmt(summary.nonMedicalVolunteerValue)}</th></tr></tfoot></table>
 <h2>Sources and references</h2>
 <ul style="font-size:0.85em;color:#475C8A;padding-left:20px">
   ${referenceItems}
