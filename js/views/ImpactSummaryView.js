@@ -31,7 +31,9 @@ const ImpactSummaryView = (() => {
     if (summary.reportingPeriodClinicCost !== null) {
       view.appendChild(_buildBudgetMetrics(summary));
     }
-    view.appendChild(_buildServiceImpact(summary));
+    if (_serviceCount(summary) > 0) {
+      view.appendChild(_buildServiceImpact(summary));
+    }
     const serviceRanking = _buildServiceRanking(summary);
     if (serviceRanking) view.appendChild(serviceRanking);
     const rateTable = _buildRateTable(summary);
@@ -175,7 +177,7 @@ const ImpactSummaryView = (() => {
       section.appendChild(_buildCard(
         AppCopy.metric.estimatedTotalValue,
         summary.totalEstimatedValue,
-        AppCopy.metric.totalEstimatedValueNote,
+        _totalValueNote(hasServices, hasVolunteerHours),
         "total"
       ));
     }
@@ -228,14 +230,33 @@ const ImpactSummaryView = (() => {
     const clinicName = summary.clinicName || "Your clinic";
     const serviceCount = _serviceCount(summary);
     const volunteerHours = _totalVolunteerHours(summary);
+    const hasServices = serviceCount > 0;
+    const hasVolunteerHours = volunteerHours > 0;
     const totalText = `${Formatting.currency(summary.totalEstimatedValue)}`;
     const clinicalText = `${Formatting.currency(summary.clinicalServiceValue)}`;
     const volunteerText = `${Formatting.currency(summary.volunteerValue)}`;
     const nonMedicalVolunteerText = `${Formatting.currency(summary.nonMedicalVolunteerValue)}`;
     const periodLabel = `${_formatDate(summary.reportingPeriodFrom)} to ${_formatDate(summary.reportingPeriodTo)}`;
-    const topService = summary.mostImpactfulService ? summary.mostImpactfulService.serviceName : "the top reported service";
+    const topService = summary.mostImpactfulService ? summary.mostImpactfulService.serviceName : "";
     const topServiceShare = summary.mostImpactfulService?.clinicalValueShare || 0;
-    return `During ${periodLabel}, ${clinicName} reported delivering ${serviceCount} clinical services and benefiting from ${volunteerHours} donated volunteer hours. Using national benchmark rates, the estimated total value was ${totalText}, including ${clinicalText} in estimated clinical service value and ${nonMedicalVolunteerText} in non-medical volunteer value. Medical-professional volunteer value is not included in the estimated total as it is included in the clinical service value. The full reported volunteer contribution value was ${volunteerText}. The standout service was ${topService}, contributing ${Formatting.number(topServiceShare, 1)}% of the clinic’s estimated clinical service value.`;
+    const activityText = hasServices && hasVolunteerHours
+      ? `${clinicName} reported delivering ${serviceCount} clinical services and benefiting from ${volunteerHours} donated volunteer hours.`
+      : hasServices
+        ? `${clinicName} reported delivering ${serviceCount} clinical services.`
+        : hasVolunteerHours
+          ? `${clinicName} reported ${volunteerHours} donated volunteer hours.`
+          : `${clinicName} reported no clinical services or volunteer hours.`;
+    const valueText = hasServices && hasVolunteerHours
+      ? `including ${clinicalText} in estimated clinical service value and ${nonMedicalVolunteerText} in non-medical volunteer value. Medical-professional volunteer value is not included in the estimated total as it is included in the clinical service value. The full reported volunteer contribution value was ${volunteerText}.`
+      : hasServices
+        ? `reflecting ${clinicalText} in estimated clinical service value.`
+        : hasVolunteerHours
+          ? `reflecting ${volunteerText} in estimated volunteer contribution value.`
+          : "";
+    const serviceText = hasServices
+      ? ` The standout service was ${topService}, contributing ${Formatting.number(topServiceShare, 1)}% of the clinic’s estimated clinical service value.`
+      : "";
+    return `During ${periodLabel}, ${activityText} Using national benchmark rates, the estimated total value was ${totalText}, ${valueText}${serviceText}`;
   }
 
   function _buildCard(label, value, note, variant) {
@@ -247,6 +268,12 @@ const ImpactSummaryView = (() => {
       <p class="impact-card__note">${note}</p>
     `;
     return card;
+  }
+
+  function _totalValueNote(hasServices, hasVolunteerHours) {
+    if (hasServices && hasVolunteerHours) return AppCopy.metric.totalEstimatedValueNote;
+    if (hasServices) return AppCopy.metric.totalEstimatedValueServicesOnlyNote;
+    return AppCopy.metric.totalEstimatedValueVolunteerOnlyNote;
   }
 
   function _buildServiceImpact(summary) {
@@ -353,6 +380,7 @@ const ImpactSummaryView = (() => {
     const ratioText = summary.valueToCostRatio !== null ? `${summary.valueToCostRatio.toFixed(2)}` : "—";
     const benchmarkDirection = summary.benchmarkValueROI > 0 ? "higher" : summary.benchmarkValueROI < 0 ? "lower" : "equal";
     const benchmarkPercent = Math.abs(summary.benchmarkValueROI || 0).toFixed(1);
+    const totalValueNote = _totalValueNote(_serviceCount(summary) > 0, _totalVolunteerHours(summary) > 0);
 
     section.innerHTML = `
       <h2 class="summary-section__heading" id="budget-metrics-heading">${AppCopy.summaryView.costHeading}</h2>
@@ -361,7 +389,7 @@ const ImpactSummaryView = (() => {
       </p>
       <div class="budget-metrics__grid">
         ${_buildMetric("Reported clinic cost", Formatting.currency(summary.reportingPeriodClinicCost), "Total clinic cost reported for this period.")}
-        ${_buildMetric("Estimated total value", Formatting.currency(summary.totalEstimatedValue), AppCopy.metric.totalEstimatedValueNote)}
+        ${_buildMetric("Estimated total value", Formatting.currency(summary.totalEstimatedValue), totalValueNote)}
         ${_buildMetric(AppCopy.summaryView.valuePerDollarLabel, `$${ratioText}`, "Estimated benchmark value for every $1 of reported clinic cost.")}
         ${_buildMetric(AppCopy.summaryView.benchmarkComparisonLabel, `${benchmarkPercent}% ${benchmarkDirection}`, "The estimated total benchmark value compared with the reported clinic cost.")}
       </div>

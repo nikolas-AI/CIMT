@@ -673,9 +673,9 @@ Preventive Care Value
 
 Current total:
 
-> Clinical Service Value + Non-Medical Volunteer Value = Total Estimated Community Impact
+> Clinical Service Value + Non-Medical Volunteer Value = Total Estimated Community Impact when both categories are reported
 
-Medical-professional volunteer value remains visible in the volunteer breakdown but is excluded because clinical service rates already represent that work.
+When no services are reported, the total equals the full volunteer contribution value. When no volunteer hours are reported, the total equals clinical service value. Medical-professional volunteer value is excluded only when clinical services are also reported, because clinical service rates already represent that work.
 
 Potential future total:
 

@@ -39,7 +39,11 @@ const Calculator = (() => {
     const nonMedicalVolunteerValue = volunteerBreakdown
       .filter(row => row.category === "nonMedical")
       .reduce((sum, row) => sum + row.estimatedValue, 0);
-    const totalValue             = nonMedicalVolunteerValue + clinicalValue;
+    const hasServices            = serviceBreakdown.some(row => row.count > 0);
+    const hasVolunteerHours      = volunteerBreakdown.some(row => row.hours > 0);
+    const totalValue             = hasServices
+      ? clinicalValue + (hasVolunteerHours ? nonMedicalVolunteerValue : 0)
+      : (hasVolunteerHours ? volunteerValue : 0);
     const clinicCost         = _optionalPositiveNumber(state.clinic.reportingPeriodClinicCost);
     const valueToCostRatio   = clinicCost > 0 ? totalValue / clinicCost : null;
     const benchmarkValueROI  = clinicCost > 0

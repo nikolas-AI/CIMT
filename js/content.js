@@ -18,6 +18,7 @@ const AppCopy = (() => {
     serviceRequired: "Please select a clinical service.",
     serviceCountRequired: "Please enter the number of visits.",
     serviceCountNegative: "The count cannot be negative.",
+    impactActivityRequired: "Report at least one clinical service or volunteer hour before viewing the impact summary.",
   };
 
   const summary = {
@@ -113,6 +114,8 @@ const AppCopy = (() => {
     estimatedVolunteerContributionValue: "Estimated volunteer contribution value",
     mostImpactful: "Most impactful reported service",
     totalEstimatedValueNote: "Estimated benchmark value of reported services plus non-medical volunteer support.",
+    totalEstimatedValueServicesOnlyNote: "Estimated benchmark value of reported clinical services.",
+    totalEstimatedValueVolunteerOnlyNote: "Estimated benchmark value of reported volunteer contributions.",
     clinicalServiceCountNote: "Total service count entered for this reporting period.",
     estimatedClinicalServiceValueNote: "Estimated benchmark value of reported clinical services.",
     volunteerHoursNote: "Total donated hours reported across volunteer roles.",

@@ -58,6 +58,11 @@
       return;
     }
 
+    if (step >= 4 && !_impactActivityComplete()) {
+      ProgressIndicator.showWarning(AppCopy.validation.impactActivityRequired);
+      return;
+    }
+
     const incompleteStep = _firstIncompleteStep(step);
     if (incompleteStep !== null) {
       ProgressIndicator.showWarning(AppCopy.progress.stepWarning(incompleteStep, step));
@@ -155,6 +160,12 @@
     );
   }
 
+  function _impactActivityComplete() {
+    const hasVolunteerHours = !state.noVolunteerHours && state.volunteers.some(entry => Number(entry.hours) > 0);
+    const hasServices = !state.noServicesProvided && state.services.some(entry => Number(entry.count) > 0);
+    return hasVolunteerHours || hasServices;
+  }
+
   // -----------------------------------------------------------------
   // IMPACT COMPUTATION
   // Called when the user clicks "See Impact" on View 4.
@@ -163,6 +174,10 @@
   // Calculate once, save the result, and then show the summary screen. Keeping
   // the math here prevents the summary from using stale totals.
   function _computeAndShowImpact() {
+    if (!_impactActivityComplete()) {
+      ProgressIndicator.showWarning(AppCopy.validation.impactActivityRequired);
+      return;
+    }
     state.impact = Calculator.computeImpact(state);
     advance();
   }

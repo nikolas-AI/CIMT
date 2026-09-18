@@ -176,7 +176,7 @@ const EntryList = (() => {
         searchInput.id = selectId;
         searchInput.className = "field__input field__search";
         searchInput.type = "search";
-        searchInput.placeholder = `Select or search ${config.selectLabel.toLowerCase()}s`;
+        searchInput.placeholder = `Select or search ${config.selectLabel.toLowerCase()}`;
         searchInput.setAttribute("role", "combobox");
         searchInput.setAttribute("aria-autocomplete", "list");
         searchInput.setAttribute("aria-describedby", `${selectId}-error`);
