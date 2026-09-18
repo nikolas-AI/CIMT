@@ -696,6 +696,7 @@ interface ImpactSummary {
   totalEstimatedValue: number;
   volunteerValue: number;
   nonMedicalVolunteerValue: number;
+  medicalProfessionalVolunteerValue: number;
   clinicalServiceValue: number;
   volunteerBreakdown: VolunteerImpactItem[];
   serviceBreakdown: ClinicalImpactItem[];
@@ -1407,6 +1408,8 @@ interface ImpactSummary {
   clinicName: string;
   totalEstimatedValue: number;
   volunteerValue: number;
+  nonMedicalVolunteerValue: number;
+  medicalProfessionalVolunteerValue: number;
   clinicalServiceValue: number;
   volunteerBreakdown: VolunteerImpactItem[];
   serviceBreakdown: ClinicalImpactItem[];
@@ -1428,6 +1431,8 @@ const mockImpactSummary = {
   clinicName: "Community Hope Clinic",
   totalEstimatedValue: 450000,
   volunteerValue: 45000,
+  nonMedicalVolunteerValue: 12000,
+  medicalProfessionalVolunteerValue: 33000,
   clinicalServiceValue: 405000,
   volunteerBreakdown: [],
   serviceBreakdown: [],

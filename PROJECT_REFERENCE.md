@@ -305,6 +305,7 @@ Every calculated result should identify:
   totalEstimatedValue: 0,
   volunteerValue: 0,
   nonMedicalVolunteerValue: 0,
+  medicalProfessionalVolunteerValue: 0,
   clinicalServiceValue: 0,
 
   estimatedSavings: 0,

@@ -39,6 +39,7 @@ const Calculator = (() => {
     const nonMedicalVolunteerValue = volunteerBreakdown
       .filter(row => row.category === "nonMedical")
       .reduce((sum, row) => sum + row.estimatedValue, 0);
+    const medicalProfessionalVolunteerValue = volunteerValue - nonMedicalVolunteerValue;
     const hasServices            = serviceBreakdown.some(row => row.count > 0);
     const hasVolunteerHours      = volunteerBreakdown.some(row => row.hours > 0);
     const totalValue             = hasServices
@@ -62,6 +63,7 @@ const Calculator = (() => {
       totalEstimatedValue:  totalValue,
       volunteerValue:       volunteerValue,
       nonMedicalVolunteerValue: nonMedicalVolunteerValue,
+      medicalProfessionalVolunteerValue: medicalProfessionalVolunteerValue,
       clinicalServiceValue: clinicalValue,
       reportingPeriodClinicCost: clinicCost,
       reportingPeriodDays:       _periodDays(state.clinic.reportingPeriodFrom, state.clinic.reportingPeriodTo),
@@ -177,6 +179,7 @@ const Calculator = (() => {
  * @property {number}  totalEstimatedValue
  * @property {number}  volunteerValue
  * @property {number}  nonMedicalVolunteerValue
+ * @property {number}  medicalProfessionalVolunteerValue
  * @property {number}  clinicalServiceValue
  * @property {number|null} reportingPeriodClinicCost
  * @property {number|null} reportingPeriodDays

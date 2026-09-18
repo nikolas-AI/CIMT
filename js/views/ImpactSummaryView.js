@@ -31,7 +31,7 @@ const ImpactSummaryView = (() => {
     if (summary.reportingPeriodClinicCost !== null) {
       view.appendChild(_buildBudgetMetrics(summary));
     }
-    if (_serviceCount(summary) > 0) {
+    if (_hasReportedServices(summary)) {
       view.appendChild(_buildServiceImpact(summary));
     }
     const serviceRanking = _buildServiceRanking(summary);
@@ -119,6 +119,10 @@ const ImpactSummaryView = (() => {
     return summary.serviceBreakdown.reduce((sum, row) => sum + row.count, 0);
   }
 
+  function _hasReportedServices(summary) {
+    return _serviceCount(summary) > 0 || Number(summary.clinicalServiceValue) > 0;
+  }
+
   function _totalVolunteerHours(summary) {
     return summary.volunteerBreakdown.reduce((sum, row) => sum + row.hours, 0);
   }
@@ -140,8 +144,10 @@ const ImpactSummaryView = (() => {
   function _buildBreakdown(summary) {
     const section = document.createElement("div");
     section.className = "impact-breakdown";
-    const hasServices = _serviceCount(summary) > 0;
+    const hasServices = _hasReportedServices(summary);
     const hasVolunteerHours = _totalVolunteerHours(summary) > 0;
+    const hasMedicalVolunteerValue = summary.medicalProfessionalVolunteerValue > 0;
+    const hasNonMedicalVolunteerValue = summary.nonMedicalVolunteerValue > 0;
 
     const heading = document.createElement("h2");
     heading.className = "impact-breakdown__heading";
@@ -158,19 +164,44 @@ const ImpactSummaryView = (() => {
     }
 
     if (hasVolunteerHours) {
-      section.appendChild(_buildCard(
-        AppCopy.metric.estimatedVolunteerContributionValue,
-        summary.volunteerValue,
-        AppCopy.metric.estimatedVolunteerContributionValueNote,
-        "volunteer"
-      ));
-
-      section.appendChild(_buildCard(
-        AppCopy.metric.estimatedNonMedicalVolunteerValue,
-        summary.nonMedicalVolunteerValue,
-        AppCopy.metric.estimatedNonMedicalVolunteerValueNote,
-        "volunteer"
-      ));
+      if (!hasServices) {
+        if (hasMedicalVolunteerValue && hasNonMedicalVolunteerValue) {
+          section.appendChild(_buildCard(
+            AppCopy.metric.estimatedMedicalProfessionalVolunteerValue,
+            summary.medicalProfessionalVolunteerValue,
+            AppCopy.metric.estimatedMedicalProfessionalVolunteerValueNote,
+            "volunteer"
+          ));
+          section.appendChild(_buildCard(
+            AppCopy.metric.estimatedNonMedicalVolunteerValue,
+            summary.nonMedicalVolunteerValue,
+            AppCopy.metric.estimatedNonMedicalVolunteerValueNote,
+            "volunteer"
+          ));
+        } else {
+          section.appendChild(_buildCard(
+            AppCopy.metric.estimatedVolunteerContributionValue,
+            summary.volunteerValue,
+            AppCopy.metric.estimatedVolunteerContributionValueNote,
+            "volunteer"
+          ));
+        }
+      } else {
+        section.appendChild(_buildCard(
+          AppCopy.metric.estimatedVolunteerContributionValue,
+          summary.volunteerValue,
+          AppCopy.metric.estimatedVolunteerContributionValueNote,
+          "volunteer"
+        ));
+        if (hasNonMedicalVolunteerValue) {
+          section.appendChild(_buildCard(
+            AppCopy.metric.estimatedNonMedicalVolunteerValue,
+            summary.nonMedicalVolunteerValue,
+            AppCopy.metric.estimatedNonMedicalVolunteerValueNote,
+            "volunteer"
+          ));
+        }
+      }
     }
 
     if (hasServices || hasVolunteerHours) {
@@ -181,6 +212,11 @@ const ImpactSummaryView = (() => {
         "total"
       ));
     }
+
+    section.style.setProperty(
+      "--impact-card-columns",
+      String(Math.max(section.children.length - 1, 1))
+    );
 
     return section;
   }
@@ -380,7 +416,7 @@ const ImpactSummaryView = (() => {
     const ratioText = summary.valueToCostRatio !== null ? `${summary.valueToCostRatio.toFixed(2)}` : "—";
     const benchmarkDirection = summary.benchmarkValueROI > 0 ? "higher" : summary.benchmarkValueROI < 0 ? "lower" : "equal";
     const benchmarkPercent = Math.abs(summary.benchmarkValueROI || 0).toFixed(1);
-    const totalValueNote = _totalValueNote(_serviceCount(summary) > 0, _totalVolunteerHours(summary) > 0);
+    const totalValueNote = _totalValueNote(_hasReportedServices(summary), _totalVolunteerHours(summary) > 0);
 
     section.innerHTML = `
       <h2 class="summary-section__heading" id="budget-metrics-heading">${AppCopy.summaryView.costHeading}</h2>

@@ -120,6 +120,8 @@ const AppCopy = (() => {
     estimatedClinicalServiceValueNote: "Estimated benchmark value of reported clinical services.",
     volunteerHoursNote: "Total donated hours reported across volunteer roles.",
     estimatedVolunteerContributionValueNote: "Estimated replacement value of donated time across all reported volunteer roles (Both Medical and Non-Medical).",
+    estimatedMedicalProfessionalVolunteerValue: "Estimated medical-professional volunteer value",
+    estimatedMedicalProfessionalVolunteerValueNote: "Estimated replacement value of donated time from medical-professional roles.",
     estimatedNonMedicalVolunteerValue: "Estimated non-medical volunteer value",
     estimatedNonMedicalVolunteerValueNote: "Non-medical volunteer value included in the estimated total.",
     mostImpactfulNote: "Highest estimated benchmark value among reported services.",

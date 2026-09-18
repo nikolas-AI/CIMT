@@ -880,8 +880,11 @@ body {
 /* Breakdown cards: compare the impact categories side by side. */
 .impact-breakdown {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--impact-card-columns, 1), minmax(0, 1fr));
   grid-template-rows: auto auto;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   gap: 0;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -892,6 +895,8 @@ body {
 .impact-breakdown__heading {
   grid-column: 1 / -1;
   grid-row: 1;
+  width: 100%;
+  box-sizing: border-box;
   align-self: stretch;
   padding: var(--space-5) var(--space-6);
   background: var(--color-surface);
