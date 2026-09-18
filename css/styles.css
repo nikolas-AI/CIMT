@@ -81,7 +81,7 @@ html { font-size: 16px; scroll-behavior: smooth; }
 body {
   font-family: var(--font-body);
   font-size: var(--text-base);
-  color: var(--color-impact);
+  color: var(--color-navy);
   background:
     linear-gradient(rgba(255,253,248,0.34) 1px, transparent 1px),
     var(--color-bg);
@@ -298,7 +298,8 @@ body {
   explanatory text consistent across all five steps.
    --------------------------------------------------------- */
 .view {
-  max-width: 720px;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
   animation: fadeSlideIn 0.22s ease;
 }
@@ -328,7 +329,8 @@ body {
   color: var(--color-slate);
   font-size: var(--text-base);
   margin-bottom: var(--space-8);
-  max-width: 56ch;
+  width: 100%;
+  max-width: none;
 }
 
 /* ---------------------------------------------------------
@@ -348,7 +350,8 @@ body {
 }
 
 .welcome-hero .view-intro {
-  max-width: 48ch;
+  width: 100%;
+  max-width: none;
   font-size: var(--text-lg);
   margin-bottom: var(--space-4);
 }
@@ -365,6 +368,26 @@ body {
 .welcome-hero__note {
   color: var(--color-muted);
   font-size: var(--text-sm);
+  line-height: 1.7;
+  margin-bottom: var(--space-3);
+}
+
+.welcome-section-heading {
+  color: var(--color-navy);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: var(--space-6) 0 var(--space-3);
+}
+
+.welcome-list {
+  list-style: disc;
+  padding-left: 1.4rem;
+  color: var(--color-slate);
+  display: grid;
+  gap: var(--space-2);
+  line-height: 1.7;
 }
 
 .welcome-disclaimer {
@@ -373,10 +396,10 @@ body {
 
 .view-disclaimer {
   font-size: var(--text-sm);
-  color: var(--color-muted);
-  background: #FFF1C7;
-  border: 1px solid #E8D39B;
-  border-left: 4px solid #D89A2B;
+  color: var(--color-slate);
+  background: rgba(30, 107, 99, 0.05);
+  border: 1px solid rgba(30, 107, 99, 0.18);
+  border-left: 4px solid var(--color-accent);
   border-radius: var(--radius-sm);
   padding: var(--space-4);
   margin-bottom: var(--space-6);
@@ -554,7 +577,7 @@ body {
 
 .field__option:hover,
 .field__option:focus-visible {
-  background: var(--color-background);
+  background: var(--color-bg);
   outline: none;
 }
 
@@ -850,7 +873,7 @@ body {
 /* Breakdown cards: compare the two sources of estimated impact side by side. */
 .impact-breakdown {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-template-rows: auto auto;
   gap: 0;
   border: 1px solid var(--color-border);
@@ -870,6 +893,7 @@ body {
   line-height: 1.3;
   margin: 0;
   border-bottom: 1px solid var(--color-border);
+  text-align: left;
 }
 
 .impact-card {
@@ -884,13 +908,16 @@ body {
   animation: summaryCardIn 0.3s ease both;
 }
 
-/* Use one accent line so the two impact categories have equal visual weight. */
+/* Use one accent line so the three impact categories have equal visual weight. */
 .impact-card--clinical,
-.impact-card--volunteer { border-top-color: var(--color-accent); }
+.impact-card--volunteer,
+.impact-card--total { border-top-color: var(--color-accent); }
 
-.impact-card--volunteer { border-right: 0; }
+.impact-card--total { border-right: 0; }
 
 .impact-card--volunteer { animation-delay: 0.06s; }
+
+.impact-card--total { animation-delay: 0.12s; }
 
 @keyframes summaryCardIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -923,6 +950,11 @@ body {
 /* Rate and reference sections: shared spacing and heading treatment. */
 .summary-section {
   margin-bottom: var(--space-8);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
 }
 
 .summary-section__heading {
@@ -942,6 +974,37 @@ body {
   color: var(--color-slate);
   margin-bottom: var(--space-4);
   line-height: 1.6;
+  width: 100%;
+  max-width: none;
+}
+
+.impact-narrative,
+.summary-section__note {
+  width: 100%;
+  max-width: none;
+  font-size: var(--text-base);
+  line-height: 1.7;
+  color: var(--color-slate);
+  margin-bottom: var(--space-5);
+}
+
+.funder-ready-statement {
+  background: rgba(30, 107, 99, 0.04);
+  border: 1px solid rgba(30, 107, 99, 0.18);
+  border-left: 4px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  padding: var(--space-5);
+  color: var(--color-navy);
+  font-size: var(--text-base);
+  line-height: 1.7;
+  white-space: pre-line;
+  margin-bottom: var(--space-4);
+  max-width: 100%;
+  width: 100%;
+}
+
+.funder-ready-statement + .download-actions {
+  margin-top: 0;
 }
 
 /* Featured service result: gives the report's clearest insight a distinct visual anchor. */
@@ -954,6 +1017,7 @@ body {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
   padding: var(--space-6) var(--space-6) var(--space-5);
+  width: 100%;
 }
 
 .service-impact__box .summary-section__heading {
@@ -1134,16 +1198,35 @@ body {
 }
 
 /* References list: readable linked sources without default bullet indentation. */
+.summary-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.summary-detail-grid .summary-section {
+  margin-bottom: 0;
+}
+
+.summary-detail-grid .summary-section__heading {
+  margin-bottom: var(--space-3);
+}
+
 .references-list {
   list-style: none;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  width: 100%;
+  max-width: none;
 }
 
 .references-list li {
   font-size: var(--text-sm);
   color: var(--color-slate);
+  width: 100%;
+  line-height: 1.6;
 }
 
 .references-list a {
@@ -1156,9 +1239,16 @@ body {
 /* Download actions: stack export buttons so each has a full, easy-to-tap target. */
 .download-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-3);
   margin-bottom: var(--space-8);
+}
+
+.download-actions .btn {
+  width: auto;
+  min-width: 220px;
 }
 
 /* ---------------------------------------------------------
@@ -1224,6 +1314,7 @@ body {
     gap: var(--space-3);
   }
   .service-ranking__controls { align-self: flex-start; }
+  .summary-detail-grid { grid-template-columns: 1fr; }
 
   .progress-step__text { font-size: 0.65rem; }
 }

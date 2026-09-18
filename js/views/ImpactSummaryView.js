@@ -39,8 +39,13 @@ const ImpactSummaryView = (() => {
     if (summary.volunteerBreakdown.length > 0) {
       view.appendChild(_buildVolunteerRateSource());
     }
-    view.appendChild(_buildMethodologySection());
-    view.appendChild(_buildWaysToUseSection());
+
+    const detailGrid = document.createElement("div");
+    detailGrid.className = "summary-detail-grid";
+    detailGrid.appendChild(_buildMethodologySection());
+    detailGrid.appendChild(_buildWaysToUseSection());
+    view.appendChild(detailGrid);
+
     view.appendChild(_buildReferences());
     view.appendChild(_buildDownloadActions(summary));
 
@@ -167,15 +172,10 @@ const ImpactSummaryView = (() => {
     section.className = "summary-section";
 
     const townText = _buildFunderReadyText(summary);
-    const textarea = document.createElement("textarea");
-    textarea.readOnly = true;
-    textarea.rows = 5;
-    textarea.value = townText;
-    textarea.className = "funder-ready-statement";
-    textarea.setAttribute("aria-label", "Funder-ready impact statement");
-
-    const buttons = document.createElement("div");
-    buttons.className = "download-actions";
+    const statement = document.createElement("p");
+    statement.className = "funder-ready-statement";
+    statement.textContent = townText;
+    statement.setAttribute("aria-label", "Funder-ready impact statement");
 
     const copyButton = document.createElement("button");
     copyButton.type = "button";
@@ -186,36 +186,25 @@ const ImpactSummaryView = (() => {
         await navigator.clipboard.writeText(townText);
         copyButton.textContent = AppCopy.summary.copySuccess;
       } catch (error) {
-        textarea.focus();
-        textarea.select();
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(statement);
+        selection.removeAllRanges();
+        selection.addRange(range);
         document.execCommand("copy");
         copyButton.textContent = AppCopy.summary.copySuccess;
       }
     });
 
-    const donorButton = document.createElement("button");
-    donorButton.type = "button";
-    donorButton.className = "btn btn--secondary";
-    donorButton.textContent = AppCopy.summary.impactStatementButtonSecondary;
-    donorButton.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(townText);
-        donorButton.textContent = AppCopy.summary.copySuccess;
-      } catch (error) {
-        textarea.focus();
-        textarea.select();
-        document.execCommand("copy");
-        donorButton.textContent = AppCopy.summary.copySuccess;
-      }
-    });
-
-    buttons.append(copyButton, donorButton);
+    const buttonWrap = document.createElement("div");
+    buttonWrap.className = "download-actions";
+    buttonWrap.appendChild(copyButton);
 
     section.innerHTML = `
       <h2 class="summary-section__heading">${AppCopy.summary.funderReadyTitle}</h2>
     `;
-    section.appendChild(textarea);
-    section.appendChild(buttons);
+    section.appendChild(statement);
+    section.appendChild(buttonWrap);
     return section;
   }
 

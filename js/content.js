@@ -42,7 +42,7 @@ const AppCopy = (() => {
     eyebrow: "Clinic Impact Estimator",
     heading: "Show the value of your clinic’s work",
     intro: "Use your clinic’s aggregate service counts and volunteer hours to create a clear impact summary for a selected reporting period.",
-    description: "The estimator helps you communicate the estimated value of care, donated volunteer time, and reported clinic activity—without entering any patient information.",
+    description: "The estimator helps you communicate the estimated value of care, donated volunteer time, and reported clinic activity, without entering any patient information.",
     note: "Your completed summary can support grant applications, donor communications, board reports, and conversations about your clinic’s role in the community.",
     whatYouNeedTitle: "What you’ll need",
     list: [
