@@ -100,7 +100,7 @@ const AppCopy = (() => {
     estimatedPerService: "Estimated value per service",
     estimatedTotal: "Estimated total value",
     addLabel: "Add another service",
-    emptyState: "No services reported for this period",
+    emptyState: "No services to report for this period",
     next: "See impact summary",
     back: "Back",
   };
