@@ -11,28 +11,32 @@
   component from inventing its own slightly different version.
    --------------------------------------------------------- */
 :root {
-  /* Palette: page, surfaces, text, actions, status, and summary colors. */
-  --color-bg:            #F6F3EA;
-  --color-surface:       #FFFDF8;
-  --color-border:        #D8D2C3;
-  --color-border-focus:  #1E6B63;
+    /* Palette: Verdigris and Oxblood */
+--color-bg:             #EDEEE5;
+--color-surface:        #F8F8F1;
+--color-border:         #C9CEC0;
+--color-border-focus:   #176B63;
 
-  --color-navy:          #193832;        /* primary text */
-  --color-slate:         #536963;        /* secondary text */
-  --color-muted:         #7B8880;        /* placeholder / hint */
+--color-navy:           #172B2A;
+--color-slate:          #52615E;
+--color-muted:          #7D8983;
 
-  --color-accent:        #1E6B63;        /* forest teal — CTAs, links */
-  --color-accent-hover:  #15524C;
-  --color-impact:        #C65B38;        /* coral — impact totals */
-  --color-impact-bg:     #E1F0E7;        /* mint — impact summary surface */
+--color-accent:         #176B63;
+--color-accent-hover:   #0E504A;
+--color-impact:         #7F1D2D;
+--color-impact-bg:      #F0D8DC;
 
-  --color-error:         #B54842;
-  --color-error-bg:      #FCEAE4;
-  --color-success:       #397D5C;
+--color-error:          #A82235;
+--color-error-bg:       #F5E0E3;
+--color-success:        #34664B;
 
-  --color-step-done:     var(--color-success);
-  --color-step-active:   var(--color-impact);
-  --color-step-future:   #D8D2C3;
+--color-step-done:      var(--color-success);
+--color-step-active:    var(--color-impact);
+--color-step-future:    #C9CEC0;
+
+
+
+
 
   /* Typography: display is used for large results; body is used for controls. */
   --font-display:        'DM Serif Display', Georgia, serif;
@@ -217,6 +221,7 @@ body {
 
 .progress-step:hover .progress-step__text { color: var(--color-navy); }
 
+
 .progress-step__label-wrap {
   display: flex;
   flex-direction: column;
@@ -224,6 +229,8 @@ body {
   gap: var(--space-2);
   flex: 1;
 }
+
+.progress-step__dot:hover { color: var(--color-navy); }
 
 .progress-step__dot {
   /* Fixed dimensions keep the progress bar from shifting when a number becomes
@@ -498,7 +505,7 @@ body {
   font-family: var(--font-body);
   font-size: var(--text-base);
   color: var(--color-navy);
-  background: rgba(255,253,248,0.8);
+  background: white;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -651,7 +658,7 @@ body {
   grid-template-columns: minmax(0, 1fr) minmax(140px, 180px) auto;
   gap: var(--space-3);
   align-items: start;
-  background: rgba(255,253,248,0.82);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: var(--space-4);
@@ -1011,7 +1018,7 @@ body {
 .service-impact__box {
   position: relative;
   overflow: hidden;
-  background: var(--color-impact-bg);
+  background: var(--color-surface);
   border: 1px solid rgba(198,91,56,0.28);
   border-left: 6px solid var(--color-impact);
   border-radius: var(--radius-md);
