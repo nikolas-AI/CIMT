@@ -39,7 +39,9 @@ const EntryList = (() => {
   function create(config) {
     let entries = (config.entries && config.entries.length > 0)
       ? config.entries.map(e => ({ ...e }))
-      : [_newEntry()];
+      : config.allowEmpty
+        ? []
+        : [_newEntry()];
 
     // The component owns temporary row data while it is on screen. The parent
     // view receives a copy through onEntriesChange and stores the durable state.

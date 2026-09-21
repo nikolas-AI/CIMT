@@ -42,9 +42,9 @@ The experience should require minimal technical knowledge and should be usable b
 This specification covers the frontend experience for:
 
 1. Application introduction
-2. Clinic name input
-3. Volunteer-hours collection
-4. Clinical-service collection
+2. Clinic information input
+3. Impact method selection
+4. Method-specific activity collection
 5. Impact summary
 6. Calculation-result presentation
 7. Benchmark/rate explanation
@@ -142,31 +142,45 @@ The frontend should not contain one large component responsible for the entire a
 
 ## Application Flow
 
-The application consists of four primary views.
+The application consists of five primary views.
 
 #### View 1
-Clinic Information
+Welcome
 
        │ Next
 
        ▼
 
 #### View 2
-Volunteer Hours
+Clinic Information
 
        │ Next
 
        ▼
 
 #### View 3
-Clinical Services
+Impact Method
 
        │ Next
 
        ▼
        
 #### View 4
+Method-specific Activity
+
+  │ See Impact
+
+  ▼
+
+#### View 5
 Impact Summary
+
+After clinic information, the user selects exactly one impact method:
+
+- **Impact by Volunteer Hours:** collect medical-professional and non-medical volunteer hours.
+- **Impact by Clinical Services:** collect clinical service counts and optional non-medical volunteer hours. Medical-professional volunteer hours are not available in this method because the clinical benchmark already represents that labor.
+
+The selected method controls the activity form, calculation, summary labels, and exports. Switching methods requires confirmation and clears incompatible entries.
 
 The application should behave as a single-page application experience.
 
@@ -302,7 +316,7 @@ Clicking Next should:
 
 - Validate the clinic name.
 - Preserve the entered value in application state.
-- Transition to the Volunteer Hours view.
+- Transition to the Impact Method view.
 
 If validation fails, remain on the current view and display an inline error.
 
@@ -310,10 +324,12 @@ Example:
 
 - Please enter your clinic name.
 
-## View 2 — Volunteer Hours
+## View 3 — Impact Method and Activity
 ### 7.1 Purpose
 
-Collect the number of volunteer hours contributed by different volunteer roles.
+Let the user select one calculation method and enter only the activity supported by that method.
+
+The Volunteer Hours method collects medical-professional and non-medical volunteer hours. The Clinical Services method collects clinical service counts and optional non-medical volunteer hours. Medical-professional volunteer hours must not be offered in the Clinical Services method.
 
 ### 7.2 Heading
 
@@ -465,7 +481,7 @@ Validates the volunteer entries and transitions to View 3.
 
 No full-page navigation should occur.
 
-## View 3 — Clinical Services
+## View 4 — Method-specific Activity
 ### 8.1 Purpose
 
 Collect the number of patients/visits associated with each clinical service.
@@ -635,33 +651,33 @@ This disclaimer should remain visible on the summary and downloaded PDF.
 
 The summary should contain a breakdown of the major components.
 
-### 10.1 Volunteer Contribution Value
+### 10.1 Method-specific Impact Breakdown
 
-Display:
+When Impact by Volunteer Hours is selected, display only entered positive categories:
 
-Volunteer Contribution Value
+- Medical professional volunteer hours
+- Non-medical professional volunteer hours
+- Estimated volunteer impact
 
-Example:
+When Impact by Clinical Services is selected, display only entered positive categories:
 
-$45,000
+- Clinical services
+- Non-medical volunteer support
+- Estimated clinical impact
 
-Supporting information:
+The Clinical Services total is:
 
-Based on reported volunteer hours and applicable benchmark hourly values.
+```text
+clinical service value + non-medical volunteer value
+```
 
-### 10.2 Clinical Service Value
+The Volunteer Hours total is:
 
-Display:
+```text
+medical-professional volunteer value + non-medical volunteer value
+```
 
-Clinical Service Value
-
-Example:
-
-$405,000
-
-Supporting information:
-
-Based on reported service activity and applicable healthcare benchmark rates.
+Medical-professional volunteer value must never be added to the Clinical Services method because the PFS-based clinical valuation already includes the medical labor component.
 
 ### 10.3 Future Categories
 
@@ -671,15 +687,7 @@ Potential future category:
 
 Preventive Care Value
 
-Current total:
-
-> Clinical Service Value + Non-Medical Volunteer Value = Total Estimated Community Impact when both categories are reported
-
-When no services are reported, the total equals the full volunteer contribution value. When no volunteer hours are reported, the total equals clinical service value. Medical-professional volunteer value is excluded only when clinical services are also reported, because clinical service rates already represent that work.
-
-Potential future total:
-
-> Clinical Service Value + Non-Medical Volunteer Value + Preventive Care Value = Total Estimated Community Impact
+The selected method's total is labeled as estimated volunteer impact or estimated clinical impact. It is never presented as revenue, reimbursement, profit, or guaranteed savings.
 
 The Version 1 UI should support the architecture for this expansion even if only the first two categories are initially populated.
 
@@ -896,15 +904,19 @@ Clinic Name = "Community Hope Clinic"
   ↓
 
 #### View 2
-Volunteer Hours
-Physician = 100
-Nurse = 50
+Clinic Information
 
   ↓
 
 #### View 3
-Primary Care = 500
-Diabetes Screening = 100
+Impact by Volunteer Hours
+Physician = 100
+Administrative Volunteer = 50
+
+  ↓
+
+#### View 4
+Volunteer activity
 
 If the user clicks Back, their previous values must remain populated.
 
@@ -916,6 +928,8 @@ Conceptual structure:
 ```
 interface ClinicEstimatorState {
   clinic: ClinicInformation;
+
+  impactMethod: "volunteerHours" | "clinicalServices" | null;
 
   volunteers: VolunteerEntry[];
 
@@ -943,6 +957,10 @@ interface ClinicalServiceEntry {
   count: number;
 }
 ```
+
+The Clinical Services method may contain only non-medical volunteer entries.
+The Volunteer Hours method may contain both volunteer categories. A method
+change requires confirmation and clears incompatible entries.
 
 ## Component Architecture
 
@@ -1447,45 +1465,28 @@ Do not place mock benchmark values directly inside JSX/templates.
 
 The UI implementation should include tests for:
 
-1. Navigation
-2. View 1 → View 2
-3. View 2 → View 3
-4. View 3 → View 4
-5. Back navigation
-6. State preservation
-7. Forms
-8. Required-field validation
-9. Numeric validation
-10. Zero values
-11. Multiple volunteer roles
-12. Multiple clinical services
-13. Removing entries
-14. Duplicate prevention
-15. Summary
-16. Correct display of clinic name
-17. Correct display of provided calculation result
-18. Breakdown rendering
-19. Rate table rendering
-20. Reference rendering
-21. Downloads
-22. PDF action is triggered
-23. Excel action is triggered
-24. Loading states are displayed
-25. Errors are handled
-26. Accessibility
-27. Keyboard navigation
-28. Focus management
-29. Form labels
-30. Error announcements
-31. Heading structure
+1. Welcome -> Clinic -> Method -> Activity -> Impact navigation
+2. Method selection and required-method validation
+3. Back navigation and method-specific state preservation
+4. Volunteer Hours totals for medical-only, non-medical-only, and mixed entries
+5. Clinical Services totals for services-only, support-only, and combined entries
+6. Medical-role exclusion in Clinical Services
+7. Positive eligible activity validation
+8. Method switching confirmation and incompatible-entry clearing
+9. Numeric validation, removal, and duplicate prevention
+10. Method-specific summary component visibility
+11. Rate table and service-ranking visibility
+12. PDF and Excel method-specific exports
+13. Accessibility, keyboard navigation, focus management, and error announcements
 
 ## Definition of Done — Version 1 UI
 
 The frontend is considered complete when:
 
-- The application opens on the Clinic Information view.
-- The clinic name can be entered and validated.
-- Next transitions to the Volunteer Hours view without a full-page reload.
+- The application opens on the Welcome view.
+- Clinic information can be entered and validated.
+- The user can select exactly one impact method.
+- The Activity view exposes only inputs supported by that method.
 - Volunteer roles can be selected.
 - Volunteer hours can be entered.
 - Additional volunteer roles can be added.
@@ -1495,6 +1496,8 @@ The frontend is considered complete when:
 - Service counts can be entered.
 - Additional services can be added.
 - Service entries can be removed.
+- The summary labels and totals match the selected method.
+- Medical-professional volunteer value is never added to Clinical Services impact.
 - See Impact transitions to the summary.
 - The summary displays the clinic name.
 - The summary displays a prominent estimated total.

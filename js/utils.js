@@ -36,6 +36,13 @@ const Formatting = (() => {
 // VALIDATION
 // -----------------------------------------------------------------
 const Validation = (() => {
+  /** Validate the explicit impact calculation method. */
+  function impactMethod(value) {
+    return value === "volunteerHours" || value === "clinicalServices"
+      ? null
+      : AppCopy.validation.impactMethodRequired;
+  }
+
   /** Return an error message when the clinic name is blank, otherwise null. */
   function clinicName(value) {
     const trimmed = (value || "").trim();
@@ -126,7 +133,7 @@ const Validation = (() => {
     return null;
   }
 
-  return { clinicName, clinicAddressField, stateCode, zipCode, reportingPeriod, reportingPeriodClinicCost, volunteerEntry, serviceEntry };
+  return { impactMethod, clinicName, clinicAddressField, stateCode, zipCode, reportingPeriod, reportingPeriodClinicCost, volunteerEntry, serviceEntry };
 })();
 
 // -----------------------------------------------------------------

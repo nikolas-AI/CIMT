@@ -19,6 +19,7 @@ const AppCopy = (() => {
     serviceCountRequired: "Please enter the number of visits.",
     serviceCountNegative: "The count cannot be negative.",
     impactActivityRequired: "Report at least one clinical service or volunteer hour before viewing the impact summary.",
+    impactMethodRequired: "Choose an impact calculation method before continuing.",
   };
 
   const summary = {
@@ -32,6 +33,30 @@ const AppCopy = (() => {
     copySuccess: "Impact statement copied. Review it and tailor it to your organization’s voice and funding requirements.",
     impactStatementButton: "Copy impact statement",
     impactStatementButtonSecondary: "Copy for grant or donor use",
+  };
+
+  const impactMethod = {
+    ariaLabel: "Impact calculation method",
+    heading: "Choose how to calculate impact",
+    intro: "Select one method for this report. The two methods keep donated medical labor separate from clinical service valuation.",
+    legend: "Impact calculation method",
+    volunteerTitle: "Impact by Volunteer Hours",
+    volunteerDescription: "Estimate the replacement value of medical-professional and non-medical donated time.",
+    servicesTitle: "Impact by Clinical Services",
+    servicesDescription: "Estimate clinical services using benchmark rates, with optional non-medical volunteer support.",
+    switchWarning: "Changing the impact method will clear entries that do not apply to the new method. Continue?",
+    next: "Continue",
+  };
+
+  const impactActivity = {
+    ariaLabel: "Impact activity",
+    volunteerHeading: "Report volunteer hours",
+    volunteerIntro: "Enter donated hours by role. This method values medical-professional and non-medical volunteer time separately and adds both values together.",
+    servicesHeading: "Report clinical services",
+    servicesIntro: "Enter the clinical services provided during the reporting period. Clinical service values already include the medical labor represented by the benchmark rate.",
+    supportHeading: "Optional non-medical volunteer support",
+    supportIntro: "Add administrative or other support hours if they were donated separately from the clinical services. Medical-professional volunteer roles are not available in this method.",
+    next: "See impact summary",
   };
 
   const progress = {
@@ -136,27 +161,22 @@ const AppCopy = (() => {
       return "Your clinic’s estimated community impact";
     },
     periodText: (startDate, endDate) => `Reporting period: ${startDate || "Not specified"}–${endDate || "Not specified"}`,
-    narrative: (clinicName, serviceCount, volunteerHours, clinicalValue, volunteerValue, nonMedicalVolunteerValue, totalValue) => {
+    narrative: (impactMethod, clinicName, serviceCount, volunteerHours, clinicalValue, volunteerValue, nonMedicalVolunteerValue, totalValue) => {
       const name = clinicName || "Your clinic";
-      const serviceSentence = Number(serviceCount || 0) > 0
-        ? `During this reporting period, ${name} reported providing ${serviceCount} clinical services`
-        : `During this reporting period, ${name} reported no clinical services`;
-      const volunteerSentence = Number(volunteerHours || 0) > 0
-        ? ` and receiving ${volunteerHours} volunteer hours.`
-        : ".";
-
-      if (Number(volunteerHours || 0) > 0 && Number(serviceCount || 0) > 0) {
-        return `${serviceSentence}${volunteerSentence} Based on national benchmark rates, this activity represents an estimated total value of ${Formatting.currency(totalValue)}, including ${Formatting.currency(clinicalValue)} in reported clinical service value and ${Formatting.currency(nonMedicalVolunteerValue)} in non-medical volunteer value. Medical-professional volunteer value is not included in the estimated total as it is included in the clinical service value.`;
+      if (impactMethod === "volunteerHours") {
+        return `During this reporting period, ${name} reported ${volunteerHours} volunteer hours. Based on benchmark hourly rates, the estimated volunteer impact is ${Formatting.currency(totalValue)}.`;
       }
-
-      if (Number(volunteerHours || 0) > 0) {
-        return `During this reporting period, ${name} reported ${volunteerHours} volunteer hours, representing an estimated donated-time value of ${Formatting.currency(volunteerValue)} based on benchmark hourly rates. The estimated total includes ${Formatting.currency(nonMedicalVolunteerValue)} from non-medical volunteer roles.`;
+      const hasServices = Number(serviceCount || 0) > 0;
+      const hasSupport = Number(volunteerHours || 0) > 0;
+      if (hasServices && hasSupport) {
+        return `During this reporting period, ${name} reported ${serviceCount} clinical services and ${volunteerHours} hours of non-medical volunteer support. Based on national benchmark rates, the estimated clinical impact is ${Formatting.currency(totalValue)}, including ${Formatting.currency(clinicalValue)} in clinical service value and ${Formatting.currency(nonMedicalVolunteerValue)} in non-medical volunteer value.`;
       }
-
-      if (Number(serviceCount || 0) > 0) {
-        return `${serviceSentence}. Based on national benchmark rates, these services represent an estimated clinical service value of ${Formatting.currency(clinicalValue)}.`;
+      if (hasServices) {
+        return `During this reporting period, ${name} reported ${serviceCount} clinical services. Based on national benchmark rates, the estimated clinical impact is ${Formatting.currency(totalValue)}.`;
       }
-
+      if (hasSupport) {
+        return `During this reporting period, ${name} reported ${volunteerHours} hours of non-medical volunteer support. Based on benchmark hourly rates, the estimated clinical impact is ${Formatting.currency(totalValue)}.`;
+      }
       return summary.emptyState;
     },
     serviceNarrative: (serviceName, count, estimatedValue, share) => `The ${serviceName} service represented the largest share of reported clinical service value, with ${count} services and an estimated benchmark value of ${Formatting.currency(estimatedValue)}.`,
@@ -212,6 +232,8 @@ const AppCopy = (() => {
   return {
     app: { title: "Clinic Impact Estimator", headerContext: "Aggregate impact reporting" },
     validation,
+    impactMethod,
+    impactActivity,
     welcome,
     clinic,
     volunteer,

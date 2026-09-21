@@ -13,8 +13,8 @@ const ProgressIndicator = (() => {
   const STEPS = [
     { label: "Welcome",    index: 0 },
     { label: "Clinic",     index: 1 },
-    { label: "Volunteers", index: 2 },
-    { label: "Services",   index: 3 },
+    { label: "Method",     index: 2 },
+    { label: "Activity",   index: 3 },
     { label: "Impact",     index: 4 },
   ];
 

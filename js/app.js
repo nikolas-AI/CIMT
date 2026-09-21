@@ -21,17 +21,14 @@
     /** @type {{ name: string, streetAddress: string, city: string, state: string, zipCode: string, reportingPeriodFrom: string, reportingPeriodTo: string, reportingPeriodClinicCost: number|null }} */
     clinic: { name: "", streetAddress: "", city: "", state: "", zipCode: "", reportingPeriodFrom: "", reportingPeriodTo: "", reportingPeriodClinicCost: null },
 
+    /** @type {"volunteerHours"|"clinicalServices"|null} */
+    impactMethod: null,
+
     /** @type {Array<{ id: string, roleId: string, hours: number }>} */
     volunteers: [],
 
     /** @type {Array<{ id: string, serviceId: string, count: number }>} */
     services: [],
-
-    /** @type {boolean} */
-    noVolunteerHours: false,
-
-    /** @type {boolean} */
-    noServicesProvided: false,
 
     /** @type {ImpactSummary|null} */
     impact: null,
@@ -58,14 +55,14 @@
       return;
     }
 
-    if (step >= 4 && !_impactActivityComplete()) {
-      ProgressIndicator.showWarning(AppCopy.validation.impactActivityRequired);
-      return;
-    }
-
     const incompleteStep = _firstIncompleteStep(step);
     if (incompleteStep !== null) {
       ProgressIndicator.showWarning(AppCopy.progress.stepWarning(incompleteStep, step));
+      return;
+    }
+
+    if (step >= 4 && !_impactActivityComplete()) {
+      ProgressIndicator.showWarning(AppCopy.validation.impactActivityRequired);
       return;
     }
 
@@ -77,14 +74,13 @@
   function advance() { goTo(state.currentStep + 1); }
   function retreat() { goTo(state.currentStep - 1); }
 
-  // Start Over clears every answer and checkbox, then draws the first screen.
+  // Start Over clears every answer and method selection, then draws the first screen.
   // Replacing the arrays removes the old rows, not just their displayed text.
   function startOver() {
     state.clinic = { name: "", streetAddress: "", city: "", state: "", zipCode: "", reportingPeriodFrom: "", reportingPeriodTo: "", reportingPeriodClinicCost: null };
+    state.impactMethod = null;
     state.volunteers = [];
     state.services = [];
-    state.noVolunteerHours = false;
-    state.noServicesProvided = false;
     state.impact = null;
     goTo(0);
   }
@@ -108,11 +104,11 @@
         break;
 
       case 2:
-        VolunteerHoursView.render(state, { onBack: retreat, onNext: advance });
+        ImpactMethodView.render(state, { onBack: retreat, onNext: advance });
         break;
 
       case 3:
-        ClinicalServicesView.render(state, { onBack: retreat, onNext: _computeAndShowImpact });
+        ImpactActivityView.render(state, { onBack: retreat, onNext: _computeAndShowImpact });
         break;
 
       case 4:
@@ -129,8 +125,8 @@
 
   function _firstIncompleteStep(targetStep) {
     if (targetStep >= 2 && !_clinicDetailsComplete()) return 1;
-    if (targetStep >= 3 && !_volunteerDetailsComplete()) return 2;
-    if (targetStep >= 4 && !_serviceDetailsComplete()) return 3;
+    if (targetStep >= 3 && !_impactMethodComplete()) return 2;
+    if (targetStep >= 4 && !_activityDetailsComplete()) return 3;
     return null;
   }
 
@@ -144,26 +140,35 @@
       !Validation.reportingPeriodClinicCost(state.clinic.reportingPeriodClinicCost);
   }
 
-  function _volunteerDetailsComplete() {
-    if (state.noVolunteerHours) return true;
-    return state.volunteers.length > 0 && state.volunteers.every(entry =>
+  function _impactMethodComplete() {
+    return state.impactMethod === "volunteerHours" || state.impactMethod === "clinicalServices";
+  }
+
+  function _activityDetailsComplete() {
+    const volunteerEntries = state.impactMethod === "clinicalServices"
+      ? state.volunteers.filter(entry => {
+        const role = VOLUNTEER_ROLES.find(item => item.id === entry.roleId);
+        return role && role.category === "nonMedical";
+      })
+      : state.volunteers;
+    const volunteersValid = volunteerEntries.every(entry =>
       entry.roleId && Number.isFinite(Number(entry.hours)) && Number(entry.hours) >= 0 &&
       Number.isInteger(Number(entry.hours) * 2)
     );
-  }
-
-  function _serviceDetailsComplete() {
-    if (state.noServicesProvided) return true;
-    return state.services.length > 0 && state.services.every(entry =>
+    const servicesValid = state.services.every(entry =>
       entry.serviceId && Number.isFinite(Number(entry.count)) &&
       Number.isInteger(Number(entry.count)) && Number(entry.count) >= 0
     );
+    const hasVolunteerHours = volunteerEntries.some(entry => Number(entry.hours) > 0);
+    const hasServices = state.services.some(entry => Number(entry.count) > 0);
+    if (state.impactMethod === "volunteerHours") {
+      return volunteersValid && hasVolunteerHours;
+    }
+    return servicesValid && (hasServices || hasVolunteerHours);
   }
 
   function _impactActivityComplete() {
-    const hasVolunteerHours = !state.noVolunteerHours && state.volunteers.some(entry => Number(entry.hours) > 0);
-    const hasServices = !state.noServicesProvided && state.services.some(entry => Number(entry.count) > 0);
-    return hasVolunteerHours || hasServices;
+    return _activityDetailsComplete();
   }
 
   // -----------------------------------------------------------------

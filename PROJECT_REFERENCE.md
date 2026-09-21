@@ -1,7 +1,7 @@
 # Clinic Impact Estimator Project Reference
 
 **Status:** Living project document  
-**Last updated:** 2026-09-11  
+**Last updated:** 2026-09-21
 **Project type:** Browser-based static web application  
 **Primary objective:** Estimate and communicate a clinic's impact using aggregate, non-PHI data.
 
@@ -29,6 +29,8 @@ The application currently provides:
 - Optional total clinic cost input for the reporting period
 - Volunteer hours by role
 - Clinical service counts
+- Explicit impact method selection
+- Method-specific activity entry and summary calculations
 - Benchmark-based service valuation
 - Volunteer contribution valuation
 - Reporting-period clinic cost comparison
@@ -52,17 +54,24 @@ step that must be completed.
 
 ## Current Calculation Model
 
-The current calculator estimates:
+The user selects exactly one calculation method. The calculator never combines
+medical-professional volunteer value with PFS-based clinical service value.
 
 ```text
 Clinical service value = service count x benchmark rate
 
 Volunteer contribution value = volunteer hours x benchmark hourly rate
 
-Total estimated value =
-clinical service value + non-medical volunteer value, when both services and volunteer hours are reported
+Impact by Volunteer Hours:
+total volunteer impact = medical-professional volunteer value + non-medical volunteer value
 
-When no services are reported, total estimated value equals the full volunteer contribution value. When no volunteer hours are reported, total estimated value equals clinical service value. Medical-professional volunteer value is excluded only when clinical services are also reported, because clinical service rates already represent that work.
+Impact by Clinical Services:
+total clinical impact = clinical service value + non-medical volunteer value
+
+Medical-professional volunteer roles are unavailable in the Clinical Services
+method because the PFS-based clinical service valuation already represents the
+medical labor associated with those services. Non-medical support roles remain
+available because they are separate from the clinical service itself.
 
 Estimated value per $1 invested =
 total estimated value / total clinic cost for the reporting period
@@ -256,7 +265,7 @@ Every calculated result should identify:
 - Limitations
 - Whether the result is estimated or observed
 
-## Recommended Future Input Model
+## Current Input Model
 
 ```js
 {
@@ -270,6 +279,8 @@ Every calculated result should identify:
     reportingPeriodTo: "",
     reportingPeriodClinicCost: 0
   },
+
+  impactMethod: "volunteerHours" | "clinicalServices",
 
   volunteers: [
     {
@@ -294,6 +305,11 @@ Every calculated result should identify:
 }
 ```
 
+The workflow is Welcome -> Clinic -> Method -> Activity -> Impact. The Activity
+screen is conditional: Volunteer Hours exposes all volunteer roles, while
+Clinical Services exposes clinical services and optional non-medical volunteer
+support. Switching methods asks for confirmation and clears incompatible data.
+
 ## Recommended Future Output Model
 
 ```js
@@ -302,6 +318,7 @@ Every calculated result should identify:
   reportingPeriodFrom: "",
   reportingPeriodTo: "",
 
+  impactMethod: "volunteerHours",
   totalEstimatedValue: 0,
   volunteerValue: 0,
   nonMedicalVolunteerValue: 0,

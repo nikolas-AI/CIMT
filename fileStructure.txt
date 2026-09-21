@@ -13,9 +13,9 @@ clinic-impact-estimator/
     ├── views/
     │   ├── WelcomeView.js               # Step 1 — introduction and privacy scope
     │   ├── ClinicInformationView.js    # Step 2 — clinic details + cost
-    │   ├── VolunteerHoursView.js       # Step 3 — role + hours entries
-    │   ├── ClinicalServicesView.js     # Step 4 — service + visit count entries
-    │   └── ImpactSummaryView.js        # Step 5 — totals, tables, references
+    │   ├── ImpactMethodView.js         # Step 3 — choose the calculation method
+    │   ├── ImpactActivityView.js       # Step 4 — method-specific activity inputs
+    │   └── ImpactSummaryView.js        # Step 5 — method-specific totals, tables, references
     └── services/
         └── exportService.js            # PDF (print) + Excel (CSV) download stubs
 
@@ -27,8 +27,8 @@ clinic-impact-estimator/
     The user moves through five screens:
     1. Welcome: learn what the tool does and what information is needed.
     2. Clinic information: enter clinic details and reporting-period cost.
-    3. Volunteer hours: add volunteer roles and hours.
-    4. Clinical services: add services and visit counts.
+    3. Impact method: choose Volunteer Hours or Clinical Services.
+    4. Activity: enter only the inputs supported by the selected method.
     5. Impact summary: review the results and export them.
 
     FILE RESPONSIBILITIES

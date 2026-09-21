@@ -24,27 +24,38 @@ const Calculator = (() => {
   * @returns {ImpactSummary} Values ready for the summary screen or an export.
    */
   function computeImpact(state) {
-    // Checking "none" means that category counts as zero. The empty array also
-    // protects us if old rows are still present in memory for any reason.
-    const volunteerEntries = state.noVolunteerHours ? [] : (state.volunteers || []);
-    const serviceEntries   = state.noServicesProvided ? [] : (state.services || []);
+    const impactMethod = state.impactMethod;
+    if (impactMethod !== "volunteerHours" && impactMethod !== "clinicalServices") {
+      throw new Error("A valid impact method is required before calculating impact.");
+    }
+
+    // The method is the source of truth. Clinical Services may use only
+    // non-medical volunteer roles; medical volunteer time belongs exclusively
+    // to the Volunteer Hours method to avoid double-counting clinical labor.
+    const volunteerEntries = (state.volunteers || []).filter(entry => {
+      const role = VOLUNTEER_ROLES.find(item => item.id === entry.roleId);
+      return role && (impactMethod === "volunteerHours" || role.category === "nonMedical");
+    });
+    const serviceEntries = impactMethod === "clinicalServices" ? (state.services || []) : [];
 
     const volunteerBreakdown = _computeVolunteerBreakdown(volunteerEntries);
     const serviceBreakdown   = _computeServiceBreakdown(serviceEntries);
     const clinicalValue      = serviceBreakdown.reduce((sum, r) => sum + r.estimatedValue, 0);
-    const serviceImpactRanking = _rankServices(serviceBreakdown, clinicalValue);
+    const serviceImpactRanking = impactMethod === "clinicalServices"
+      ? _rankServices(serviceBreakdown, clinicalValue)
+      : { byValue: [], byVisits: [] };
     const mostImpactfulService = serviceImpactRanking.byValue[0] || null;
 
     const volunteerValue         = volunteerBreakdown.reduce((sum, r) => sum + r.estimatedValue, 0);
     const nonMedicalVolunteerValue = volunteerBreakdown
       .filter(row => row.category === "nonMedical")
       .reduce((sum, row) => sum + row.estimatedValue, 0);
-    const medicalProfessionalVolunteerValue = volunteerValue - nonMedicalVolunteerValue;
-    const hasServices            = serviceBreakdown.some(row => row.count > 0);
-    const hasVolunteerHours      = volunteerBreakdown.some(row => row.hours > 0);
-    const totalValue             = hasServices
-      ? clinicalValue + (hasVolunteerHours ? nonMedicalVolunteerValue : 0)
-      : (hasVolunteerHours ? volunteerValue : 0);
+    const medicalProfessionalVolunteerValue = impactMethod === "volunteerHours"
+      ? volunteerValue - nonMedicalVolunteerValue
+      : 0;
+    const totalValue = impactMethod === "volunteerHours"
+      ? volunteerValue
+      : clinicalValue + nonMedicalVolunteerValue;
     const clinicCost         = _optionalPositiveNumber(state.clinic.reportingPeriodClinicCost);
     const valueToCostRatio   = clinicCost > 0 ? totalValue / clinicCost : null;
     const benchmarkValueROI  = clinicCost > 0
@@ -53,6 +64,7 @@ const Calculator = (() => {
 
     /** @type {ImpactSummary} */
     return {
+      impactMethod:             impactMethod,
       clinicName:           state.clinic.name,
       streetAddress:        state.clinic.streetAddress,
       city:                 state.clinic.city,
@@ -61,7 +73,7 @@ const Calculator = (() => {
       reportingPeriodFrom:  state.clinic.reportingPeriodFrom,
       reportingPeriodTo:    state.clinic.reportingPeriodTo,
       totalEstimatedValue:  totalValue,
-      volunteerValue:       volunteerValue,
+      volunteerValue:       impactMethod === "volunteerHours" ? volunteerValue : nonMedicalVolunteerValue,
       nonMedicalVolunteerValue: nonMedicalVolunteerValue,
       medicalProfessionalVolunteerValue: medicalProfessionalVolunteerValue,
       clinicalServiceValue: clinicalValue,
@@ -169,6 +181,7 @@ const Calculator = (() => {
 
 /**
  * @typedef {Object} ImpactSummary
+ * @property {"volunteerHours"|"clinicalServices"} impactMethod
  * @property {string}  clinicName
  * @property {string}  streetAddress
  * @property {string}  city
