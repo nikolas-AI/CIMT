@@ -96,9 +96,6 @@ const ImpactSummaryView = (() => {
       summary.clinicName,
       _serviceCount(summary),
       _totalVolunteerHours(summary),
-      summary.clinicalServiceValue,
-      summary.volunteerValue,
-      summary.nonMedicalVolunteerValue,
       summary.totalEstimatedValue
     );
     return narrative;
@@ -146,9 +143,8 @@ const ImpactSummaryView = (() => {
     const section = document.createElement("div");
     section.className = "impact-breakdown";
     const hasServices = summary.impactMethod === "clinicalServices" && _hasReportedServices(summary);
-    const hasVolunteerHours = _totalVolunteerHours(summary) > 0;
+    const hasVolunteerHours = summary.impactMethod === "volunteerHours" && _totalVolunteerHours(summary) > 0;
     const hasMedicalVolunteerValue = summary.medicalProfessionalVolunteerValue > 0;
-    const hasNonMedicalVolunteerValue = summary.nonMedicalVolunteerValue > 0;
 
     const heading = document.createElement("h2");
     heading.className = "impact-breakdown__heading";
@@ -181,22 +177,13 @@ const ImpactSummaryView = (() => {
       ));
     }
 
-    if (summary.impactMethod === "clinicalServices" && hasNonMedicalVolunteerValue) {
-      section.appendChild(_buildCard(
-        "Non-medical volunteer support",
-        summary.nonMedicalVolunteerValue,
-        AppCopy.metric.estimatedNonMedicalVolunteerValueNote,
-        "volunteer"
-      ));
-    }
-
     if (hasServices || hasVolunteerHours) {
       section.appendChild(_buildCard(
         summary.impactMethod === "volunteerHours" ? "Estimated volunteer impact" : "Estimated clinical impact",
         summary.totalEstimatedValue,
         summary.impactMethod === "volunteerHours"
           ? "Estimated replacement value of reported medical and non-medical donated time."
-            : _totalValueNote(summary.impactMethod, hasServices, hasVolunteerHours),
+            : _totalValueNote(summary.impactMethod),
         "total"
       ));
     }
@@ -255,27 +242,16 @@ const ImpactSummaryView = (() => {
     const serviceCount = summary.impactMethod === "clinicalServices" ? _serviceCount(summary) : 0;
     const volunteerHours = _totalVolunteerHours(summary);
     const hasServices = serviceCount > 0;
-    const hasVolunteerHours = volunteerHours > 0;
     const totalText = `${Formatting.currency(summary.totalEstimatedValue)}`;
     const clinicalText = `${Formatting.currency(summary.clinicalServiceValue)}`;
-    const volunteerText = `${Formatting.currency(summary.volunteerValue)}`;
-    const nonMedicalVolunteerText = `${Formatting.currency(summary.nonMedicalVolunteerValue)}`;
     const periodLabel = `${_formatDate(summary.reportingPeriodFrom)} to ${_formatDate(summary.reportingPeriodTo)}`;
     const topService = summary.mostImpactfulService ? summary.mostImpactfulService.serviceName : "";
     const topServiceShare = summary.mostImpactfulService?.clinicalValueShare || 0;
     if (summary.impactMethod === "volunteerHours") {
       return `During ${periodLabel}, ${clinicName} reported ${volunteerHours} donated volunteer hours. Using benchmark hourly rates, the estimated volunteer impact was ${totalText}.`;
     }
-    const activityText = hasServices && hasVolunteerHours
-      ? `${clinicName} reported delivering ${serviceCount} clinical services and receiving ${volunteerHours} hours of non-medical volunteer support.`
-      : hasServices
-        ? `${clinicName} reported delivering ${serviceCount} clinical services.`
-        : `${clinicName} reported ${volunteerHours} hours of non-medical volunteer support.`;
-    const valueText = hasServices && hasVolunteerHours
-      ? `including ${clinicalText} in estimated clinical service value and ${nonMedicalVolunteerText} in non-medical volunteer value.`
-      : hasServices
-        ? `reflecting ${clinicalText} in estimated clinical service value.`
-        : `reflecting ${nonMedicalVolunteerText} in non-medical volunteer value.`;
+    const activityText = `${clinicName} reported delivering ${serviceCount} clinical services.`;
+    const valueText = `reflecting ${clinicalText} in estimated clinical service value.`;
     const serviceText = hasServices
       ? ` The standout service was ${topService}, contributing ${Formatting.number(topServiceShare, 1)}% of the clinic’s estimated clinical service value.`
       : "";
@@ -293,12 +269,8 @@ const ImpactSummaryView = (() => {
     return card;
   }
 
-  function _totalValueNote(impactMethod, hasServices, hasVolunteerHours) {
-    if (impactMethod === "clinicalServices" && hasServices && hasVolunteerHours) return AppCopy.metric.totalEstimatedValueNote;
-    if (impactMethod === "clinicalServices" && hasServices) return AppCopy.metric.totalEstimatedValueServicesOnlyNote;
-    if (impactMethod === "clinicalServices") return "Estimated replacement value of reported non-medical volunteer support.";
-    if (hasServices && hasVolunteerHours) return AppCopy.metric.totalEstimatedValueNote;
-    if (hasServices) return AppCopy.metric.totalEstimatedValueServicesOnlyNote;
+  function _totalValueNote(impactMethod) {
+    if (impactMethod === "clinicalServices") return AppCopy.metric.totalEstimatedValueServicesOnlyNote;
     return AppCopy.metric.totalEstimatedValueVolunteerOnlyNote;
   }
 

@@ -29,13 +29,9 @@ const Calculator = (() => {
       throw new Error("A valid impact method is required before calculating impact.");
     }
 
-    // The method is the source of truth. Clinical Services may use only
-    // non-medical volunteer roles; medical volunteer time belongs exclusively
-    // to the Volunteer Hours method to avoid double-counting clinical labor.
-    const volunteerEntries = (state.volunteers || []).filter(entry => {
-      const role = VOLUNTEER_ROLES.find(item => item.id === entry.roleId);
-      return role && (impactMethod === "volunteerHours" || role.category === "nonMedical");
-    });
+    // The method is the source of truth. Clinical Services has no volunteer
+    // input because its benchmark value covers the clinical service only.
+    const volunteerEntries = impactMethod === "volunteerHours" ? (state.volunteers || []) : [];
     const serviceEntries = impactMethod === "clinicalServices" ? (state.services || []) : [];
 
     const volunteerBreakdown = _computeVolunteerBreakdown(volunteerEntries);
@@ -53,9 +49,7 @@ const Calculator = (() => {
     const medicalProfessionalVolunteerValue = impactMethod === "volunteerHours"
       ? volunteerValue - nonMedicalVolunteerValue
       : 0;
-    const totalValue = impactMethod === "volunteerHours"
-      ? volunteerValue
-      : clinicalValue + nonMedicalVolunteerValue;
+    const totalValue = impactMethod === "volunteerHours" ? volunteerValue : clinicalValue;
     const clinicCost         = _optionalPositiveNumber(state.clinic.reportingPeriodClinicCost);
     const valueToCostRatio   = clinicCost > 0 ? totalValue / clinicCost : null;
     const benchmarkValueROI  = clinicCost > 0
@@ -73,7 +67,7 @@ const Calculator = (() => {
       reportingPeriodFrom:  state.clinic.reportingPeriodFrom,
       reportingPeriodTo:    state.clinic.reportingPeriodTo,
       totalEstimatedValue:  totalValue,
-      volunteerValue:       impactMethod === "volunteerHours" ? volunteerValue : nonMedicalVolunteerValue,
+      volunteerValue:       volunteerValue,
       nonMedicalVolunteerValue: nonMedicalVolunteerValue,
       medicalProfessionalVolunteerValue: medicalProfessionalVolunteerValue,
       clinicalServiceValue: clinicalValue,

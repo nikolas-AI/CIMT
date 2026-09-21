@@ -390,13 +390,6 @@ body {
   font-size: var(--text-base);
 }
 
-.activity-subheading {
-  margin: var(--space-8) 0 var(--space-2);
-  color: var(--color-navy);
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-}
-
 /* ---------------------------------------------------------
   WELCOME VIEW
   The opening screen explains the purpose and boundaries of the estimator

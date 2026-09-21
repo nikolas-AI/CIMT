@@ -64,10 +64,7 @@ const ImpactMethodView = (() => {
     if (method === "volunteerHours") {
       state.services = [];
     } else {
-      state.volunteers = (state.volunteers || []).filter(entry => {
-        const role = VOLUNTEER_ROLES.find(item => item.id === entry.roleId);
-        return role && role.category === "nonMedical";
-      });
+      state.volunteers = [];
     }
     state.impactMethod = method;
     state.impact = null;

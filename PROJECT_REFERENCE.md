@@ -66,12 +66,12 @@ Impact by Volunteer Hours:
 total volunteer impact = medical-professional volunteer value + non-medical volunteer value
 
 Impact by Clinical Services:
-total clinical impact = clinical service value + non-medical volunteer value
+total clinical impact = clinical service value
 
 Medical-professional volunteer roles are unavailable in the Clinical Services
 method because the PFS-based clinical service valuation already represents the
-medical labor associated with those services. Non-medical support roles remain
-available because they are separate from the clinical service itself.
+medical labor associated with those services. Volunteer hours are therefore not
+collected in this method.
 
 Estimated value per $1 invested =
 total estimated value / total clinic cost for the reporting period
@@ -307,8 +307,8 @@ Every calculated result should identify:
 
 The workflow is Welcome -> Clinic -> Method -> Activity -> Impact. The Activity
 screen is conditional: Volunteer Hours exposes all volunteer roles, while
-Clinical Services exposes clinical services and optional non-medical volunteer
-support. Switching methods asks for confirmation and clears incompatible data.
+Clinical Services exposes clinical services only. Switching methods asks for
+confirmation and clears incompatible data.
 
 ## Recommended Future Output Model
 

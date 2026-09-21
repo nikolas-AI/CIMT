@@ -178,7 +178,7 @@ Impact Summary
 After clinic information, the user selects exactly one impact method:
 
 - **Impact by Volunteer Hours:** collect medical-professional and non-medical volunteer hours.
-- **Impact by Clinical Services:** collect clinical service counts and optional non-medical volunteer hours. Medical-professional volunteer hours are not available in this method because the clinical benchmark already represents that labor.
+- **Impact by Clinical Services:** collect clinical service counts only. Volunteer hours are not part of this method because the clinical benchmark represents the selected service valuation.
 
 The selected method controls the activity form, calculation, summary labels, and exports. Switching methods requires confirmation and clears incompatible entries.
 
@@ -329,7 +329,7 @@ Example:
 
 Let the user select one calculation method and enter only the activity supported by that method.
 
-The Volunteer Hours method collects medical-professional and non-medical volunteer hours. The Clinical Services method collects clinical service counts and optional non-medical volunteer hours. Medical-professional volunteer hours must not be offered in the Clinical Services method.
+The Volunteer Hours method collects medical-professional and non-medical volunteer hours. The Clinical Services method collects clinical service counts only.
 
 ### 7.2 Heading
 
@@ -662,13 +662,12 @@ When Impact by Volunteer Hours is selected, display only entered positive catego
 When Impact by Clinical Services is selected, display only entered positive categories:
 
 - Clinical services
-- Non-medical volunteer support
 - Estimated clinical impact
 
 The Clinical Services total is:
 
 ```text
-clinical service value + non-medical volunteer value
+clinical service value
 ```
 
 The Volunteer Hours total is:
@@ -958,9 +957,9 @@ interface ClinicalServiceEntry {
 }
 ```
 
-The Clinical Services method may contain only non-medical volunteer entries.
-The Volunteer Hours method may contain both volunteer categories. A method
-change requires confirmation and clears incompatible entries.
+The Clinical Services method contains only clinical service entries. The
+Volunteer Hours method may contain both volunteer categories. A method change
+requires confirmation and clears incompatible entries.
 
 ## Component Architecture
 

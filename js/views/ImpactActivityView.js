@@ -1,7 +1,6 @@
 "use strict";
 
 const ImpactActivityView = (() => {
-  let _volunteerList = null;
   let _serviceList = null;
 
   function render(state, { onBack, onNext }) {
@@ -21,21 +20,11 @@ const ImpactActivityView = (() => {
 
     const fields = view.querySelector("#impact-activity-fields");
     if (isVolunteerMethod) {
-      _volunteerList = _createVolunteerList(state, VOLUNTEER_ROLES.filter(role => role.active));
-      fields.appendChild(_volunteerList);
+      const volunteerList = _createVolunteerList(state, VOLUNTEER_ROLES.filter(role => role.active));
+      fields.appendChild(volunteerList);
     } else {
       _serviceList = _createServiceList(state);
       fields.appendChild(_serviceList);
-      const supportHeading = document.createElement("h2");
-      supportHeading.className = "activity-subheading";
-      supportHeading.textContent = AppCopy.impactActivity.supportHeading;
-      fields.appendChild(supportHeading);
-      const supportIntro = document.createElement("p");
-      supportIntro.className = "field__help";
-      supportIntro.textContent = AppCopy.impactActivity.supportIntro;
-      fields.appendChild(supportIntro);
-      _volunteerList = _createVolunteerList(state, VOLUNTEER_ROLES.filter(role => role.active && role.category === "nonMedical"));
-      fields.appendChild(_volunteerList);
     }
 
     view.appendChild(NavigationButtons.create({
@@ -57,7 +46,6 @@ const ImpactActivityView = (() => {
       countStep: 0.5,
       addLabel: AppCopy.volunteer.addLabel,
       allowDuplicates: false,
-      allowEmpty: options.every(role => role.category === "nonMedical") && state.impactMethod === "clinicalServices",
       entries: (state.volunteers || []).map(entry => ({
         id: entry.id || _uid(),
         selectValue: entry.roleId || "",
@@ -101,16 +89,24 @@ const ImpactActivityView = (() => {
   }
 
   function _handleNext(state, onNext) {
-    const volunteerErrors = _volunteerList ? _volunteerList.validate() : [];
     const serviceErrors = _serviceList ? _serviceList.validate() : [];
-    if (volunteerErrors.length > 0 || serviceErrors.length > 0) {
+    if (state.impactMethod === "volunteerHours") {
+      const volunteerList = document.querySelector(".entry-list-wrapper");
+      const volunteerErrors = volunteerList ? volunteerList.validate() : [];
+      if (volunteerErrors.length > 0) {
+        const firstBad = document.querySelector(".is-error");
+        if (firstBad) firstBad.focus();
+        return;
+      }
+    }
+    if (serviceErrors.length > 0) {
       const firstBad = document.querySelector(".is-error");
       if (firstBad) firstBad.focus();
       return;
     }
-    const hasVolunteerHours = (state.volunteers || []).some(entry => Number(entry.hours) > 0);
     const hasServices = (state.services || []).some(entry => Number(entry.count) > 0);
-    if (state.impactMethod === "volunteerHours" ? !hasVolunteerHours : !hasServices && !hasVolunteerHours) {
+    const hasVolunteerHours = (state.volunteers || []).some(entry => Number(entry.hours) > 0);
+    if (state.impactMethod === "volunteerHours" ? !hasVolunteerHours : !hasServices) {
       ProgressIndicator.showWarning(AppCopy.validation.impactActivityRequired);
       return;
     }

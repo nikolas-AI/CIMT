@@ -145,13 +145,7 @@
   }
 
   function _activityDetailsComplete() {
-    const volunteerEntries = state.impactMethod === "clinicalServices"
-      ? state.volunteers.filter(entry => {
-        const role = VOLUNTEER_ROLES.find(item => item.id === entry.roleId);
-        return role && role.category === "nonMedical";
-      })
-      : state.volunteers;
-    const volunteersValid = volunteerEntries.every(entry =>
+    const volunteersValid = state.volunteers.every(entry =>
       entry.roleId && Number.isFinite(Number(entry.hours)) && Number(entry.hours) >= 0 &&
       Number.isInteger(Number(entry.hours) * 2)
     );
@@ -159,12 +153,12 @@
       entry.serviceId && Number.isFinite(Number(entry.count)) &&
       Number.isInteger(Number(entry.count)) && Number(entry.count) >= 0
     );
-    const hasVolunteerHours = volunteerEntries.some(entry => Number(entry.hours) > 0);
+    const hasVolunteerHours = state.volunteers.some(entry => Number(entry.hours) > 0);
     const hasServices = state.services.some(entry => Number(entry.count) > 0);
     if (state.impactMethod === "volunteerHours") {
       return volunteersValid && hasVolunteerHours;
     }
-    return servicesValid && (hasServices || hasVolunteerHours);
+    return servicesValid && hasServices;
   }
 
   function _impactActivityComplete() {

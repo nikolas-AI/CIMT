@@ -54,7 +54,10 @@ const ExportService = (() => {
     ];
     const totalEstimatedValueRow = rows.length;
     rows.push(["Total Estimated Value", summary.totalEstimatedValue]);
-    rows.push(["Non-Medical Volunteer Value Included", summary.nonMedicalVolunteerValue]);
+    if (summary.impactMethod === "volunteerHours") {
+      rows.push(["Medical Professional Volunteer Value", summary.medicalProfessionalVolunteerValue]);
+      rows.push(["Non-Medical Volunteer Value", summary.nonMedicalVolunteerValue]);
+    }
     rows.push([]);
     let budgetSectionRow = null;
     let budgetRows = [];
@@ -65,7 +68,6 @@ const ExportService = (() => {
         ["Reported Clinic Cost", summary.reportingPeriodClinicCost],
         ["Reporting Period Days", summary.reportingPeriodDays],
         ["Estimated Total Value", summary.totalEstimatedValue],
-        ["Non-Medical Volunteer Value Included", summary.nonMedicalVolunteerValue],
         ["Estimated Benchmark Value per $1 of Reported Clinic Cost", summary.valueToCostRatio],
         ["Benchmark-Value Comparison (%)", summary.benchmarkValueROI],
       ];
@@ -105,31 +107,38 @@ const ExportService = (() => {
       visitRankingEndRow = rows.length;
     }
     rows.push([]);
-    const clinicalSectionRow = rows.length;
-    rows.push(["Clinical Services"]);
-    const clinicalHeaderRow = summary.impactMethod === "clinicalServices" ? rows.length : null;
+    let clinicalSectionRow = null;
+    let clinicalHeaderRow = null;
+    let clinicalTotalRow = null;
     if (summary.impactMethod === "clinicalServices") {
+      clinicalSectionRow = rows.length;
+      rows.push(["Clinical Services"]);
+      clinicalHeaderRow = rows.length;
       rows.push(["Service", "CPT/HCPCS Code", "Reported Service Count", "Benchmark Rate", "Estimated Benchmark Value"]);
       rows.push(...summary.serviceBreakdown.map(row => [
           row.serviceName, row.code, row.count, row.benchmarkRate, row.estimatedValue,
         ]));
-    } else {
-      rows.push(["Not applicable for Impact by Volunteer Hours."]);
+      clinicalTotalRow = rows.length;
+      rows.push(["", "", "", "Clinical Total", summary.clinicalServiceValue]);
     }
-    const clinicalTotalRow = rows.length;
-    rows.push(["", "", "", "Clinical Total", summary.clinicalServiceValue]);
     rows.push([]);
-    const volunteerSectionRow = rows.length;
-    rows.push(["Volunteer Contributions"]);
-    const volunteerHeaderRow = rows.length;
-    rows.push(["Role", "Category", "Volunteer Hours", "Benchmark Rate / Hour", "Estimated Volunteer Contribution Value"]);
-    rows.push(...summary.volunteerBreakdown.map(row => [
-        row.roleName, row.category, row.hours, row.benchmarkRate, row.estimatedValue,
-      ]));
-    const volunteerTotalRow = rows.length;
-    rows.push(["", "", "", summary.impactMethod === "volunteerHours" ? "Estimated Volunteer Impact" : "Non-Medical Volunteer Support", summary.volunteerValue]);
-    const nonMedicalVolunteerTotalRow = rows.length;
-    rows.push(["", "", "", "Non-Medical Volunteer Value Included", summary.nonMedicalVolunteerValue]);
+    let volunteerSectionRow = null;
+    let volunteerHeaderRow = null;
+    let volunteerTotalRow = null;
+    let nonMedicalVolunteerTotalRow = null;
+    if (summary.impactMethod === "volunteerHours") {
+      volunteerSectionRow = rows.length;
+      rows.push(["Volunteer Contributions"]);
+      volunteerHeaderRow = rows.length;
+      rows.push(["Role", "Category", "Volunteer Hours", "Benchmark Rate / Hour", "Estimated Volunteer Contribution Value"]);
+      rows.push(...summary.volunteerBreakdown.map(row => [
+          row.roleName, row.category, row.hours, row.benchmarkRate, row.estimatedValue,
+        ]));
+      volunteerTotalRow = rows.length;
+      rows.push(["", "", "", "Estimated Volunteer Impact", summary.volunteerValue]);
+      nonMedicalVolunteerTotalRow = rows.length;
+      rows.push(["", "", "", "Non-Medical Volunteer Value", summary.nonMedicalVolunteerValue]);
+    }
     rows.push([]);
     const disclaimerSectionRow = rows.length;
     rows.push(["Disclaimer"]);
@@ -145,15 +154,14 @@ const ExportService = (() => {
       : null;
     sheet["!merges"] = [
       ...[0, ...(budgetSectionRow === null ? [] : [budgetSectionRow]), ...(serviceImpactSectionRow === null ? [] : [serviceImpactSectionRow]),
-        ...(valueRankingSectionRow === null ? [] : [valueRankingSectionRow]), ...(visitRankingSectionRow === null ? [] : [visitRankingSectionRow]), clinicalSectionRow, volunteerSectionRow,
+        ...(valueRankingSectionRow === null ? [] : [valueRankingSectionRow]), ...(visitRankingSectionRow === null ? [] : [visitRankingSectionRow]), ...(clinicalSectionRow === null ? [] : [clinicalSectionRow]), ...(volunteerSectionRow === null ? [] : [volunteerSectionRow]),
         disclaimerSectionRow, disclaimerRow]
         .map(row => ({ s: { r: row, c: 0 }, e: { r: row, c: 4 } })),
     ];
 
     const boldRows = [0, ...(serviceImpactSectionRow === null ? [] : [serviceImpactSectionRow]), ...(valueRankingSectionRow === null ? [] : [valueRankingSectionRow, valueRankingHeaderRow]),
-      ...(visitRankingSectionRow === null ? [] : [visitRankingSectionRow, visitRankingHeaderRow]), clinicalSectionRow, ...(clinicalHeaderRow === null ? [] : [clinicalHeaderRow]),
-      clinicalTotalRow, volunteerSectionRow, volunteerHeaderRow, volunteerTotalRow,
-      nonMedicalVolunteerTotalRow, disclaimerSectionRow];
+      ...(visitRankingSectionRow === null ? [] : [visitRankingSectionRow, visitRankingHeaderRow]), ...(clinicalSectionRow === null ? [] : [clinicalSectionRow]), ...(clinicalHeaderRow === null ? [] : [clinicalHeaderRow, clinicalTotalRow]),
+      ...(volunteerSectionRow === null ? [] : [volunteerSectionRow, volunteerHeaderRow, volunteerTotalRow, nonMedicalVolunteerTotalRow]), disclaimerSectionRow];
     if (budgetSectionRow !== null) boldRows.push(budgetSectionRow);
     const styleRow = (rowIndex, style) => {
       for (let columnIndex = 0; columnIndex < 5; columnIndex += 1) {
@@ -185,7 +193,6 @@ const ExportService = (() => {
     if (budgetSectionRow !== null) {
       formatCurrency(budgetSectionRow + 1, 1);
       formatCurrency(budgetSectionRow + 3, 1);
-      formatCurrency(budgetSectionRow + 4, 1);
     }
     for (const [headerRow, endRow] of [
       ...(valueRankingHeaderRow === null ? [] : [[valueRankingHeaderRow, valueRankingEndRow]]),
@@ -200,15 +207,17 @@ const ExportService = (() => {
         formatCurrency(rowIndex, 3);
         formatCurrency(rowIndex, 4);
       }
+      formatCurrency(clinicalTotalRow, 4);
     }
-    formatCurrency(clinicalTotalRow, 4);
-    for (let rowIndex = volunteerHeaderRow + 1; rowIndex < volunteerTotalRow; rowIndex += 1) {
-      formatCurrency(rowIndex, 2);
-      formatCurrency(rowIndex, 3);
-      formatCurrency(rowIndex, 4);
+    if (volunteerHeaderRow !== null) {
+      for (let rowIndex = volunteerHeaderRow + 1; rowIndex < volunteerTotalRow; rowIndex += 1) {
+        formatCurrency(rowIndex, 2);
+        formatCurrency(rowIndex, 3);
+        formatCurrency(rowIndex, 4);
+      }
+      formatCurrency(volunteerTotalRow, 4);
+      formatCurrency(nonMedicalVolunteerTotalRow, 4);
     }
-    formatCurrency(volunteerTotalRow, 4);
-    formatCurrency(nonMedicalVolunteerTotalRow, 4);
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, sheet, AppCopy.exportCopy.workbookSummary);
@@ -353,9 +362,9 @@ ${serviceRankingHTML}
 ${summary.impactMethod === "clinicalServices" ? `<h2>Clinical Services</h2>
 <table><thead><tr><th>Service</th><th>Code</th><th style="text-align:right">Reported count</th><th style="text-align:right">Benchmark rate</th><th style="text-align:right">Estimated benchmark value</th></tr></thead>
 <tbody>${svcRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Clinical total</th><th style="text-align:right">${_fmt(summary.clinicalServiceValue)}</th></tr></tfoot></table>` : ""}
-<h2>Volunteer Contributions</h2>
+${summary.impactMethod === "volunteerHours" ? `<h2>Volunteer Contributions</h2>
 <table><thead><tr><th>Role</th><th>Category</th><th style="text-align:right">Volunteer hours</th><th style="text-align:right">Benchmark rate / hour</th><th style="text-align:right">Estimated contribution value</th></tr></thead>
-<tbody>${volRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">${summary.impactMethod === "volunteerHours" ? "Estimated volunteer impact" : "Non-medical volunteer support"}</th><th style="text-align:right">${_fmt(summary.volunteerValue)}</th></tr></tfoot></table>
+<tbody>${volRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Estimated volunteer impact</th><th style="text-align:right">${_fmt(summary.volunteerValue)}</th></tr></tfoot></table>` : ""}
 <h2>Sources and references</h2>
 <ul style="font-size:0.85em;color:#475C8A;padding-left:20px">
   ${referenceItems}
