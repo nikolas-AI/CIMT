@@ -6,6 +6,7 @@ const ImpactActivityView = (() => {
   function render(state, { onBack, onNext }) {
     const container = document.getElementById("view-container");
     container.innerHTML = "";
+    _serviceList = null;
     const isVolunteerMethod = state.impactMethod === "volunteerHours";
 
     const view = document.createElement("div");
@@ -71,7 +72,6 @@ const ImpactActivityView = (() => {
       countStep: 1,
       addLabel: AppCopy.services.addLabel,
       allowDuplicates: false,
-      allowEmpty: state.impactMethod === "clinicalServices",
       searchable: true,
       entries: (state.services || []).map(entry => ({
         id: entry.id || _uid(),

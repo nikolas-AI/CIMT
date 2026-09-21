@@ -145,6 +145,7 @@ const ImpactSummaryView = (() => {
     const hasServices = summary.impactMethod === "clinicalServices" && _hasReportedServices(summary);
     const hasVolunteerHours = summary.impactMethod === "volunteerHours" && _totalVolunteerHours(summary) > 0;
     const hasMedicalVolunteerValue = summary.medicalProfessionalVolunteerValue > 0;
+    const hasNonMedicalVolunteerValue = summary.nonMedicalVolunteerValue > 0;
 
     const heading = document.createElement("h2");
     heading.className = "impact-breakdown__heading";
@@ -168,13 +169,6 @@ const ImpactSummaryView = (() => {
           "volunteer"
         ));
       }
-    } else if (hasServices) {
-      section.appendChild(_buildCard(
-        "Clinical services",
-        summary.clinicalServiceValue,
-        AppCopy.metric.estimatedClinicalServiceValueNote,
-        "clinical"
-      ));
     }
 
     if (hasServices || hasVolunteerHours) {
