@@ -34,7 +34,7 @@ const ClinicInformationView = (() => {
       <p class="view-intro">${AppCopy.clinic.intro}</p>
 
       <div class="view-disclaimer" role="note">
-        <strong>Why this matters:</strong> ${AppCopy.clinic.disclaimer}
+         ${AppCopy.clinic.disclaimer}
       </div>
 
       <section class="clinic-snapshot" aria-labelledby="clinic-snapshot-heading">

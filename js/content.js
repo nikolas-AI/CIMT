@@ -25,7 +25,7 @@ const AppCopy = (() => {
   const summary = {
     emptyState: "Enter services provided or volunteer hours donated to create a summary for this reporting period.",
     fiShortDisclaimer: "Important: Dollar amounts are estimates based on reported totals and reference rates. They are not revenue, payments, profit, or confirmed savings.",
-    methodologyNote: "Service totals are multiplied by reference rates. Volunteer hours are multiplied by reference hourly rates. The rates are national estimates and are not adjusted for your ZIP code. No patient information is needed.",
+    methodologyNote: "Reported service counts are multiplied by reference rates. Volunteer hours are multiplied by reference hourly rates. The rates are national estimates and are not adjusted for your ZIP code.",
     shortDisclaimer: "Important: This is an estimate of service and volunteer value provided by the clinic. It is not revenue, payment, profit, or confirmed savings.",
     costComparisonNote: "Important: This compares your reported clinic cost with the estimated value provied by your clinic. It is not financial return, revenue, profit, or confirmed healthcare savings.",
     rankingNote: "The list shows which reported services have the highest estimated value. It does not show care quality, patient need, payments, or actual savings.",
@@ -36,10 +36,10 @@ const AppCopy = (() => {
   };
 
   const impactMethod = {
-    ariaLabel: "Calculation option",
-    heading: "Choose a calculation option",
-    intro: "Choose how you want to estimate value for this report.",
-    legend: "Calculation option",
+    ariaLabel: "Impact calculation method",
+    heading: "Choose how to calculate the impact of your clinic",
+    intro: "Choose how you want to estimate the value provided by your clinic for this report.",
+    legend: "Calculation method",
     volunteerTitle: "Volunteer hours",
     volunteerDescription: "Estimate the value of donated time by volunteer role.",
     servicesTitle: "Clinical services",
@@ -65,8 +65,8 @@ const AppCopy = (() => {
   const welcome = {
     eyebrow: "Clinic Impact Estimator",
     heading: "Show the value of your clinic’s work",
-    intro: "Use service totals and volunteer hours to create a clear summary for a selected reporting period.",
-    description: "The tool estimates the value of care and donated time without asking for patient information.",
+    intro: "Use your clinic’s total service counts and volunteer hours to create a clear impact summary for a selected reporting period.",
+    description: "The estimator helps you communicate the estimated value of care, donated volunteer time, and reported clinic activity, without entering any patient information. Your completed summary can support grant applications, donor communications, board reports, and conversations about your clinic’s role in the community.",
     note: "Use the summary for grant applications, donor updates, board reports, and community conversations.",
     whatYouNeedTitle: "What you’ll need",
     list: [
@@ -83,10 +83,10 @@ const AppCopy = (() => {
   const clinic = {
     ariaLabel: "Clinic Information",
     heading: "Clinic information",
-    intro: "Your clinic details and reporting period identify the report. Reference rates are national estimates and are not adjusted by ZIP code.",
-    disclaimer: "Important: Adding your clinic cost lets the report compare that cost with an estimated value. This is a comparison, not actual financial return or confirmed savings.",
+    intro: "Your clinic location and reporting period help identify the report and provide context for people who review it. Reference rates are national estimates and are not adjusted by ZIP code.",
+    disclaimer: "Note: Adding your clinic cost lets the report compare your reported investment with an estimated value provided by your clinic. This is a comparison, not actual financial return or confirmed savings.",
     snapshotHeading: "Clinic snapshot",
-    snapshotIntro: "Enter the organization and dates for this report.",
+    snapshotIntro: "Enter the organization's information and dates for this report.",
     nameLabel: "Clinic name",
     streetLabel: "Street address",
     cityLabel: "City",
@@ -96,7 +96,7 @@ const AppCopy = (() => {
     fromLabel: "From",
     toLabel: "To",
     costLabel: "Total clinic cost for this reporting period",
-    costHelp: "Include the costs your organization reports for this period, such as supplies, facilities, staff, technology, or administration.",
+    costHelp: "Include the clinic costs you report for this period, such as supplies, facilities, staffing, technology, administration, or other operating expenses.",
     next: "Next",
     back: "Back",
   };
