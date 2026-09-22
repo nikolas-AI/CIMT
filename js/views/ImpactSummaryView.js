@@ -542,25 +542,29 @@ const ImpactSummaryView = (() => {
   // ---------------------------------------------------------------
   function _buildMethodologySection() {
     const section = document.createElement("section");
-    section.className = "summary-section";
+    section.className = "summary-section summary-disclosure";
     const list = AppCopy.summaryView.methodologyBullets.map(item => `<li>${item}</li>`).join("");
     section.innerHTML = `
-      <h2 class="summary-section__heading">${AppCopy.summaryView.methodologySectionTitle}</h2>
-      <ul class="references-list">${list}</ul>
+      <details>
+        <summary class="summary-section__heading">${AppCopy.summaryView.methodologySectionTitle}</summary>
+        <ul class="references-list">${list}</ul>
+      </details>
     `;
     return section;
   }
 
   function _buildWaysToUseSection() {
     const section = document.createElement("section");
-    section.className = "summary-section";
+    section.className = "summary-section summary-disclosure";
     const items = AppCopy.summaryView.fundingBullets.map(item => `<li>${item}</li>`).join("");
     section.innerHTML = `
-      <h2 class="summary-section__heading">${AppCopy.summaryView.fundingTitle}</h2>
-      <ul class="references-list">
-        ${items}
-      </ul>
-      <p class="summary-section__intro">${AppCopy.summaryView.fundingNote}</p>
+      <details>
+        <summary class="summary-section__heading">${AppCopy.summaryView.fundingTitle}</summary>
+        <ul class="references-list">
+          ${items}
+        </ul>
+        <p class="summary-section__intro">${AppCopy.summaryView.fundingNote}</p>
+      </details>
     `;
     return section;
   }

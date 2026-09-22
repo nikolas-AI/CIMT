@@ -438,6 +438,20 @@ body {
   margin: var(--space-6) 0 var(--space-3);
 }
 
+.welcome-disclosure summary,
+.summary-disclosure summary {
+  cursor: pointer;
+}
+
+.welcome-disclosure summary::marker,
+.summary-disclosure summary::marker {
+  color: var(--color-accent);
+}
+
+.welcome-disclosure[open] .welcome-section-heading {
+  margin-bottom: var(--space-3);
+}
+
 .welcome-list {
   list-style: disc;
   padding-left: 1.4rem;
@@ -1273,6 +1287,10 @@ body {
 
 .summary-detail-grid .summary-section__heading {
   margin-bottom: var(--space-3);
+}
+
+.summary-disclosure details:not([open]) .summary-section__heading {
+  margin-bottom: 0;
 }
 
 .references-list {

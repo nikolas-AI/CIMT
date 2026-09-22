@@ -24,10 +24,12 @@ const WelcomeView = (() => {
         <p class="view-intro">${AppCopy.welcome.intro}</p>
         <p class="welcome-hero__note">${AppCopy.welcome.description} ${AppCopy.welcome.note}</p>
 
-        <h2 class="welcome-section-heading">${AppCopy.welcome.whatYouNeedTitle}</h2>
-        <ul class="welcome-list">
-          ${AppCopy.welcome.list.map(item => `<li>${item}</li>`).join("")}
-        </ul>
+        <details class="welcome-disclosure">
+          <summary class="welcome-section-heading">${AppCopy.welcome.whatYouNeedTitle}</summary>
+          <ul class="welcome-list">
+            ${AppCopy.welcome.list.map(item => `<li>${item}</li>`).join("")}
+          </ul>
+        </details>
       </section>
 
       <div class="view-disclaimer welcome-disclaimer" role="note">
