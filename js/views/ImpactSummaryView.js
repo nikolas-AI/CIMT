@@ -21,7 +21,7 @@ const ImpactSummaryView = (() => {
     const view = document.createElement("div");
     view.className = "view view--impact";
     view.setAttribute("role", "region");
-    view.setAttribute("aria-label", "Impact Summary");
+    view.setAttribute("aria-label", "Impact summary");
 
     view.appendChild(_buildHero(summary));
     view.appendChild(_buildImpactNarrative(summary));
@@ -74,17 +74,17 @@ const ImpactSummaryView = (() => {
     const headline = AppCopy.summaryView.heading(summary.clinicName, summary.reportingPeriodFrom, summary.reportingPeriodTo);
     const hero = document.createElement("div");
     hero.className = "impact-hero";
-    hero.setAttribute("aria-label", "Impact total");
+    hero.setAttribute("aria-label", "Estimated total value");
 
     hero.innerHTML = `
-      <p class="impact-hero__eyebrow">Estimated clinic impact summary</p>
+      <p class="impact-hero__eyebrow">Estimated clinic value summary</p>
       <p class="impact-hero__clinic">${_escape(headline)}</p>
       <p class="impact-hero__address">${_escape(summary.streetAddress)}, ${_escape(summary.city)}, ${_escape(summary.state)} ${_escape(summary.zipCode)}</p>
       <p class="impact-hero__period">${_escape(_formatRange(summary.reportingPeriodFrom, summary.reportingPeriodTo))}</p>
       <p class="impact-hero__total" aria-label="Total estimated value: ${Formatting.currency(summary.totalEstimatedValue)}">
         ${Formatting.currency(summary.totalEstimatedValue)}
       </p>
-      <p class="impact-hero__label">${summary.impactMethod === "volunteerHours" ? "Estimated volunteer impact" : "Estimated clinical impact"}</p>
+      <p class="impact-hero__label">${summary.impactMethod === "volunteerHours" ? "Estimated value of volunteer time" : "Estimated value of clinical services"}</p>
     `;
     return hero;
   }
@@ -151,13 +151,13 @@ const ImpactSummaryView = (() => {
 
     const heading = document.createElement("h2");
     heading.className = "impact-breakdown__heading";
-    heading.textContent = "Estimated impact at a glance";
+    heading.textContent = "Estimated value at a glance";
     section.appendChild(heading);
 
     if (summary.impactMethod === "volunteerHours") {
       if (hasMedicalVolunteerValue) {
         section.appendChild(_buildCard(
-          "Medical professional volunteer hours",
+          "Estimated value of medical volunteer time",
           summary.medicalProfessionalVolunteerValue,
           AppCopy.metric.estimatedMedicalProfessionalVolunteerValueNote,
           "volunteer"
@@ -165,7 +165,7 @@ const ImpactSummaryView = (() => {
       }
       if (hasNonMedicalVolunteerValue) {
         section.appendChild(_buildCard(
-          "Non-medical professional volunteer hours",
+          "Estimated value of non-medical volunteer time",
           summary.nonMedicalVolunteerValue,
           AppCopy.metric.estimatedNonMedicalVolunteerValueNote,
           "volunteer"
@@ -175,10 +175,10 @@ const ImpactSummaryView = (() => {
 
     if (hasServices || hasVolunteerHours) {
       section.appendChild(_buildCard(
-        summary.impactMethod === "volunteerHours" ? "Estimated volunteer impact" : "Estimated clinical impact",
+        summary.impactMethod === "volunteerHours" ? "Estimated value of total volunteer time" : "Estimated value of clinical services",
         summary.totalEstimatedValue,
         summary.impactMethod === "volunteerHours"
-          ? "Estimated replacement value of reported medical and non-medical donated time."
+          ? "Estimated value of the total reported donated time. Includes both medical and non-medical volunteer time."
             : _totalValueNote(summary.impactMethod),
         "total"
       ));
@@ -200,7 +200,7 @@ const ImpactSummaryView = (() => {
     const statement = document.createElement("p");
     statement.className = "funder-ready-statement";
     statement.textContent = townText;
-    statement.setAttribute("aria-label", "Funder-ready impact statement");
+    statement.setAttribute("aria-label", "Impact statement for grants and donors");
 
     const copyButton = document.createElement("button");
     copyButton.type = "button";
@@ -244,14 +244,14 @@ const ImpactSummaryView = (() => {
     const topService = summary.mostImpactfulService ? summary.mostImpactfulService.serviceName : "";
     const topServiceShare = summary.mostImpactfulService?.clinicalValueShare || 0;
     if (summary.impactMethod === "volunteerHours") {
-      return `During ${periodLabel}, ${clinicName} reported ${volunteerHours} donated volunteer hours. Using benchmark hourly rates, the estimated volunteer impact was ${totalText}.`;
+      return `During ${periodLabel}, ${clinicName} reported ${volunteerHours} donated volunteer hours. Using reference hourly rates, the estimated value of that time was ${totalText}.`;
     }
     const activityText = `${clinicName} reported delivering ${serviceCount} clinical services.`;
-    const valueText = `reflecting ${clinicalText} in estimated clinical service value.`;
+    const valueText = `with an estimated service value of ${clinicalText}.`;
     const serviceText = hasServices
-      ? ` The standout service was ${topService}, contributing ${Formatting.number(topServiceShare, 1)}% of the clinic’s estimated clinical service value.`
+      ? ` The highest-value service was ${topService}, contributing ${Formatting.number(topServiceShare, 1)}% of the clinic’s estimated service value.`
       : "";
-    return `During ${periodLabel}, ${activityText} Using national benchmark rates, the estimated total value was ${totalText}, ${valueText}${serviceText}`;
+    return `During ${periodLabel}, ${activityText} Using national reference rates, the estimated total value was ${totalText}, ${valueText}${serviceText}`;
   }
 
   function _buildCard(label, value, note, variant) {
@@ -281,11 +281,11 @@ const ImpactSummaryView = (() => {
         <div class="service-impact__box">
           <h2 class="summary-section__heading" id="service-impact-heading">${AppCopy.metric.mostImpactful}</h2>
           <p class="service-impact__statement">
-            <strong>${_escape(service.serviceName)}</strong> represented the largest share of reported clinical service value, with
-            <strong>${Formatting.number(service.count, 0)} services</strong> and an estimated benchmark value of
+            <strong>${_escape(service.serviceName)}</strong> had the largest share of the estimated service value, with
+            <strong>${Formatting.number(service.count, 0)} services</strong> and an estimated value of
             <strong>${Formatting.currency(service.estimatedValue)}</strong>.
           </p>
-          <p class="summary-section__intro">This service accounted for ${Formatting.number(service.clinicalValueShare, 1)}% of the estimated clinical service value reported for this period.</p>
+          <p class="summary-section__intro">This service made up ${Formatting.number(service.clinicalValueShare, 1)}% of the estimated service value reported for this period.</p>
         </div>
       `
       : `
@@ -310,9 +310,9 @@ const ImpactSummaryView = (() => {
           <h2 class="summary-section__heading" id="service-ranking-heading">${AppCopy.summaryView.rankTitle}</h2>
           <p class="summary-section__intro">${AppCopy.summaryView.rankIntro}</p>
         </div>
-        <div class="service-ranking__controls" role="group" aria-label="Rank services by">
+        <div class="service-ranking__controls" role="group" aria-label="Show services by">
           <button type="button" class="service-ranking__toggle is-active" data-ranking-mode="value" aria-pressed="true">Estimated value</button>
-          <button type="button" class="service-ranking__toggle" data-ranking-mode="visits" aria-pressed="false">Reported count</button>
+          <button type="button" class="service-ranking__toggle" data-ranking-mode="visits" aria-pressed="false">Number reported</button>
         </div>
       </div>
       <div class="service-ranking__table-wrap"></div>
@@ -329,10 +329,10 @@ const ImpactSummaryView = (() => {
             <tr>
               <th scope="col">Rank</th>
               <th scope="col">Service</th>
-              <th scope="col">Reported count</th>
-              <th scope="col">Benchmark rate</th>
-              <th scope="col">Estimated benchmark value</th>
-              <th scope="col">Share of total estimated clinical value</th>
+              <th scope="col">Number reported</th>
+              <th scope="col">Reference rate</th>
+              <th scope="col">Estimated value</th>
+              <th scope="col">Share of total estimated service value</th>
             </tr>
           </thead>
           <tbody>
@@ -384,8 +384,8 @@ const ImpactSummaryView = (() => {
       <div class="budget-metrics__grid">
         ${_buildMetric("Reported clinic cost", Formatting.currency(summary.reportingPeriodClinicCost), "Total clinic cost reported for this period.")}
         ${_buildMetric("Estimated total value", Formatting.currency(summary.totalEstimatedValue), totalValueNote)}
-        ${_buildMetric(AppCopy.summaryView.valuePerDollarLabel, `$${ratioText}`, "Estimated benchmark value for every $1 of reported clinic cost.")}
-        ${_buildMetric(AppCopy.summaryView.benchmarkComparisonLabel, `${benchmarkPercent}% ${benchmarkDirection}`, "The estimated total benchmark value compared with the reported clinic cost.")}
+        ${_buildMetric(AppCopy.summaryView.valuePerDollarLabel, `$${ratioText}`, "Estimated value for every $1 of reported clinic cost.")}
+        ${_buildMetric(AppCopy.summaryView.benchmarkComparisonLabel, `${benchmarkPercent}% ${benchmarkDirection}`, "The estimated total value compared with the reported clinic cost.")}
       </div>
       <p class="summary-section__note">${AppCopy.summary.costComparisonNote}</p>
     `;
@@ -403,7 +403,7 @@ const ImpactSummaryView = (() => {
   }
 
   // ---------------------------------------------------------------
-  // Medical benchmark rate table
+  // Reference rate table
   // ---------------------------------------------------------------
   function _buildRateTable(summary) {
     // Only selected services and roles appear here. The calculator has already
@@ -415,11 +415,9 @@ const ImpactSummaryView = (() => {
 
     if (summary.serviceBreakdown.length > 0) {
       section.innerHTML = `
-        <h2 class="summary-section__heading">Medical Benchmark Rates Used</h2>
+        <h2 class="summary-section__heading">Reference rates used</h2>
         <p class="summary-section__intro">
-          Clinical service values are estimated using publicly available healthcare benchmark rates.
-          These benchmarks provide a consistent reference point for estimating the value of services
-          provided.
+          Clinical service values use publicly available reference rates. These rates provide a consistent way to estimate the value of the services reported.
         </p>
       `;
     }
@@ -431,14 +429,14 @@ const ImpactSummaryView = (() => {
     if (summary.serviceBreakdown.length > 0) {
       const svcTable = document.createElement("table");
       svcTable.className = "rate-table";
-      svcTable.setAttribute("aria-label", "Clinical service benchmark rates");
+      svcTable.setAttribute("aria-label", "Clinical service reference rates");
       svcTable.innerHTML = `
         <thead>
           <tr>
             <th scope="col">Service</th>
-            <th scope="col">CPT/HCPCS Code</th>
-            <th scope="col">Benchmark Rate</th>
-            <th scope="col">Visits</th>
+            <th scope="col">Service code</th>
+            <th scope="col">Reference rate</th>
+            <th scope="col">Number reported</th>
           </tr>
         </thead>
         <tbody>
@@ -459,12 +457,12 @@ const ImpactSummaryView = (() => {
     if (summary.volunteerBreakdown.length > 0) {
       const volHeading = document.createElement("h3");
       volHeading.style.cssText = "font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-muted);margin:1.5rem 0 0.75rem;";
-      volHeading.textContent = "Volunteer Time Benchmark Rates";
+      volHeading.textContent = "Volunteer time reference rates";
       tableWrap.appendChild(volHeading);
 
       const volTable = document.createElement("table");
       volTable.className = "rate-table";
-      volTable.setAttribute("aria-label", "Volunteer time benchmark rates");
+      volTable.setAttribute("aria-label", "Volunteer time reference rates");
       volTable.innerHTML = `
         <thead>
           <tr>

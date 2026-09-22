@@ -468,13 +468,20 @@ body {
 .view-disclaimer {
   font-size: var(--text-sm);
   color: var(--color-slate);
-  background: rgba(30, 107, 99, 0.05);
-  border: 1px solid rgba(30, 107, 99, 0.18);
-  border-left: 4px solid var(--color-accent);
+  background: rgba(194, 122, 43, 0.08);
+  border: 1px solid rgba(194, 122, 43, 0.28);
+  border-left: 5px solid var(--color-impact);
   border-radius: var(--radius-sm);
   padding: var(--space-4);
   margin-bottom: var(--space-6);
   line-height: 1.5;
+}
+
+.view-disclaimer strong,
+.impact-disclaimer strong,
+.summary-section__note strong {
+  color: var(--color-navy);
+  font-weight: 700;
 }
 
 .clinic-snapshot {
@@ -933,9 +940,10 @@ body {
 .impact-disclaimer {
   font-size: var(--text-sm);
   color: var(--color-muted);
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  background: rgba(194, 122, 43, 0.08);
+  border: 1px solid rgba(194, 122, 43, 0.28);
+  border-left: 5px solid var(--color-impact);
+  border-radius: var(--radius-sm);
   padding: var(--space-4);
   margin-bottom: var(--space-6);
   line-height: 1.5;
@@ -1062,6 +1070,14 @@ body {
   line-height: 1.7;
   color: var(--color-slate);
   margin-bottom: var(--space-5);
+}
+
+.summary-section__note {
+  padding: var(--space-4);
+  background: rgba(194, 122, 43, 0.08);
+  border: 1px solid rgba(194, 122, 43, 0.28);
+  border-left: 5px solid var(--color-impact);
+  border-radius: var(--radius-sm);
 }
 
 .funder-ready-statement {

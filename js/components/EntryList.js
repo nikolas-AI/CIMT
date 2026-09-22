@@ -87,7 +87,7 @@ const EntryList = (() => {
         // Save messages on the row data because a selection change rebuilds all
         // rows to refresh which options are disabled. This keeps other errors visible.
         if (!sel.value) {
-          entry.selectError = `Please choose a ${config.selectLabel.toLowerCase()}.`;
+          entry.selectError = `Select a ${config.selectLabel.toLowerCase()}.`;
           DOM.showError(selControl, selErr, entry.selectError);
           rowValid = false;
         } else {
@@ -98,12 +98,12 @@ const EntryList = (() => {
         const countError = _validateCount(inp.value, config.countStep);
         if (countError) {
           entry.countError = countError === "empty" || countError === "format"
-            ? "Please enter a valid number."
+              ? "Enter a valid number."
             : countError === "step"
               ? config.countStep === 1
-                ? "Please enter a whole number."
-                : `Please enter a value in increments of ${config.countStep}.`
-              : "Enter a value greater than or equal to zero.";
+                ? "Enter a whole number."
+                : `Enter a value in steps of ${config.countStep}.`
+              : "Enter a value of zero or more.";
           DOM.showError(inp, inpErr, entry.countError);
           rowValid = false;
         } else {

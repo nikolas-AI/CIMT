@@ -9,7 +9,7 @@
 ## Product Overview
 ### 1.1 Purpose
 
-The Clinic Impact Estimator is a browser-based tool that helps free clinics, charitable clinics, student-run clinics, faith-based health ministries, community health programs, and rural safety-net providers communicate the estimated economic value of the services they provide.
+The Clinic Impact Estimator is a browser-based tool that helps free clinics, charitable clinics, student-run clinics, faith-based health ministries, community health programs, and rural safety-net providers explain the estimated value of the services they provide.
 
 The application collects simple operational information from a clinic and presents an understandable impact summary.
 
@@ -19,7 +19,7 @@ Clinic name
 Volunteer hours by role
 Clinical service activity by service type
 
-The application will then display an impact summary containing estimated values based on predefined benchmark rates.
+The application will then display a summary using predefined reference rates.
 
 >Important: The UI must present these figures as estimates of service value, not actual revenue, reimbursement, or guaranteed healthcare savings.
 
@@ -43,11 +43,11 @@ This specification covers the frontend experience for:
 
 1. Application introduction
 2. Clinic information input
-3. Impact method selection
+3. Calculation option selection
 4. Method-specific activity collection
 5. Impact summary
 6. Calculation-result presentation
-7. Benchmark/rate explanation
+7. Reference-rate explanation
 8. References
 9. PDF download control
 10. Excel download control
@@ -86,7 +86,7 @@ The interface should follow these principles.
 
 The user should only be asked for information that is necessary to produce the estimate.
 
-Avoid healthcare billing terminology unless it is necessary. When technical terminology is displayed, provide plain-language explanations.
+Avoid healthcare billing terms unless they are necessary. When a technical term is displayed, explain it in plain language.
 
 ### 3.2 Transparent
 
@@ -94,9 +94,9 @@ Users should understand:
 
 1. What information they entered.
 2. What the estimate represents.
-3. Which benchmark rates were used.
+3. Which reference rates were used.
 4. How the estimate was derived.
-5. Where the benchmark information came from.
+5. Where the reference information came from.
 
 ### 3.3 Non-Misleading
 
@@ -159,7 +159,7 @@ Clinic Information
        ▼
 
 #### View 3
-Impact Method
+Calculation Option
 
        │ Next
 
@@ -175,10 +175,10 @@ Method-specific Activity
 #### View 5
 Impact Summary
 
-After clinic information, the user selects exactly one impact method:
+After clinic information, the user selects exactly one calculation option:
 
-- **Impact by Volunteer Hours:** collect medical-professional and non-medical volunteer hours.
-- **Impact by Clinical Services:** collect clinical service counts only. Volunteer hours are not part of this method because the clinical benchmark represents the selected service valuation.
+- **Volunteer hours:** collect volunteer hours by role.
+- **Clinical services:** collect service totals only. Volunteer hours are not part of this option because the service reference rate already includes the related clinical work.
 
 The selected method controls the activity form, calculation, summary labels, and exports. Switching methods requires confirmation and clears incompatible entries.
 
@@ -243,7 +243,7 @@ The application should communicate where the user is in the process.
 
 The current step should be visually distinguished.
 
-The progress indicator should not require the user to understand technical workflow terminology.
+The progress indicator should use everyday words and should not require the user to understand technical workflow terms.
 
 ## View 1 — Clinic Information
 ### 6.1 Purpose
@@ -268,7 +268,7 @@ The Clinic Impact Estimator helps you communicate the value of the care and volu
 
 A secondary explanation should clarify:
 
-This tool provides benchmark-based estimates. It does not calculate actual revenue, reimbursement, or guaranteed healthcare savings.
+This tool provides estimates based on reference rates. It does not calculate revenue, payments, or guaranteed healthcare savings.
 
 ### 6.3 Clinic Name Input
 
@@ -324,7 +324,7 @@ Example:
 
 - Please enter your clinic name.
 
-## View 3 — Impact Method and Activity
+## View 3 — Calculation Option and Activity
 ### 7.1 Purpose
 
 Let the user select one calculation method and enter only the activity supported by that method.
@@ -1315,7 +1315,7 @@ Instead of:
 
 Prefer:
 
-*Benchmark rate*
+*Reference rate*
 
 Instead of:
 
@@ -1327,14 +1327,14 @@ The following terminology should be used consistently.
 
 |Concept                      |  	Preferred UI Term     |
 |-----------------------------|-------------------------|
-|Overall result               |  	Estimated Impact     |
+|Overall result               |  	Estimated Value     |
 |Healthcare service valuation | 	Estimated Service Value     |
-|Volunteer valuation          |  	Volunteer Contribution Value     |
-|Medical benchmark            | 	Benchmark Rate     |
-|Patient/service activity	    |  Visits / Patients / Count     |
+|Volunteer valuation          | 	Estimated Value of Volunteer Time     |
+|Medical benchmark            | 	Reference Rate     |
+|Patient/service activity	    |  Services Reported     |
 |Volunteer quantity           | 	Hours     |
-|Medical procedure identifier	|  CPT/HCPCS Code     |
-|Overall total	               |   Total Estimated Community Impact     |
+|Medical procedure identifier	|  Service Code     |
+|Overall total	               |   Total Estimated Value     |
 
 Avoid using revenue, income, payment received, or actual savings to describe calculated values.
 
@@ -1352,13 +1352,13 @@ Do not collect:
 - Individual patient identifiers
 - Insurance information
 
-The tool operates on aggregate operational data.
+The tool uses combined activity totals.
 
 The interface should reinforce this benefit where appropriate.
 
 Suggested text:
 
-No patient-level information is required.
+No patient information is required.
 
 ## Download UX
 

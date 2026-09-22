@@ -3,19 +3,19 @@
 **Status:** Living project document  
 **Last updated:** 2026-09-21
 **Project type:** Browser-based static web application  
-**Primary objective:** Estimate and communicate a clinic's impact using aggregate, non-PHI data.
+**Primary objective:** Estimate and explain the value of a clinic's work using combined totals and no patient details.
 
 ## Product Vision
 
 The Clinic Impact Estimator should help free clinics, charitable clinics, student-run clinics, faith-based health programs, and rural safety-net providers communicate:
 
 - Estimated value of services provided
-- Volunteer contribution value
+- Estimated value of donated volunteer time
 - Potential healthcare savings
 - Diverted emergency-room utilization
 - Saved productivity
 - Service-specific impact
-- Evidence useful for fundraising and grant applications
+- Information useful for fundraising and grant applications
 
 The tool must prioritize ease of use, EMR independence, non-PHI inputs, transparent assumptions, and defensible calculations.
 
@@ -31,15 +31,15 @@ The application currently provides:
 - Clinical service counts
 - Explicit impact method selection
 - Method-specific activity entry and summary calculations
-- Benchmark-based service valuation
-- Volunteer contribution valuation
+- Service value based on reference rates
+- Volunteer time value based on reference hourly rates
 - Reporting-period clinic cost comparison
 - Benchmark-value ratio and ROI metrics when clinic cost is supplied
 - Five-step single-page workflow with a welcome screen
 - Clickable progress navigation with required-step guards
 - Validation and state preservation during navigation
-- Impact summary dashboard
-- Benchmark rate tables
+- Impact summary
+- Reference-rate tables
 - References and disclaimers
 - Browser print/PDF workflow
 - Excel breakdown export
@@ -52,15 +52,15 @@ navigation is always available. Forward jumps are allowed only when the required
 previous steps are complete; otherwise an accessible warning identifies the first
 step that must be completed.
 
-## Current Calculation Model
+## How The Math Works
 
-The user selects exactly one calculation method. The calculator never combines
+The user selects exactly one calculation option. The calculator never combines
 medical-professional volunteer value with PFS-based clinical service value.
 
 ```text
-Clinical service value = service count x benchmark rate
+Clinical service value = service count x reference rate
 
-Volunteer contribution value = volunteer hours x benchmark hourly rate
+Volunteer time value = volunteer hours x reference hourly rate
 
 Impact by Volunteer Hours:
 total volunteer impact = medical-professional volunteer value + non-medical volunteer value
@@ -76,7 +76,7 @@ collected in this method.
 Estimated value per $1 invested =
 total estimated value / total clinic cost for the reporting period
 
-Benchmark-value ROI =
+Cost and estimated value comparison =
 (total estimated value - total clinic cost) / total clinic cost x 100
 
 Most impactful service =
@@ -86,7 +86,7 @@ Service impact rankings =
 positive-count services ordered by total estimated benchmark value or visit count
 ```
 
-These values represent estimated benchmark value. They do not represent:
+These values are estimates. They do not represent:
 
 - Actual revenue
 - Reimbursement received
@@ -94,7 +94,7 @@ These values represent estimated benchmark value. They do not represent:
 - Actual profit
 - Confirmed avoided emergency-room visits
 
-Estimated value per $1 invested and benchmark-value ROI are comparison metrics, not actual financial ROI.
+Estimated value per $1 of clinic cost and the cost comparison are comparison measures, not actual financial return.
 They are shown only when a positive reporting-period clinic cost is supplied. A missing
 or zero cost does not produce a ratio or ROI result.
 
@@ -103,19 +103,19 @@ ties are resolved by visit count and then service name so the report is determin
 The impact page allows users to switch the service list between value ranking and visit
 count ranking. Each ranked service also shows its share of total clinical service value.
 
-## Current Data Sources
+## Current Reference Sources
 
-Benchmark data is currently stored locally in `js/data.js`.
+Reference rates and source links are currently stored locally in `js/data.js`.
 
 Current data categories include:
 
-- Volunteer roles and hourly benchmark rates
+- Volunteer roles and hourly reference rates
 - Clinical services and CPT/HCPCS codes
-- Clinical benchmark rates
+- Clinical reference rates
 - Volunteer valuation source
 - Reference links
 
-The current clinical rates are approximate national benchmark values and are not yet localized by ZIP code.
+The current clinical rates are approximate national reference values and are not yet adjusted by ZIP code.
 
 ## Project Structure
 
@@ -138,9 +138,8 @@ js/
     views/
         WelcomeView.js
         ClinicInformationView.js
-        ClinicalServicesView.js
+        ImpactActivityView.js
         ImpactSummaryView.js
-        VolunteerHoursView.js
 ```
 
 ## Responsibilities
@@ -155,7 +154,7 @@ Owns configurable catalogs and references:
 
 - Volunteer roles
 - Clinical services
-- Benchmark rates
+- Reference rates
 - Source metadata
 - Reference links
 
@@ -181,7 +180,7 @@ Contains screen-specific rendering and form behavior.
 
 ### `js/services/exportService.js`
 
-Owns PDF/print and Excel export behavior.
+Creates the printable report and Excel workbook.
 
 ### `css/styles.css`
 
