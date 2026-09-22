@@ -17,18 +17,39 @@
   // All answers live here while the app is open. A view receives this object,
   // reads values from it when it is drawn, and writes new values back into it.
   // -----------------------------------------------------------------
+  // Set to false when the estimator is ready for normal blank starts.
+  const TESTING_DEFAULTS_ENABLED = true;
+  const TESTING_DEFAULTS = {
+    clinic: {
+      name: "Testing Community Clinic",
+      streetAddress: "123 Main Street",
+      city: "Austin",
+      state: "TX",
+      zipCode: "78701",
+      reportingPeriodFrom: "2026-01-01",
+      reportingPeriodTo: "2026-06-30",
+      reportingPeriodClinicCost: 25000,
+    },
+    impactMethod: "clinicalServices",
+    volunteers: [],
+    services: [
+      { id: "test-service-1", serviceId: "primary-care-brief", count: 25 },
+      { id: "test-service-2", serviceId: "vaccination", count: 40 },
+    ],
+  };
+
   const state = {
     /** @type {{ name: string, streetAddress: string, city: string, state: string, zipCode: string, reportingPeriodFrom: string, reportingPeriodTo: string, reportingPeriodClinicCost: number|null }} */
-    clinic: { name: "", streetAddress: "", city: "", state: "", zipCode: "", reportingPeriodFrom: "", reportingPeriodTo: "", reportingPeriodClinicCost: null },
+    clinic: TESTING_DEFAULTS_ENABLED ? { ...TESTING_DEFAULTS.clinic } : { name: "", streetAddress: "", city: "", state: "", zipCode: "", reportingPeriodFrom: "", reportingPeriodTo: "", reportingPeriodClinicCost: null },
 
     /** @type {"volunteerHours"|"clinicalServices"|null} */
-    impactMethod: null,
+    impactMethod: TESTING_DEFAULTS_ENABLED ? TESTING_DEFAULTS.impactMethod : null,
 
     /** @type {Array<{ id: string, roleId: string, hours: number }>} */
-    volunteers: [],
+    volunteers: TESTING_DEFAULTS_ENABLED ? TESTING_DEFAULTS.volunteers.map(entry => ({ ...entry })) : [],
 
     /** @type {Array<{ id: string, serviceId: string, count: number }>} */
-    services: [],
+    services: TESTING_DEFAULTS_ENABLED ? TESTING_DEFAULTS.services.map(entry => ({ ...entry })) : [],
 
     /** @type {ImpactSummary|null} */
     impact: null,
