@@ -26,7 +26,9 @@ const ImpactSummaryView = (() => {
     view.appendChild(_buildHero(summary));
     view.appendChild(_buildImpactNarrative(summary));
     view.appendChild(_buildDisclaimer());
-    view.appendChild(_buildBreakdown(summary));
+    if (summary.impactMethod === "volunteerHours") {
+      view.appendChild(_buildBreakdown(summary));
+    }
     view.appendChild(_buildFunderReadyStatement(summary));
     if (summary.reportingPeriodClinicCost !== null) {
       view.appendChild(_buildBudgetMetrics(summary));
