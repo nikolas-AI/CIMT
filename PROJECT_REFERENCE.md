@@ -1,4 +1,4 @@
-# Clinic Impact Estimator Project Reference
+# Care in Action Project Reference
 
 **Status:** Living project document  
 **Last updated:** 2026-09-21
@@ -7,7 +7,7 @@
 
 ## Product Vision
 
-The Clinic Impact Estimator should help free clinics, charitable clinics, student-run clinics, faith-based health programs, and rural safety-net providers communicate:
+Care in Action should help free clinics, charitable clinics, student-run clinics, faith-based health programs, and rural safety-net providers communicate:
 
 - Estimated value of services provided
 - Estimated value of donated volunteer time
