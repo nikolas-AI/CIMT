@@ -53,7 +53,14 @@ const ExportService = (() => {
       ["Calculation Option", _methodLabel(summary.impactMethod)],
     ];
     const totalEstimatedValueRow = rows.length;
-    rows.push(["Total Estimated Value", summary.totalEstimatedValue]);
+    rows.push([AppCopy.exportCopy.labels.total, summary.totalEstimatedValue]);
+    rows.push([summary.impactMethod === "volunteerHours" ? "Reported Volunteer Hours" : "Reported Clinical Services",
+      summary.impactMethod === "volunteerHours"
+        ? summary.volunteerBreakdown.reduce((sum, row) => sum + row.hours, 0)
+        : summary.serviceBreakdown.reduce((sum, row) => sum + row.count, 0)]);
+    rows.push(["Estimate Basis", summary.impactMethod === "volunteerHours"
+      ? "Reported volunteer hours multiplied by public reference hourly rates"
+      : "Reported service counts multiplied by public reference rates"]);
     if (summary.impactMethod === "volunteerHours") {
       rows.push(["Medical Professional Volunteer Value", summary.medicalProfessionalVolunteerValue]);
       rows.push(["Non-Medical Volunteer Value", summary.nonMedicalVolunteerValue]);
@@ -67,9 +74,11 @@ const ExportService = (() => {
       budgetRows = [
         ["Reported Clinic Cost", summary.reportingPeriodClinicCost],
         ["Reporting Period Days", summary.reportingPeriodDays],
-        ["Estimated Total Value", summary.totalEstimatedValue],
+        [AppCopy.exportCopy.labels.total, summary.totalEstimatedValue],
         ["Estimated Value per $1 of Reported Clinic Cost", summary.valueToCostRatio],
-        ["Cost and Estimated Value Comparison (%)", summary.benchmarkValueROI],
+        ["Estimated Value as a Share of Reported Clinic Cost (%)", summary.reportingPeriodClinicCost > 0
+          ? summary.totalEstimatedValue / summary.reportingPeriodClinicCost * 100
+          : null],
       ];
       rows.push(...budgetRows);
       rows.push(["Cost Note", AppCopy.summary.costComparisonNote]);
@@ -308,11 +317,19 @@ const ExportService = (() => {
           <tr><th>Reported clinic cost</th><td style="text-align:right">${_fmt(summary.reportingPeriodClinicCost)}</td></tr>
           <tr><th>Estimated total value</th><td style="text-align:right">${_fmt(summary.totalEstimatedValue)}</td></tr>
           <tr><th>${AppCopy.summaryView.valuePerDollarLabel}</th><td style="text-align:right">$${summary.valueToCostRatio.toFixed(2)}</td></tr>
-          <tr><th>${AppCopy.summaryView.benchmarkComparisonLabel}</th><td style="text-align:right">${Math.abs(summary.benchmarkValueROI || 0).toFixed(1)}% ${summary.benchmarkValueROI > 0 ? "higher" : summary.benchmarkValueROI < 0 ? "lower" : "equal"}</td></tr>
+          <tr><th>Estimated value as a share of reported clinic cost</th><td style="text-align:right">${summary.reportingPeriodClinicCost > 0 ? (summary.totalEstimatedValue / summary.reportingPeriodClinicCost * 100).toFixed(1) : "0.0"}%</td></tr>
         </tbody>
       </table>
       <p class="disclaimer">${AppCopy.summary.costComparisonNote}</p>
     ` : "";
+
+    const activityCount = summary.impactMethod === "volunteerHours"
+      ? summary.volunteerBreakdown.reduce((sum, row) => sum + row.hours, 0).toFixed(1)
+      : summary.serviceBreakdown.reduce((sum, row) => sum + row.count, 0).toLocaleString("en-US");
+    const activityLabel = summary.impactMethod === "volunteerHours" ? "Volunteer hours reported" : "Clinical services reported";
+    const estimateBasis = summary.impactMethod === "volunteerHours"
+      ? "Reported volunteer hours multiplied by public reference hourly rates."
+      : "Reported service counts multiplied by public reference rates.";
 
     const serviceImpactHTML = summary.impactMethod === "clinicalServices" && summary.mostImpactfulService
       ? `<h2>${AppCopy.metric.mostImpactful}</h2><p><strong>${_escapeHTML(summary.mostImpactfulService.serviceName)}</strong> had the largest share of the estimated service value, with <strong>${summary.mostImpactfulService.count.toLocaleString("en-US")} services</strong> and an estimated value of <strong>${_fmt(summary.mostImpactfulService.estimatedValue)}</strong>.</p><p class="disclaimer">This service made up ${summary.mostImpactfulService.clinicalValueShare.toFixed(1)}% of the estimated service value reported for this period.</p>`
@@ -342,12 +359,16 @@ const ExportService = (() => {
   .total { font-size: 2.5em; font-weight: bold; color: #1A2340; margin: 8px 0 4px; }
   .label { color: #475C8A; margin-bottom: 4px; }
   .clinic-name { color: #C27A2B; font-size: 1.25em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 6px; }
+  .status { display: inline-block; color: #34664B; border: 1px solid #AFC7B6; border-radius: 999px; padding: 4px 10px; font-weight: 700; margin: 0 0 12px; }
   .disclaimer { font-size: 0.85em; color: #8492B0; border: 1px solid #DDE2EE; padding: 10px 14px; border-radius: 6px; margin: 12px 0; }
+  .kpi-table { margin: 12px 0; }
+  .kpi-table th, .kpi-table td { background: #F8F9FC; border: 1px solid #DDE2EE; padding: 8px; text-align: left; }
   table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
   th { text-align: left; padding: 6px 8px; background: #F8F9FC; font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #DDE2EE; }
   td { padding: 6px 8px; border-bottom: 1px solid #F0F2F7; }
   @media print { body { margin: 20px; } }
 </style></head><body>
+<p class="status">&#10003; Report complete</p>
 <p class="clinic-name">${_escapeHTML(summary.clinicName)}</p>
 <p style="color:#475C8A;margin:0 0 4px">${_escapeHTML(summary.streetAddress)}, ${_escapeHTML(summary.city)}, ${_escapeHTML(summary.state)} ${_escapeHTML(summary.zipCode)}</p>
 <p style="color:#475C8A;margin:0 0 12px">Reporting period: ${_formatDate(summary.reportingPeriodFrom)} - ${_formatDate(summary.reportingPeriodTo)}</p>
@@ -355,10 +376,11 @@ const ExportService = (() => {
 <p class="total">${_fmt(summary.totalEstimatedValue)}</p>
 <p class="label">${summary.impactMethod === "volunteerHours" ? "Estimated value of volunteer time" : "Estimated value of clinical services"}</p>
 <p class="label">Calculation option: ${_methodLabel(summary.impactMethod)}</p>
+<table class="kpi-table"><tbody><tr><th>${activityLabel}</th><td>${activityCount}</td><th>Estimate basis</th><td>${estimateBasis}</td></tr></tbody></table>
 <p class="disclaimer">${AppCopy.summary.shortDisclaimer}</p>
-${budgetHTML}
 ${serviceImpactHTML}
 ${serviceRankingHTML}
+${budgetHTML}
 ${summary.impactMethod === "clinicalServices" ? `<h2>Clinical Services</h2>
 <table><thead><tr><th>Service</th><th>Service code</th><th style="text-align:right">Number reported</th><th style="text-align:right">Reference rate</th><th style="text-align:right">Estimated value</th></tr></thead>
 <tbody>${svcRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Clinical services total</th><th style="text-align:right">${_fmt(summary.clinicalServiceValue)}</th></tr></tfoot></table>` : ""}

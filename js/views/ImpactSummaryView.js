@@ -24,20 +24,21 @@ const ImpactSummaryView = (() => {
     view.setAttribute("aria-label", "Impact summary");
 
     view.appendChild(_buildHero(summary));
+    view.appendChild(_buildKpiStrip(summary));
+    view.appendChild(_buildEstimateCallout(summary));
     view.appendChild(_buildImpactNarrative(summary));
-    view.appendChild(_buildDisclaimer());
     if (summary.impactMethod === "volunteerHours") {
       view.appendChild(_buildBreakdown(summary));
     }
-    view.appendChild(_buildFunderReadyStatement(summary));
-    if (summary.reportingPeriodClinicCost !== null) {
-      view.appendChild(_buildBudgetMetrics(summary));
-    }
     if (summary.impactMethod === "clinicalServices" && _hasReportedServices(summary)) {
       view.appendChild(_buildServiceImpact(summary));
+      view.appendChild(_buildServiceValueChart(summary));
     }
     const serviceRanking = _buildServiceRanking(summary);
     if (serviceRanking) view.appendChild(serviceRanking);
+    if (summary.reportingPeriodClinicCost !== null) {
+      view.appendChild(_buildBudgetMetrics(summary));
+    }
     const rateTable = _buildRateTable(summary);
     if (rateTable) view.appendChild(rateTable);
     if (summary.volunteerBreakdown.length > 0) {
@@ -51,14 +52,15 @@ const ImpactSummaryView = (() => {
     view.appendChild(detailGrid);
 
     view.appendChild(_buildReferences());
+    view.appendChild(_buildFunderReadyStatement(summary));
     view.appendChild(_buildDownloadActions(summary));
 
     // Back returns to the last input step; Start Over is a separate callback
     // that clears state before returning to the first step.
     const nav = NavigationButtons.create({
-      backLabel: "Back",
+      backLabel: AppCopy.summaryDashboard.backAction,
       onBack,
-      nextLabel: "Start Over",
+      nextLabel: AppCopy.summaryDashboard.startOverAction,
       onNext: onStartOver,
     });
     view.appendChild(nav);
@@ -77,16 +79,71 @@ const ImpactSummaryView = (() => {
     hero.setAttribute("aria-label", "Estimated total value");
 
     hero.innerHTML = `
-      <p class="impact-hero__eyebrow">Estimated clinic value summary</p>
+      <p class="impact-hero__status" role="status">&#10003; ${_escape(AppCopy.summaryDashboard.reportComplete)}</p>
+      <p class="impact-hero__eyebrow">${_escape(AppCopy.summaryDashboard.eyebrow)}</p>
       <p class="impact-hero__clinic">${_escape(headline)}</p>
       <p class="impact-hero__address">${_escape(summary.streetAddress)}, ${_escape(summary.city)}, ${_escape(summary.state)} ${_escape(summary.zipCode)}</p>
       <p class="impact-hero__period">${_escape(_formatRange(summary.reportingPeriodFrom, summary.reportingPeriodTo))}</p>
       <p class="impact-hero__total" aria-label="Total estimated value: ${Formatting.currency(summary.totalEstimatedValue)}">
         ${Formatting.currency(summary.totalEstimatedValue)}
       </p>
-      <p class="impact-hero__label">${summary.impactMethod === "volunteerHours" ? "Estimated value of volunteer time" : "Estimated value of clinical services"}</p>
+      <p class="impact-hero__label">${_escape(summary.impactMethod === "volunteerHours" ? AppCopy.summaryDashboard.estimatedVolunteerValue : AppCopy.summaryDashboard.estimatedServiceValue)}</p>
     `;
     return hero;
+  }
+
+  function _buildKpiStrip(summary) {
+    const section = document.createElement("section");
+    section.className = "summary-kpis";
+    section.setAttribute("aria-labelledby", "summary-kpis-heading");
+
+    const activityLabel = summary.impactMethod === "volunteerHours"
+      ? AppCopy.summaryDashboard.volunteerHoursKpi
+      : AppCopy.summaryDashboard.clinicalServicesKpi;
+    const activityValue = summary.impactMethod === "volunteerHours"
+      ? Formatting.number(_totalVolunteerHours(summary), 1)
+      : Formatting.number(_serviceCount(summary), 0);
+    const cards = [
+      [activityLabel, activityValue, summary.impactMethod === "volunteerHours" ? AppCopy.summaryDashboard.donatedTimeNote : AppCopy.summaryDashboard.reportedActivityNote],
+      [AppCopy.summaryDashboard.estimatedCommunityValueKpi, Formatting.currency(summary.totalEstimatedValue), AppCopy.summaryDashboard.estimatedCommunityValueNote],
+    ];
+
+    if (summary.reportingPeriodClinicCost !== null) {
+      const ratio = summary.valueToCostRatio === null ? "—" : `$${summary.valueToCostRatio.toFixed(2)}`;
+      cards.push([AppCopy.summaryDashboard.valuePerDollarKpi, ratio, AppCopy.summaryDashboard.valuePerDollarNote]);
+    }
+
+    section.innerHTML = `
+      <h2 class="sr-only" id="summary-kpis-heading">${_escape(AppCopy.summaryDashboard.kpiHeading)}</h2>
+      <div class="summary-kpis__grid">
+        ${cards.map(([label, value, note]) => `
+          <div class="summary-kpi">
+            <p class="summary-kpi__label">${_escape(label)}</p>
+            <p class="summary-kpi__value">${_escape(value)}</p>
+            <p class="summary-kpi__note">${_escape(note)}</p>
+          </div>
+        `).join("")}
+      </div>
+    `;
+    return section;
+  }
+
+  function _buildEstimateCallout(summary) {
+    const section = document.createElement("section");
+    section.className = "estimate-callout";
+    section.setAttribute("aria-labelledby", "estimate-callout-heading");
+    section.innerHTML = `
+      <div class="estimate-callout__icon" aria-hidden="true">i</div>
+      <div>
+        <h2 id="estimate-callout-heading">${_escape(AppCopy.summaryDashboard.estimateHeading)}</h2>
+        <p>${_escape(AppCopy.summaryDashboard.estimateIntro(summary.impactMethod))}</p>
+        <details>
+          <summary>${_escape(AppCopy.summaryDashboard.estimateDetailsLabel)}</summary>
+          <p>${_escape(AppCopy.summaryDashboard.estimateDetails(summary.impactMethod))}</p>
+        </details>
+      </div>
+    `;
+    return section;
   }
 
   function _buildImpactNarrative(summary) {
@@ -293,7 +350,14 @@ const ImpactSummaryView = (() => {
             <strong>${Formatting.number(service.count, 0)} services</strong> and an estimated value of
             <strong>${Formatting.currency(service.estimatedValue)}</strong>.
           </p>
-          <p class="summary-section__intro">This service made up ${Formatting.number(service.clinicalValueShare, 1)}% of the estimated service value reported for this period.</p>
+          <p class="service-impact__stats">${_escape(AppCopy.summaryDashboard.topContributorStats(
+            Formatting.number(service.count, 0),
+            Formatting.currency(service.estimatedValue),
+            Formatting.number(service.clinicalValueShare, 1)
+          ))}</p>
+          <div class="service-impact__bar" role="img" aria-label="${_escape(service.serviceName)} contributed ${Formatting.number(service.clinicalValueShare, 1)} percent of estimated service value">
+            <span style="width: ${Math.min(100, Math.max(0, service.clinicalValueShare))}%"></span>
+          </div>
         </div>
       `
       : `
@@ -302,6 +366,37 @@ const ImpactSummaryView = (() => {
           <p class="summary-section__intro">${AppCopy.summary.emptyState}</p>
         </div>
       `;
+    return section;
+  }
+
+  function _buildServiceValueChart(summary) {
+    const rows = summary.serviceImpactRanking?.byValue || [];
+    if (rows.length === 0) return null;
+
+    const section = document.createElement("section");
+    section.className = "summary-section service-value-chart";
+    section.setAttribute("aria-labelledby", "service-value-chart-heading");
+    const maximum = Math.max(...rows.map(row => row.estimatedValue), 1);
+    section.innerHTML = `
+      <h2 class="summary-section__heading" id="service-value-chart-heading">${_escape(AppCopy.summaryDashboard.valueChartHeading)}</h2>
+      <p class="summary-section__intro">${_escape(AppCopy.summaryDashboard.valueChartIntro)}</p>
+      <div class="service-value-chart__rows">
+        ${rows.map(row => {
+          const width = Math.min(100, Math.max(0, row.estimatedValue / maximum * 100));
+          return `
+            <div class="service-value-chart__row">
+              <div class="service-value-chart__label">
+                <span>${_escape(row.serviceName)}</span>
+                <strong>${Formatting.currency(row.estimatedValue)}</strong>
+              </div>
+              <div class="service-value-chart__track" aria-hidden="true">
+                <span style="width: ${width}%"></span>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
     return section;
   }
 
@@ -382,7 +477,7 @@ const ImpactSummaryView = (() => {
     const ratioText = summary.valueToCostRatio !== null ? `${summary.valueToCostRatio.toFixed(2)}` : "—";
     const benchmarkDirection = summary.benchmarkValueROI > 0 ? "higher" : summary.benchmarkValueROI < 0 ? "lower" : "equal";
     const benchmarkPercent = Math.abs(summary.benchmarkValueROI || 0).toFixed(1);
-    const totalValueNote = _totalValueNote(_hasReportedServices(summary), _totalVolunteerHours(summary) > 0);
+    const totalValueNote = _totalValueNote(summary.impactMethod);
 
     section.innerHTML = `
       <h2 class="summary-section__heading" id="budget-metrics-heading">${AppCopy.summaryView.costHeading}</h2>

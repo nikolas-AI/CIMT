@@ -198,6 +198,33 @@ const AppCopy = (() => {
     ],
   };
 
+  const summaryDashboard = {
+    reportComplete: "Report complete",
+    eyebrow: "Community impact summary",
+    estimatedServiceValue: "Estimated value of clinical services",
+    estimatedVolunteerValue: "Estimated value of volunteer time",
+    kpiHeading: "Impact at a glance",
+    clinicalServicesKpi: "Clinical services reported",
+    volunteerHoursKpi: "Volunteer hours reported",
+    reportedActivityNote: "Reported activity",
+    donatedTimeNote: "Reported donated time",
+    estimatedCommunityValueKpi: "Estimated community value",
+    estimatedCommunityValueNote: "Based on reported activity and reference rates",
+    valuePerDollarKpi: "Estimated value per $1 of cost",
+    valuePerDollarNote: "Informational comparison, not ROI",
+    estimateHeading: "About this estimate",
+    estimateIntro: (impactMethod) => `Calculated from aggregate ${impactMethod === "volunteerHours" ? "volunteer hours" : "service counts"} and publicly available reference rates. This is a planning and communication estimate, not revenue, reimbursement, savings, financial ROI, or a measure of care quality.`,
+    estimateDetailsLabel: "How this estimate is calculated",
+    estimateDetails: (impactMethod) => `${impactMethod === "volunteerHours"
+      ? "Reported volunteer hours are multiplied by the applicable reference hourly rate for each role."
+      : "Reported service counts are multiplied by the applicable reference rate for each service."} Patient information is not collected or required.`,
+    topContributorStats: (count, value, share) => `${count} reported services · ${value} estimated value · ${share}% of total`,
+    valueChartHeading: "Estimated value by service",
+    valueChartIntro: "The bars show the estimated value of each reported service. Numeric labels provide the same information without relying on color.",
+    backAction: "Edit reported activity",
+    startOverAction: "Create another report",
+  };
+
   const exportCopy = {
     pdfTitle: "Estimated Clinic Impact Summary",
     pdfSubtitle: "Activity summary using reference-rate estimates",
@@ -230,6 +257,7 @@ const AppCopy = (() => {
     metric,
     summary: summary,
     summaryView,
+    summaryDashboard,
     progress,
     exportCopy,
   };
