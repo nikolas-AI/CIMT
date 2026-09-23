@@ -518,7 +518,7 @@ const ImpactSummaryView = (() => {
   // ---------------------------------------------------------------
   function _buildReferences() {
     const section = document.createElement("div");
-    section.className = "summary-section";
+    section.className = "summary-section summary-disclosure";
 
     const items = REFERENCES.map(ref => `
       <li>
@@ -529,8 +529,10 @@ const ImpactSummaryView = (() => {
     `).join("");
 
     section.innerHTML = `
-      <h2 class="summary-section__heading">Sources and references</h2>
-      <ul class="references-list">${items}</ul>
+      <details>
+        <summary class="summary-section__heading">Sources and references</summary>
+        <ul class="references-list">${items}</ul>
+      </details>
     `;
     return section;
   }
