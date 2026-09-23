@@ -1,4 +1,4 @@
-# Clinic Impact Estimator
+# Care in Action
 ## UI Product Specification
 
 - **Version:** 1.0
@@ -9,7 +9,7 @@
 ## Product Overview
 ### 1.1 Purpose
 
-The Clinic Impact Estimator is a browser-based tool that helps free clinics, charitable clinics, student-run clinics, faith-based health ministries, community health programs, and rural safety-net providers explain the estimated value of the services they provide.
+Care in Action is a browser-based tool that helps free clinics, charitable clinics, student-run clinics, faith-based health ministries, community health programs, and rural safety-net providers explain the estimated value of the services they provide.
 
 The application collects simple operational information from a clinic and presents an understandable impact summary.
 
@@ -196,7 +196,7 @@ The application should use a consistent shell across all views.
 ```
 ┌──────────────────────────────────────────────┐
 ```
-│ Clinic Impact Estimator                      │
+│ Care in Action                               │
 ```
 ├──────────────────────────────────────────────┤
 ```
@@ -226,7 +226,7 @@ The application should use a consistent shell across all views.
 
 The header should display:
 
-#### Clinic Impact Estimator
+#### Care in Action
 
 The header should remain visually consistent throughout the data-entry flow.
 
@@ -264,7 +264,7 @@ The description should explain that the tool uses basic clinic activity informat
 
 Suggested messaging:
 
-The Clinic Impact Estimator helps you communicate the value of the care and volunteer support your clinic provides. Enter a few simple details to create an estimated impact summary.
+Care in Action helps you communicate the value of the care and volunteer support your clinic provides. Enter a few simple details to create an estimated impact summary.
 
 A secondary explanation should clarify:
 
@@ -1632,7 +1632,7 @@ The complete Version 1 experience is:
 
 ```
 ┌─────────────────────────────────────────┐
-│ Clinic Impact Estimator                 │
+│ Care in Action                          │
 │                                         │
 │ Estimate Your Clinic's Impact           │
 │                                         │
@@ -1649,7 +1649,7 @@ The complete Version 1 experience is:
 
 ```
 ┌─────────────────────────────────────────┐
-│ Clinic Impact Estimator                 │
+│ Care in Action                          │
 │                                         │
 │ Volunteer Hours                         │
 │                                         │
@@ -1669,7 +1669,7 @@ The complete Version 1 experience is:
 
 ```
 ┌─────────────────────────────────────────┐
-│ Clinic Impact Estimator                 │
+│ Care in Action                          │
 │                                         │
 │ Clinical Services                       │
 │                                         │
@@ -1726,6 +1726,6 @@ The UI collects structured inputs, presents structured outputs, and clearly comm
 
 The eventual calculation engine, benchmark data, and backend services should be replaceable independently of the UI.
 
-This separation is a core architectural requirement for the Clinic Impact Estimator.
+This separation is a core architectural requirement for Care in Action.
 
 This can serve as the main UI PRD/specification for an LLM coding agent. A useful next step would be to turn this into a second, more implementation-oriented document defining the exact component contracts, TypeScript interfaces, state machine, mock data, and acceptance-test scenarios while still keeping the backend/calculation layer out of scope.

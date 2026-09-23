@@ -160,7 +160,10 @@ const ImpactSummaryView = (() => {
           "Estimated value of medical volunteer time",
           summary.medicalProfessionalVolunteerValue,
           AppCopy.metric.estimatedMedicalProfessionalVolunteerValueNote,
-          "volunteer"
+          "volunteer",
+          summary.totalEstimatedValue
+            ? (summary.medicalProfessionalVolunteerValue / summary.totalEstimatedValue) * 100
+            : 0
         ));
       }
       if (hasNonMedicalVolunteerValue) {
@@ -168,7 +171,10 @@ const ImpactSummaryView = (() => {
           "Estimated value of non-medical volunteer time",
           summary.nonMedicalVolunteerValue,
           AppCopy.metric.estimatedNonMedicalVolunteerValueNote,
-          "volunteer"
+          "volunteer",
+          summary.totalEstimatedValue
+            ? (summary.nonMedicalVolunteerValue / summary.totalEstimatedValue) * 100
+            : 0
         ));
       }
     }
@@ -180,7 +186,8 @@ const ImpactSummaryView = (() => {
         summary.impactMethod === "volunteerHours"
           ? "Estimated value of the total reported donated time. Includes both medical and non-medical volunteer time."
             : _totalValueNote(summary.impactMethod),
-        "total"
+        "total",
+        100
       ));
     }
 
@@ -254,9 +261,10 @@ const ImpactSummaryView = (() => {
     return `During ${periodLabel}, ${activityText} Using national reference rates, the estimated total value was ${totalText}, ${valueText}${serviceText}`;
   }
 
-  function _buildCard(label, value, note, variant) {
+  function _buildCard(label, value, note, variant, share = 0) {
     const card = document.createElement("div");
     card.className = `impact-card impact-card--${variant}`;
+    card.style.setProperty("--impact-share", `${Math.min(100, Math.max(0, share))}%`);
     card.innerHTML = `
       <p class="impact-card__label">${label}</p>
       <p class="impact-card__value">${Formatting.currency(value)}</p>
