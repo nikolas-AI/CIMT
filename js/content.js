@@ -26,9 +26,9 @@ const AppCopy = (() => {
     emptyState: "Enter services provided or volunteer hours donated to create a summary for this reporting period.",
     fiShortDisclaimer: "Important: Dollar amounts are estimates based on reported totals and reference rates. They are not revenue, payments, profit, or confirmed savings.",
     methodologyNote: "Reported service counts are multiplied by reference rates. Volunteer hours are multiplied by reference hourly rates. The rates are national estimates and are not adjusted for your ZIP code.",
-    shortDisclaimer: "Important: This is an estimate of service and volunteer value provided by the clinic. It is not revenue, payment, profit, or confirmed savings.",
-    costComparisonNote: "Important: This compares your reported clinic cost with the estimated value provied by your clinic. It is not financial return, revenue, profit, or confirmed healthcare savings.",
-    rankingNote: "The list shows which reported services have the highest estimated value. It does not show care quality, patient need, payments, or actual savings.",
+    shortDisclaimer: "Important: This is an estimate of the value of services and volunteer contributions. It does not represent actual revenue, reimbursement, profit, or confirmed savings.",
+    costComparisonNote: "Important: This compares your reported clinic cost with the estimated value provided by your clinic. It is not actual financial ROI, revenue, reimbursement, profit, or confirmed healthcare savings.",
+    rankingNote: "Rankings show the relative estimated value of the services you reported. They do not measure clinical importance, quality of care, patient need, reimbursement, or actual savings.",
     funderReadyTitle: "Impact statement for grants and donors",
     copySuccess: "Statement copied. Review it and adjust it for your organization.",
     impactStatementButton: "Copy impact statement",
@@ -38,7 +38,7 @@ const AppCopy = (() => {
   const impactMethod = {
     ariaLabel: "Impact calculation method",
     heading: "Choose how to calculate the impact of your clinic",
-    intro: "Choose how you want to estimate the value provided by your clinic for this report.",
+    intro: "Choose how you want to estimate the value provided by your clinic for this reporting period.",
     legend: "Calculation method",
     volunteerTitle: "Volunteer hours",
     volunteerDescription: "Estimate the value of donated time by volunteer role.",
@@ -51,9 +51,9 @@ const AppCopy = (() => {
   const impactActivity = {
     ariaLabel: "Report activity",
     volunteerHeading: "Enter volunteer hours",
-    volunteerIntro: "Enter the donated hours for each volunteer role. The summary estimates the value of all reported volunteer time.",
-    servicesHeading: "Enter clinical services",
-    servicesIntro: "Enter the total number of services your clinic provided. The reference rate already includes the clinical work connected to each service.",
+    volunteerIntro: "Enter the total hours contributed during this reporting period for each volunteer role. The estimator uses reference hourly rates to estimate the value of donated time. Volunteer contribution value reflects the estimated replacement value of donated time. It is not cash received by the clinic.",
+    servicesHeading: "Enter clinical services provided",
+    servicesIntro: "Add the total number of each service your clinic provided during the reporting period. Enter combined counts only.  Each service is paired with a reference rate used to estimate the value of reported care. These rates are not your clinic’s actual charges, reimbursement, or revenue.",
     next: "See impact summary",
   };
 
@@ -76,7 +76,7 @@ const AppCopy = (() => {
       "Total volunteer hours by role",
       "Total number of clinical services provided",
     ],
-    privacy: "Important: Do not enter patient names, medical records, or other patient details. Results are estimates and should not be treated as revenue, payments, or guaranteed savings.",
+    privacy: "No patient names, medical records, or other patient-level information is needed. Results are estimates based on benchmark rates and should not be interpreted as actual revenue, reimbursement, or guaranteed savings.",
     begin: "Begin",
   };
 
