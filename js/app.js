@@ -33,8 +33,8 @@
     impactMethod: "clinicalServices",
     volunteers: [],
     services: [
-      { id: "test-service-1", serviceId: "primary-care-brief", count: 25 },
-      { id: "test-service-2", serviceId: "vaccination", count: 40 },
+      { id: "test-service-1", serviceId: "established-patient-office-visit-low-complexity-20-minutes-99213", count: 25 },
+      { id: "test-service-2", serviceId: "vaccine-administration-by-injection-first-vaccine-90471", count: 40 },
     ],
   };
 

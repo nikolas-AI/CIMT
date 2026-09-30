@@ -161,7 +161,8 @@ const EntryList = (() => {
       const displayLabel = (option) => {
         // The same label is used in the input, suggestions, and stored select
         // so users see consistent service names and codes in every state.
-        const codeLabel = option.codeSystem && option.code
+        const codeAlreadyInName = option.code && option.displayName.endsWith(`, ${option.code})`);
+        const codeLabel = option.codeSystem && option.code && !codeAlreadyInName
           ? ` (${option.codeSystem} ${option.code})`
           : "";
         return `${option.displayName}${codeLabel}`;
