@@ -34,8 +34,10 @@ const ImpactSummaryView = (() => {
       view.appendChild(_buildServiceImpact(summary));
       view.appendChild(_buildServiceValueChart(summary));
     }
-    const serviceRanking = _buildServiceRanking(summary);
-    if (serviceRanking) view.appendChild(serviceRanking);
+    if (summary.impactMethod === "clinicalServices") {
+      const serviceRanking = _buildServiceRanking(summary);
+      if (serviceRanking) view.appendChild(serviceRanking);
+    }
     if (summary.reportingPeriodClinicCost !== null) {
       view.appendChild(_buildBudgetMetrics(summary));
     }
@@ -299,23 +301,25 @@ const ImpactSummaryView = (() => {
 
   function _buildFunderReadyText(summary) {
     const clinicName = summary.clinicName || "Your clinic";
-    const serviceCount = summary.impactMethod === "clinicalServices" ? _serviceCount(summary) : 0;
-    const volunteerHours = _totalVolunteerHours(summary);
-    const hasServices = serviceCount > 0;
-    const totalText = `${Formatting.currency(summary.totalEstimatedValue)}`;
-    const clinicalText = `${Formatting.currency(summary.clinicalServiceValue)}`;
     const periodLabel = `${_formatDate(summary.reportingPeriodFrom)} to ${_formatDate(summary.reportingPeriodTo)}`;
-    const topService = summary.mostImpactfulService ? summary.mostImpactfulService.serviceName : "";
-    const topServiceShare = summary.mostImpactfulService?.clinicalValueShare || 0;
+    const totalText = Formatting.currency(summary.totalEstimatedValue);
+
     if (summary.impactMethod === "volunteerHours") {
-      return `During ${periodLabel}, ${clinicName} reported ${volunteerHours} donated volunteer hours. Using reference hourly rates, the estimated value of that time was ${totalText}.`;
+      const volunteerHours = _totalVolunteerHours(summary);
+      return `${clinicName} reported ${Formatting.number(volunteerHours, 1)} volunteer hours during ${periodLabel}. Using reference hourly rates, the estimated value of this donated time was ${totalText}.`;
     }
-    const activityText = `${clinicName} reported delivering ${serviceCount} clinical services.`;
-    const valueText = `with an estimated service value of ${clinicalText}.`;
-    const serviceText = hasServices
-      ? ` The highest-value service was ${topService}, contributing ${Formatting.number(topServiceShare, 1)}% of the clinic’s estimated service value.`
+
+    const serviceCount = _serviceCount(summary);
+    const topService = summary.mostImpactfulService;
+    const serviceSentence = topService && Number(topService.clinicalValueShare || 0) > 0
+      ? ` ${topService.serviceName} accounted for ${Formatting.number(topService.clinicalValueShare, 1)}% of the total estimated value.`
       : "";
-    return `During ${periodLabel}, ${activityText} Using national reference rates, the estimated total value was ${totalText}, ${valueText}${serviceText}`;
+
+    if (serviceCount > 0) {
+      return `${clinicName} reported ${Formatting.number(serviceCount, 0)} clinical services during ${periodLabel}. Using national reference rates, the estimated value of this care was ${totalText}.${serviceSentence}`;
+    }
+
+    return `${clinicName} reported clinical activity during ${periodLabel}. Using national reference rates, the estimated value of this care was ${totalText}.`;
   }
 
   function _buildCard(label, value, note, variant, share = 0) {
@@ -410,7 +414,7 @@ const ImpactSummaryView = (() => {
     section.innerHTML = `
       <div class="service-ranking__header">
         <div>
-          <h2 class="summary-section__heading" id="service-ranking-heading">${AppCopy.summaryView.rankTitle}</h2>
+          <h2 class="summary-section__heading" id="service-ranking-heading">Top services by estimated value</h2>
           <p class="summary-section__intro">${AppCopy.summaryView.rankIntro}</p>
         </div>
         <div class="service-ranking__controls" role="group" aria-label="Show services by">
@@ -423,9 +427,13 @@ const ImpactSummaryView = (() => {
     `;
 
     const tableWrap = section.querySelector(".service-ranking__table-wrap");
+    const title = section.querySelector("#service-ranking-heading");
     const buttons = section.querySelectorAll("[data-ranking-mode]");
     const renderRows = (mode) => {
       const rows = ranking[mode === "visits" ? "byVisits" : "byValue"];
+      title.textContent = mode === "visits"
+        ? "Top services by number reported"
+        : "Top services by estimated value";
       tableWrap.innerHTML = `
         <table class="rate-table service-ranking__table" aria-label="Clinical service impact ranking">
           <thead>
@@ -488,7 +496,7 @@ const ImpactSummaryView = (() => {
         ${_buildMetric("Reported clinic cost", Formatting.currency(summary.reportingPeriodClinicCost), "Total clinic cost reported for this period.")}
         ${_buildMetric("Estimated total value", Formatting.currency(summary.totalEstimatedValue), totalValueNote)}
         ${_buildMetric(AppCopy.summaryView.valuePerDollarLabel, `$${ratioText}`, "Estimated value for every $1 of reported clinic cost.")}
-        ${_buildMetric(AppCopy.summaryView.benchmarkComparisonLabel, `${benchmarkPercent}% ${benchmarkDirection}`, "The estimated total value compared with the reported clinic cost.")}
+        ${_buildMetric(AppCopy.summaryView.benchmarkComparisonLabel, `${benchmarkPercent}% ${benchmarkDirection}`, "The estimated total value provided by the clinic compared with the reported clinic cost.")}
       </div>
       <p class="summary-section__note">${AppCopy.summary.costComparisonNote}</p>
     `;

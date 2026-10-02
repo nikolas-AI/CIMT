@@ -352,8 +352,16 @@ const ExportService = (() => {
 <html lang="en"><head><meta charset="UTF-8">
 <title>Impact Summary — ${summary.clinicName}</title>
 <style>
-  @page { margin: 0; }
-  body { font-family: Arial, sans-serif; max-width: 720px; margin: 40px auto; color: #1A2340; font-size: 13px; }
+  @page { size: A4 portrait; margin: 0.5in; }
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 720px;
+    margin: 40px auto;
+    color: #1A2340;
+    font-size: 13px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
   h1 { font-size: 1.6em; margin-bottom: 4px; }
   h2 { font-size: 1em; text-transform: uppercase; letter-spacing: 0.06em; color: #8492B0; margin: 24px 0 8px; border-bottom: 1px solid #DDE2EE; padding-bottom: 4px; }
   .total { font-size: 2.5em; font-weight: bold; color: #1A2340; margin: 8px 0 4px; }
@@ -374,14 +382,14 @@ const ExportService = (() => {
 <p style="color:#475C8A;margin:0 0 12px">Reporting period: ${_formatDate(summary.reportingPeriodFrom)} - ${_formatDate(summary.reportingPeriodTo)}</p>
 <h1 style="font-family:Georgia,serif">${AppCopy.exportCopy.pdfTitle}</h1>
 <p class="total">${_fmt(summary.totalEstimatedValue)}</p>
-<p class="label">${summary.impactMethod === "volunteerHours" ? "Estimated value of volunteer time" : "Estimated value of clinical services"}</p>
+<p class="label">${summary.impactMethod === "volunteerHours" ? "Estimated value of volunteer time" : "Estimated value of clinical services provded"}</p>
 <p class="label">Calculation option: ${_methodLabel(summary.impactMethod)}</p>
 <table class="kpi-table"><tbody><tr><th>${activityLabel}</th><td>${activityCount}</td><th>Estimate basis</th><td>${estimateBasis}</td></tr></tbody></table>
 <p class="disclaimer">${AppCopy.summary.shortDisclaimer}</p>
 ${serviceImpactHTML}
 ${serviceRankingHTML}
 ${budgetHTML}
-${summary.impactMethod === "clinicalServices" ? `<h2>Clinical Services</h2>
+${summary.impactMethod === "clinicalServices" ? `<h2>Breakdown of Clinical Services</h2>
 <table><thead><tr><th>Service</th><th>Service code</th><th style="text-align:right">Number reported</th><th style="text-align:right">Reference rate</th><th style="text-align:right">Estimated value</th></tr></thead>
 <tbody>${svcRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Clinical services total</th><th style="text-align:right">${_fmt(summary.clinicalServiceValue)}</th></tr></tfoot></table>` : ""}
 ${summary.impactMethod === "volunteerHours" ? `<h2>Volunteer Time</h2>

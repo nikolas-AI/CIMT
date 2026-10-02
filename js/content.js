@@ -175,7 +175,7 @@ const AppCopy = (() => {
     costIntro: (cost) => `You reported ${Formatting.currency(cost)} in clinic costs for this period. The report compares that cost with the estimated value of the activity entered here.`,
     valuePerDollarLabel: "Estimated value for each $1 of clinic cost",
     valuePerDollarText: (ratio) => `For every $1 in reported clinic cost, the activity entered here has an estimated value of ${Formatting.currency(ratio)}.`,
-    benchmarkComparisonLabel: "Cost and estimated value comparison",
+    benchmarkComparisonLabel: "Estimated value and cost comparison",
     benchmarkComparisonText: (percentDifference, direction) => `The estimated total value was ${Formatting.number(percentDifference, 1)}% ${direction} than the reported clinic cost.`,
     fundingTitle: "Ways to use this summary",
     fundingBullets: [
@@ -240,7 +240,7 @@ const AppCopy = (() => {
       total: "Estimated Value",
       volunteerValue: "Estimated Value of Volunteer Time",
       cost: "Reported Clinic Cost",
-      roi: "Cost and Estimated Value Comparison",
+      roi: "Estimated Value and Cost Comparison",
       valuePerDollar: "Estimated Value per $1 of Reported Cost",
     },
   };

@@ -21,14 +21,14 @@
   const TESTING_DEFAULTS_ENABLED = true;
   const TESTING_DEFAULTS = {
     clinic: {
-      name: "Testing Community Clinic",
+      name: "TXST Clinic",
       streetAddress: "123 Main Street",
       city: "Austin",
       state: "TX",
       zipCode: "78701",
       reportingPeriodFrom: "2026-01-01",
       reportingPeriodTo: "2026-06-30",
-      reportingPeriodClinicCost: 25000,
+      reportingPeriodClinicCost: 15000,
     },
     impactMethod: "clinicalServices",
     volunteers: [],
