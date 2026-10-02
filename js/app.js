@@ -18,7 +18,7 @@
   // reads values from it when it is drawn, and writes new values back into it.
   // -----------------------------------------------------------------
   // Set to false when the estimator is ready for normal blank starts.
-  const TESTING_DEFAULTS_ENABLED = true;
+  const TESTING_DEFAULTS_ENABLED = false;
   const TESTING_DEFAULTS = {
     clinic: {
       name: "Testing Community Clinic",
