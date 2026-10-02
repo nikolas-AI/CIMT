@@ -91,11 +91,6 @@ const ExportService = (() => {
     let visitRankingHeaderRow = null;
     let visitRankingEndRow = null;
     if (summary.impactMethod === "clinicalServices") {
-      rows.push(["Service with the Highest Estimated Value"]);
-      rows.push(summary.mostImpactfulService
-        ? ["Service", summary.mostImpactfulService.serviceName, "Number Reported", summary.mostImpactfulService.count, summary.mostImpactfulService.estimatedValue]
-        : ["No clinical services were reported for this period."]);
-      rows.push(["About This List", AppCopy.summary.rankingNote]);
       rows.push([]);
       valueRankingSectionRow = rows.length;
       rows.push(["Services by Estimated Value"]);
@@ -156,38 +151,92 @@ const ExportService = (() => {
 
     const sheet = XLSX.utils.aoa_to_sheet(rows);
     sheet["!cols"] = [
-      { wch: 34 }, { wch: 22 }, { wch: 14 }, { wch: 20 }, { wch: 20 },
+      { wch: 30 }, { wch: 18 }, { wch: 16 }, { wch: 22 }, { wch: 32 },
     ];
-    const serviceImpactSectionRow = summary.impactMethod === "clinicalServices"
-      ? rows.findIndex(row => row[0] === "Most Impactful Reported Service")
-      : null;
-    sheet["!merges"] = [
-      ...[0, ...(budgetSectionRow === null ? [] : [budgetSectionRow]), ...(serviceImpactSectionRow === null ? [] : [serviceImpactSectionRow]),
-        ...(valueRankingSectionRow === null ? [] : [valueRankingSectionRow]), ...(visitRankingSectionRow === null ? [] : [visitRankingSectionRow]), ...(clinicalSectionRow === null ? [] : [clinicalSectionRow]), ...(volunteerSectionRow === null ? [] : [volunteerSectionRow]),
-        disclaimerSectionRow, disclaimerRow]
-        .map(row => ({ s: { r: row, c: 0 }, e: { r: row, c: 4 } })),
-    ];
+    sheet["!rows"] = rows.map((_, index) => ({ hpx: index === 0 ? 28 : 18 }));
+    sheet["!autofilter"] = { ref: `A1:E${rows.length}` };
+    sheet["!freeze"] = { xSplit: 0, ySplit: 1, topLeftCell: "A2", activePane: "bottomLeft", frozen: true };
 
-    const boldRows = [0, ...(serviceImpactSectionRow === null ? [] : [serviceImpactSectionRow]), ...(valueRankingSectionRow === null ? [] : [valueRankingSectionRow, valueRankingHeaderRow]),
-      ...(visitRankingSectionRow === null ? [] : [visitRankingSectionRow, visitRankingHeaderRow]), ...(clinicalSectionRow === null ? [] : [clinicalSectionRow]), ...(clinicalHeaderRow === null ? [] : [clinicalHeaderRow, clinicalTotalRow]),
-      ...(volunteerSectionRow === null ? [] : [volunteerSectionRow, volunteerHeaderRow, volunteerTotalRow, nonMedicalVolunteerTotalRow]), disclaimerSectionRow];
+    const serviceImpactSectionRow = summary.impactMethod === "clinicalServices"
+      ? rows.findIndex(row => row[0] === "Service with the Highest Estimated Value")
+      : null;
+
+    const mergeRows = [
+      0,
+      ...(budgetSectionRow === null ? [] : [budgetSectionRow]),
+      ...(serviceImpactSectionRow !== null && serviceImpactSectionRow >= 0 ? [serviceImpactSectionRow] : []),
+      ...(valueRankingSectionRow === null ? [] : [valueRankingSectionRow]),
+      ...(visitRankingSectionRow === null ? [] : [visitRankingSectionRow]),
+      ...(clinicalSectionRow === null ? [] : [clinicalSectionRow]),
+      ...(volunteerSectionRow === null ? [] : [volunteerSectionRow]),
+      disclaimerSectionRow,
+      disclaimerRow,
+    ].filter((row) => Number.isInteger(row) && row >= 0);
+    sheet["!merges"] = mergeRows.map(row => ({ s: { r: row, c: 0 }, e: { r: row, c: 4 } }));
+
+    const boldRows = [
+      0,
+      ...(serviceImpactSectionRow !== null && serviceImpactSectionRow >= 0 ? [serviceImpactSectionRow] : []),
+      ...(valueRankingSectionRow === null ? [] : [valueRankingSectionRow, valueRankingHeaderRow]),
+      ...(visitRankingSectionRow === null ? [] : [visitRankingSectionRow, visitRankingHeaderRow]),
+      ...(clinicalSectionRow === null ? [] : [clinicalSectionRow]),
+      ...(clinicalHeaderRow === null ? [] : [clinicalHeaderRow, clinicalTotalRow]),
+      ...(volunteerSectionRow === null ? [] : [volunteerSectionRow, volunteerHeaderRow, volunteerTotalRow, nonMedicalVolunteerTotalRow]),
+      disclaimerSectionRow,
+    ].filter((row) => Number.isInteger(row) && row >= 0);
     if (budgetSectionRow !== null) boldRows.push(budgetSectionRow);
+
     const styleRow = (rowIndex, style) => {
       for (let columnIndex = 0; columnIndex < 5; columnIndex += 1) {
         const cell = sheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })];
-        if (cell) cell.s = style;
+        if (cell) cell.s = { ...(cell.s || {}), ...style };
       }
     };
-    boldRows.forEach(rowIndex => styleRow(rowIndex, { font: { bold: true } }));
+
+    const sectionStyle = { font: { bold: true }, fill: { fgColor: { rgb: "D9EAF7" } }, alignment: { vertical: "center", wrapText: false, horizontal: "left" } };
+    const headerStyle = { font: { bold: true }, fill: { fgColor: { rgb: "EAF2F8" } }, border: { top: { style: "thin", color: { rgb: "D0D7DE" } }, bottom: { style: "thin", color: { rgb: "D0D7DE" } }, left: { style: "thin", color: { rgb: "D0D7DE" } }, right: { style: "thin", color: { rgb: "D0D7DE" } } }, alignment: { vertical: "center", wrapText: false, horizontal: "left" } };
+
+    boldRows.forEach(rowIndex => styleRow(rowIndex, sectionStyle));
+
+    const headerRows = [
+      ...(valueRankingHeaderRow === null ? [] : [valueRankingHeaderRow]),
+      ...(visitRankingHeaderRow === null ? [] : [visitRankingHeaderRow]),
+      ...(clinicalHeaderRow === null ? [] : [clinicalHeaderRow]),
+      ...(volunteerHeaderRow === null ? [] : [volunteerHeaderRow]),
+    ].filter((row) => Number.isInteger(row) && row >= 0);
+    headerRows.forEach(rowIndex => styleRow(rowIndex, headerStyle));
+
+    [volunteerHeaderRow, volunteerTotalRow, nonMedicalVolunteerTotalRow].filter((row) => Number.isInteger(row) && row >= 0).forEach(rowIndex => {
+      if (!sheet["!rows"]) sheet["!rows"] = [];
+      sheet["!rows"][rowIndex] = { hpx: 24 };
+      for (let columnIndex = 0; columnIndex < 5; columnIndex += 1) {
+        const cell = sheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })];
+        if (!cell) continue;
+        cell.s = {
+          ...(cell.s || {}),
+          alignment: {
+            ...(cell.s && cell.s.alignment ? cell.s.alignment : {}),
+            wrapText: false,
+            vertical: "center",
+            horizontal: columnIndex === 0 ? "left" : "right",
+          },
+        };
+      }
+    });
+
     [1, 2, 3, 4].forEach(rowIndex => {
       const cell = sheet[XLSX.utils.encode_cell({ r: rowIndex, c: 0 })];
-      if (cell) cell.s = { font: { bold: true } };
+      if (cell) cell.s = { ...(cell.s || {}), font: { bold: true } };
     });
-    sheet["A1"].s = { font: { bold: true, sz: 16 }, alignment: { horizontal: "left" } };
-    sheet[XLSX.utils.encode_cell({ r: disclaimerRow, c: 0 })].s = {
-      font: { italic: true, color: { rgb: "475C8A" } },
-      alignment: { wrapText: true },
-    };
+    if (sheet["A1"]) {
+      sheet["A1"].s = { font: { bold: true, sz: 16 }, fill: { fgColor: { rgb: "EAF2F8" } }, alignment: { horizontal: "left", vertical: "center" } };
+    }
+    if (sheet[XLSX.utils.encode_cell({ r: disclaimerRow, c: 0 })]) {
+      sheet[XLSX.utils.encode_cell({ r: disclaimerRow, c: 0 })].s = {
+        font: { italic: true, color: { rgb: "475C8A" } },
+        alignment: { wrapText: true },
+      };
+    }
 
     // Keep monetary cells numeric for Excel calculations while displaying them
     // with a dollar sign and two decimal places in the downloaded workbook.
