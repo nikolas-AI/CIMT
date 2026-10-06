@@ -47,6 +47,7 @@ const ImpactActivityView = (() => {
       countStep: 0.5,
       addLabel: AppCopy.volunteer.addLabel,
       allowDuplicates: false,
+      searchable: true,
       entries: (state.volunteers || []).map(entry => ({
         id: entry.id || _uid(),
         selectValue: entry.roleId || "",
