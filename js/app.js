@@ -18,7 +18,7 @@
   // reads values from it when it is drawn, and writes new values back into it.
   // -----------------------------------------------------------------
   // Set to false when the estimator is ready for normal blank starts.
-  const TESTING_DEFAULTS_ENABLED = false;
+  const TESTING_DEFAULTS_ENABLED = true;
   const TESTING_DEFAULTS = {
     clinic: {
       name: "TXST Clinic",
@@ -33,8 +33,8 @@
     impactMethod: "clinicalServices",
     volunteers: [],
     services: [
-      { id: "test-service-1", serviceId: "established-patient-office-visit-low-complexity-20-minutes-99213", count: 25 },
-      { id: "test-service-2", serviceId: "vaccine-administration-by-injection-first-vaccine-90471", count: 40 },
+      { id: "test-service-1", serviceId: "99213", count: 25 },
+      { id: "test-service-2", serviceId: "90471", count: 40 },
     ],
   };
 

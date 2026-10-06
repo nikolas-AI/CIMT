@@ -163,8 +163,8 @@ const Calculator = (() => {
           code:           svc.code,
           codeSystem:     svc.codeSystem,
           count:          count,
-          benchmarkRate:  svc.benchmarkRateUSD,
-          estimatedValue: count * svc.benchmarkRateUSD,
+          benchmarkRate:  svc.referenceRateUSD,
+          estimatedValue: count * svc.referenceRateUSD,
         };
       })
       .filter(Boolean);
