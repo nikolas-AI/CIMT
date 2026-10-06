@@ -12,23 +12,128 @@
 
 // -----------------------------------------------------------------
 // VOLUNTEER ROLES
-// Each role has an id, display label, category, and benchmark hourly rate.
-// The rate source is documented in VOLUNTEER_RATE_SOURCE below.
+// Each role has an id, display label, category, benchmark hourly rate, and BLS
+// occupation metadata. Roles without a direct rate use the national volunteer
+// hour value described in VOLUNTEER_RATE_SOURCE below.
 // -----------------------------------------------------------------
-// Every catalog item uses a stable id for saved state, a displayName for the
-// UI, and an active flag so an item can be retired without deleting old data.
-// Every catalog item has a stable id for saved answers, a display name for the
-// screen, and an active flag so an item can be retired without deleting history.
+// The active flag controls whether a role is offered in the tool.
 const VOLUNTEER_ROLES = [
-  { id: "physician",        displayName: "Physician (MD/DO)",        category: "medicalProfessional", benchmarkRateUSD: 120.00, active: true },
-  { id: "np-pa",            displayName: "Nurse Practitioner / PA",  category: "medicalProfessional", benchmarkRateUSD: 75.00,  active: true },
-  { id: "rn",               displayName: "Registered Nurse (RN)",    category: "medicalProfessional", benchmarkRateUSD: 45.00,  active: true },
-  { id: "pharmacist",       displayName: "Pharmacist",               category: "medicalProfessional", benchmarkRateUSD: 65.00,  active: true },
-  { id: "medical-student",  displayName: "Medical Student",          category: "medicalProfessional", benchmarkRateUSD: 20.00,  active: true },
-  { id: "nursing-student",  displayName: "Nursing Student",          category: "medicalProfessional", benchmarkRateUSD: 18.00,  active: true },
-  { id: "pharmacy-student", displayName: "Pharmacy Student",         category: "medicalProfessional", benchmarkRateUSD: 18.00,  active: true },
-  { id: "admin",            displayName: "Administrative Volunteer", category: "nonMedical",          benchmarkRateUSD: 16.00,  active: true },
-  { id: "other",            displayName: "Other Volunteer",          category: "nonMedical",          benchmarkRateUSD: 14.00,  active: true },
+  { id: "medical-director", displayName: "Medical Director", category: "medical professional", benchmarkRateUSD: 67.77, occupationCode: "11-9111", blsOccupationName: "Medical and Health Services Managers", active: true },
+  { id: "family-medicine-physician", displayName: "Family Medicine Physician", category: "medical professional", benchmarkRateUSD: 122.99, occupationCode: "29-1215", blsOccupationName: "Family Medicine Physicians", active: true },
+  { id: "general-internal-medicine-physician", displayName: "General Internal Medicine Physician", category: "medical professional", benchmarkRateUSD: 128.46, occupationCode: "29-1216", blsOccupationName: "General Internal Medicine Physicians", active: true },
+  { id: "pediatrician", displayName: "Pediatrician", category: "medical professional", benchmarkRateUSD: 101.98, occupationCode: "29-1221", blsOccupationName: "Pediatricians, General", active: true },
+  { id: "obstetrician-gynecologist", displayName: "Obstetrician-Gynecologist", category: "medical professional", benchmarkRateUSD: 134.16, occupationCode: "29-1218", blsOccupationName: "Obstetricians and Gynecologists", active: true },
+  { id: "psychiatrist", displayName: "Psychiatrist", category: "medical professional", benchmarkRateUSD: 129.78, occupationCode: "29-1223", blsOccupationName: "Psychiatrists", active: true },
+  { id: "emergency-medicine-physician", displayName: "Emergency Medicine Physician", category: "medical professional", benchmarkRateUSD: 152.64, occupationCode: "29-1214", blsOccupationName: "Emergency Medicine Physicians", active: true },
+  { id: "cardiologist", displayName: "Cardiologist", category: "medical professional", benchmarkRateUSD: 218.72, occupationCode: "29-1212", blsOccupationName: "Cardiologists", active: true },
+  { id: "dermatologist", displayName: "Dermatologist", category: "medical professional", benchmarkRateUSD: 155.55, occupationCode: "29-1213", blsOccupationName: "Dermatologists", active: true },
+  { id: "endocrinologist", displayName: "Endocrinologist", category: "medical professional", benchmarkRateUSD: 125.98, occupationCode: "29-1229", blsOccupationName: "Physicians, All Other", active: true },
+  { id: "gastroenterologist", displayName: "Gastroenterologist", category: "medical professional", benchmarkRateUSD: 125.98, occupationCode: "29-1229", blsOccupationName: "Physicians, All Other", active: true },
+  { id: "neurologist", displayName: "Neurologist", category: "medical professional", benchmarkRateUSD: 128.67, occupationCode: "29-1217", blsOccupationName: "Neurologists", active: true },
+  { id: "ophthalmologist", displayName: "Ophthalmologist", category: "medical professional", benchmarkRateUSD: 146.47, occupationCode: "29-1241", blsOccupationName: "Ophthalmologists, Except Pediatric", active: true },
+  { id: "orthopedic-surgeon", displayName: "Orthopedic Surgeon", category: "medical professional", benchmarkRateUSD: 179.60, occupationCode: "29-1242", blsOccupationName: "Orthopedic Surgeons, Except Pediatric", active: true },
+  { id: "pulmonologist", displayName: "Pulmonologist", category: "medical professional", benchmarkRateUSD: 125.98, occupationCode: "29-1229", blsOccupationName: "Physicians, All Other", active: true },
+  { id: "rheumatologist", displayName: "Rheumatologist", category: "medical professional", benchmarkRateUSD: 125.98, occupationCode: "29-1229", blsOccupationName: "Physicians, All Other", active: true },
+  { id: "general-surgeon", displayName: "General Surgeon", category: "medical professional", benchmarkRateUSD: 179.78, occupationCode: "29-1249", blsOccupationName: "Surgeons, All Other", active: true },
+  { id: "other-physician-specialist", displayName: "Other Physician Specialist", category: "medical professional", benchmarkRateUSD: 125.98, occupationCode: "29-1229", blsOccupationName: "Physicians, All Other", active: true },
+  { id: "nurse-practitioner", displayName: "Nurse Practitioner", category: "medical professional", benchmarkRateUSD: 66.01, occupationCode: "29-1171", blsOccupationName: "Nurse Practitioners", active: true },
+  { id: "physician-assistant", displayName: "Physician Assistant", category: "medical professional", benchmarkRateUSD: 67.92, occupationCode: "29-1071", blsOccupationName: "Physician Assistants", active: true },
+  { id: "registered-nurse", displayName: "Registered Nurse", category: "medical professional", benchmarkRateUSD: 48.76, occupationCode: "29-1141", blsOccupationName: "Registered Nurses", active: true },
+  { id: "triage-nurse", displayName: "Triage Nurse", category: "medical professional", benchmarkRateUSD: 48.76, occupationCode: "29-1141", blsOccupationName: "Registered Nurses", active: true },
+  { id: "nurse-case-manager", displayName: "Nurse Case Manager", category: "medical professional", benchmarkRateUSD: 48.76, occupationCode: "29-1141", blsOccupationName: "Registered Nurses", active: true },
+  { id: "licensed-vocational-nurse", displayName: "Licensed Vocational Nurse", category: "medical professional", benchmarkRateUSD: 32.24, occupationCode: "29-2061", blsOccupationName: "Licensed Practical and Licensed Vocational Nurses", active: true },
+  { id: "licensed-practical-nurse", displayName: "Licensed Practical Nurse", category: "medical professional", benchmarkRateUSD: 32.24, occupationCode: "29-2061", blsOccupationName: "Licensed Practical and Licensed Vocational Nurses", active: true },
+  { id: "certified-nurse-midwife", displayName: "Certified Nurse Midwife", category: "medical professional", benchmarkRateUSD: 65.86, occupationCode: "29-1161", blsOccupationName: "Nurse Midwives", active: true },
+  { id: "nurse-anesthetist", displayName: "Nurse Anesthetist", category: "medical professional", benchmarkRateUSD: 119.38, occupationCode: "29-1151", blsOccupationName: "Nurse Anesthetists", active: true },
+  { id: "nurse-educator", displayName: "Nurse Educator", category: "medical professional", benchmarkRateUSD: 36.14, occupationCode: "25-1072", blsOccupationName: "Nursing Instructors and Teachers, Postsecondary", active: true },
+  { id: "clinical-psychologist", displayName: "Clinical Psychologist", category: "medical professional", benchmarkRateUSD: 54.21, occupationCode: "19-3033", blsOccupationName: "Clinical and Counseling Psychologists", active: true },
+  { id: "licensed-professional-counselor", displayName: "Licensed Professional Counselor", category: "medical professional", benchmarkRateUSD: 30.98, occupationCode: "21-1018", blsOccupationName: "Substance Abuse, Behavioral Disorder, and Mental Health Counselors", active: true },
+  { id: "licensed-clinical-social-worker", displayName: "Licensed Clinical Social Worker", category: "medical professional", benchmarkRateUSD: 34.51, occupationCode: "21-1022", blsOccupationName: "Healthcare Social Workers", active: true },
+  { id: "marriage-and-family-therapist", displayName: "Marriage and Family Therapist", category: "medical professional", benchmarkRateUSD: 37.00, occupationCode: "21-1013", blsOccupationName: "Marriage and Family Therapists", active: true },
+  { id: "substance-use-counselor", displayName: "Substance Use Counselor", category: "medical professional", benchmarkRateUSD: 30.98, occupationCode: "21-1018", blsOccupationName: "Substance Abuse, Behavioral Disorder, and Mental Health Counselors", active: true },
+  { id: "healthcare-social-worker", displayName: "Healthcare Social Worker", category: "medical professional", benchmarkRateUSD: 34.51, occupationCode: "21-1022", blsOccupationName: "Healthcare Social Workers", active: true },
+  { id: "case-manager", displayName: "Case Manager", category: "medical professional", benchmarkRateUSD: 34.51, occupationCode: "21-1022", blsOccupationName: "Healthcare Social Workers", active: true },
+  { id: "peer-support-specialist", displayName: "Peer Support Specialist", category: "medical professional", benchmarkRateUSD: 27.01, occupationCode: "21-1094", blsOccupationName: "Community Health Workers", active: true },
+  { id: "pharmacist", displayName: "Pharmacist", category: "medical professional", benchmarkRateUSD: 67.75, occupationCode: "29-1051", blsOccupationName: "Pharmacists", active: true },
+  { id: "pharmacy-technician", displayName: "Pharmacy Technician", category: "medical professional", benchmarkRateUSD: 22.41, occupationCode: "29-2052", blsOccupationName: "Pharmacy Technicians", active: true },
+  { id: "medication-assistance-program-coordinator", displayName: "Medication Assistance Program Coordinator", category: "medical professional", benchmarkRateUSD: 27.01, occupationCode: "21-1094", blsOccupationName: "Community Health Workers", active: true },
+  { id: "dentist", displayName: "Dentist", category: "medical professional", benchmarkRateUSD: 91.99, occupationCode: "29-1021", blsOccupationName: "Dentists, General", active: true },
+  { id: "dental-hygienist", displayName: "Dental Hygienist", category: "medical professional", benchmarkRateUSD: 47.59, occupationCode: "29-1292", blsOccupationName: "Dental Hygienists", active: true },
+  { id: "dental-assistant", displayName: "Dental Assistant", category: "medical professional", benchmarkRateUSD: 24.13, occupationCode: "31-9091", blsOccupationName: "Dental Assistants", active: true },
+  { id: "optometrist", displayName: "Optometrist", category: "medical professional", benchmarkRateUSD: 68.05, occupationCode: "29-1041", blsOccupationName: "Optometrists", active: true },
+  { id: "optician", displayName: "Optician", category: "medical professional", benchmarkRateUSD: 24.89, occupationCode: "29-2081", blsOccupationName: "Opticians, Dispensing", active: true },
+  { id: "vision-screening-volunteer", displayName: "Vision Screening Volunteer", category: "medical professional", benchmarkRateUSD: 27.01, occupationCode: "21-1094", blsOccupationName: "Community Health Workers", active: true },
+  { id: "physical-therapist", displayName: "Physical Therapist", category: "medical professional", benchmarkRateUSD: 50.62, occupationCode: "29-1123", blsOccupationName: "Physical Therapists", active: true },
+  { id: "physical-therapist-assistant", displayName: "Physical Therapist Assistant", category: "medical professional", benchmarkRateUSD: 33.04, occupationCode: "31-2021", blsOccupationName: "Physical Therapist Assistants", active: true },
+  { id: "occupational-therapist", displayName: "Occupational Therapist", category: "medical professional", benchmarkRateUSD: 48.69, occupationCode: "29-1122", blsOccupationName: "Occupational Therapists", active: true },
+  { id: "occupational-therapy-assistant", displayName: "Occupational Therapy Assistant", category: "medical professional", benchmarkRateUSD: 33.99, occupationCode: "31-2011", blsOccupationName: "Occupational Therapy Assistants", active: true },
+  { id: "speech-language-pathologist", displayName: "Speech-Language Pathologist", category: "medical professional", benchmarkRateUSD: 47.20, occupationCode: "29-1127", blsOccupationName: "Speech-Language Pathologists", active: true },
+  { id: "audiologist", displayName: "Audiologist", category: "medical professional", benchmarkRateUSD: 46.99, occupationCode: "29-1181", blsOccupationName: "Audiologists", active: true },
+  { id: "respiratory-therapist", displayName: "Respiratory Therapist", category: "medical professional", benchmarkRateUSD: 41.97, occupationCode: "29-1126", blsOccupationName: "Respiratory Therapists", active: true },
+  { id: "dietitian", displayName: "Dietitian", category: "medical professional", benchmarkRateUSD: 37.08, occupationCode: "29-1031", blsOccupationName: "Dietitians and Nutritionists", active: true },
+  { id: "nutritionist", displayName: "Nutritionist", category: "medical professional", benchmarkRateUSD: 37.08, occupationCode: "29-1031", blsOccupationName: "Dietitians and Nutritionists", active: true },
+  { id: "chiropractor", displayName: "Chiropractor", category: "medical professional", benchmarkRateUSD: 43.52, occupationCode: "29-1011", blsOccupationName: "Chiropractors", active: true },
+  { id: "podiatrist", displayName: "Podiatrist", category: "medical professional", benchmarkRateUSD: 84.37, occupationCode: "29-1081", blsOccupationName: "Podiatrists", active: true },
+  { id: "health-education-specialist", displayName: "Health Education Specialist", category: "medical professional", benchmarkRateUSD: 35.23, occupationCode: "21-1091", blsOccupationName: "Health Education Specialists", active: true },
+  { id: "community-health-worker", displayName: "Community Health Worker", category: "medical professional", benchmarkRateUSD: 27.01, occupationCode: "21-1094", blsOccupationName: "Community Health Workers", active: true },
+  { id: "medical-assistant", displayName: "Medical Assistant", category: "medical professional", benchmarkRateUSD: 22.17, occupationCode: "31-9092", blsOccupationName: "Medical Assistants", active: true },
+  { id: "phlebotomist", displayName: "Phlebotomist", category: "medical professional", benchmarkRateUSD: 21.88, occupationCode: "31-9097", blsOccupationName: "Phlebotomists", active: true },
+  { id: "clinical-laboratory-technologist", displayName: "Clinical Laboratory Technologist", category: "medical professional", benchmarkRateUSD: 32.38, occupationCode: "29-2010", blsOccupationName: "Clinical Laboratory Technologists and Technicians", active: true },
+  { id: "clinical-laboratory-technician", displayName: "Clinical Laboratory Technician", category: "medical professional", benchmarkRateUSD: 32.38, occupationCode: "29-2010", blsOccupationName: "Clinical Laboratory Technologists and Technicians", active: true },
+  { id: "radiologic-technologist", displayName: "Radiologic Technologist", category: "medical professional", benchmarkRateUSD: 40.31, occupationCode: "29-2034", blsOccupationName: "Radiologic Technologists and Technicians", active: true },
+  { id: "diagnostic-medical-sonographer", displayName: "Diagnostic Medical Sonographer", category: "medical professional", benchmarkRateUSD: 46.75, occupationCode: "29-2032", blsOccupationName: "Diagnostic Medical Sonographers", active: true },
+  { id: "cardiovascular-technologist", displayName: "Cardiovascular Technologist", category: "medical professional", benchmarkRateUSD: 36.99, occupationCode: "29-2031", blsOccupationName: "Cardiovascular Technologists and Technicians", active: true },
+  { id: "emergency-medical-technician", displayName: "Emergency Medical Technician", category: "medical professional", benchmarkRateUSD: 22.52, occupationCode: "29-2042", blsOccupationName: "Emergency Medical Technicians", active: true },
+  { id: "paramedic", displayName: "Paramedic", category: "medical professional", benchmarkRateUSD: 30.46, occupationCode: "29-2043", blsOccupationName: "Paramedics", active: true },
+  { id: "medical-records-specialist", displayName: "Medical Records Specialist", category: "medical professional", benchmarkRateUSD: 27.30, occupationCode: "29-2072", blsOccupationName: "Medical Records Specialists", active: true },
+  { id: "health-information-technologist", displayName: "Health Information Technologist", category: "medical professional", benchmarkRateUSD: 36.04, occupationCode: "29-9021", blsOccupationName: "Health Information Technologists and Medical Registrars", active: true },
+  { id: "medical-scribe", displayName: "Medical Scribe", category: "medical professional", benchmarkRateUSD: 22.50, occupationCode: "43-6013", blsOccupationName: "Medical Secretaries and Administrative Assistants", active: true },
+  { id: "medical-interpreter", displayName: "Medical Interpreter", category: "medical professional", benchmarkRateUSD: 31.90, occupationCode: "27-3091", blsOccupationName: "Interpreters and Translators", active: true },
+  { id: "american-sign-language-interpreter", displayName: "American Sign Language Interpreter", category: "non medical", benchmarkRateUSD: 31.90, occupationCode: "27-3091", blsOccupationName: "Interpreters and Translators", active: true },
+  { id: "patient-navigator", displayName: "Patient Navigator", category: "medical professional", benchmarkRateUSD: 27.01, occupationCode: "21-1094", blsOccupationName: "Community Health Workers", active: true },
+  { id: "patient-advocate", displayName: "Patient Advocate", category: "medical professional", benchmarkRateUSD: 27.01, occupationCode: "21-1094", blsOccupationName: "Community Health Workers", active: true },
+  { id: "benefits-enrollment-counselor", displayName: "Benefits Enrollment Counselor", category: "medical professional", benchmarkRateUSD: 27.01, occupationCode: "21-1094", blsOccupationName: "Community Health Workers", active: true },
+  { id: "eligibility-screener", displayName: "Eligibility Screener", category: "medical professional", benchmarkRateUSD: 22.71, occupationCode: "43-4111", blsOccupationName: "Interviewers, Except Eligibility and Loan", active: true },
+  { id: "referral-coordinator", displayName: "Referral Coordinator", category: "medical professional", benchmarkRateUSD: 22.50, occupationCode: "43-6013", blsOccupationName: "Medical Secretaries and Administrative Assistants", active: true },
+  { id: "care-coordinator", displayName: "Care Coordinator", category: "medical professional", benchmarkRateUSD: 34.51, occupationCode: "21-1022", blsOccupationName: "Healthcare Social Workers", active: true },
+  { id: "community-outreach-volunteer", displayName: "Community Outreach Volunteer", category: "medical professional", benchmarkRateUSD: 27.01, occupationCode: "21-1094", blsOccupationName: "Community Health Workers", active: true },
+  { id: "volunteer-coordinator", displayName: "Volunteer Coordinator", category: "non medical", benchmarkRateUSD: 42.73, occupationCode: "11-9151", blsOccupationName: "Social and Community Service Managers", active: true },
+  { id: "clinic-manager", displayName: "Clinic Manager", category: "medical professional", benchmarkRateUSD: 67.77, occupationCode: "11-9111", blsOccupationName: "Medical and Health Services Managers", active: true },
+  { id: "front-desk-receptionist", displayName: "Front Desk Receptionist", category: "non medical", benchmarkRateUSD: 18.97, occupationCode: "43-4171", blsOccupationName: "Receptionists and Information Clerks", active: true },
+  { id: "patient-registration-volunteer", displayName: "Patient Registration Volunteer", category: "non medical", benchmarkRateUSD: 18.97, occupationCode: "43-4171", blsOccupationName: "Receptionists and Information Clerks", active: true },
+  { id: "appointment-scheduler", displayName: "Appointment Scheduler", category: "non medical", benchmarkRateUSD: 22.50, occupationCode: "43-6013", blsOccupationName: "Medical Secretaries and Administrative Assistants", active: true },
+  { id: "administrative-assistant", displayName: "Administrative Assistant", category: "non medical", benchmarkRateUSD: 23.73, occupationCode: "43-6014", blsOccupationName: "Secretaries and Administrative Assistants, Except Legal, Medical, and Executive", active: true },
+  { id: "data-entry-volunteer", displayName: "Data Entry Volunteer", category: "non medical", benchmarkRateUSD: 20.82, occupationCode: "43-9021", blsOccupationName: "Data Entry Keyers", active: true },
+  { id: "medical-billing-and-coding-volunteer", displayName: "Medical Billing and Coding Volunteer", category: "medical professional", benchmarkRateUSD: 27.30, occupationCode: "29-2072", blsOccupationName: "Medical Records Specialists", active: true },
+  { id: "finance-bookkeeping-volunteer", displayName: "Finance / Bookkeeping Volunteer", category: "non medical", benchmarkRateUSD: 25.75, occupationCode: "43-3031", blsOccupationName: "Bookkeeping, Accounting, and Auditing Clerks", active: true },
+  { id: "grant-writer", displayName: "Grant Writer", category: "non medical", benchmarkRateUSD: 41.39, occupationCode: "27-3043", blsOccupationName: "Writers and Authors", active: true },
+  { id: "fundraising-volunteer", displayName: "Fundraising Volunteer", category: "non medical", benchmarkRateUSD: 37.12, occupationCode: "13-1131", blsOccupationName: "Fundraisers", active: true },
+  { id: "communications-marketing-volunteer", displayName: "Communications / Marketing Volunteer", category: "non medical", benchmarkRateUSD: 40.44, occupationCode: "27-3031", blsOccupationName: "Public Relations Specialists", active: true },
+  { id: "human-resources-volunteer", displayName: "Human Resources Volunteer", category: "non medical", benchmarkRateUSD: 39.42, occupationCode: "13-1071", blsOccupationName: "Human Resources Specialists", active: true },
+  { id: "legal-counsel", displayName: "Legal Counsel", category: "non medical", benchmarkRateUSD: 89.35, occupationCode: "23-1011", blsOccupationName: "Lawyers", active: true },
+  { id: "information-technology-volunteer", displayName: "Information Technology Volunteer", category: "non medical", benchmarkRateUSD: 32.37, occupationCode: "15-1232", blsOccupationName: "Computer User Support Specialists", active: true },
+  { id: "ehr-support-volunteer", displayName: "EHR Support Volunteer", category: "non medical", benchmarkRateUSD: 32.37, occupationCode: "15-1232", blsOccupationName: "Computer User Support Specialists", active: true },
+  { id: "facilities-maintenance-volunteer", displayName: "Facilities Maintenance Volunteer", category: "non medical", benchmarkRateUSD: 25.86, occupationCode: "49-9071", blsOccupationName: "Maintenance and Repair Workers, General", active: true },
+  { id: "custodial-environmental-services-volunteer", displayName: "Custodial / Environmental Services Volunteer", category: "non medical", benchmarkRateUSD: 18.64, occupationCode: "37-2011", blsOccupationName: "Janitors and Cleaners, Except Maids and Housekeeping Cleaners", active: true },
+  { id: "supply-and-inventory-volunteer", displayName: "Supply and Inventory Volunteer", category: "non medical", benchmarkRateUSD: 19.01, occupationCode: "53-7065", blsOccupationName: "Stockers and Order Fillers", active: true },
+  { id: "donation-intake-and-sorting-volunteer", displayName: "Donation Intake and Sorting Volunteer", category: "non medical", benchmarkRateUSD: 19.01, occupationCode: "53-7065", blsOccupationName: "Stockers and Order Fillers", active: true },
+  { id: "food-pantry-volunteer", displayName: "Food Pantry Volunteer", category: "non medical", benchmarkRateUSD: 16.96, occupationCode: "35-2021", blsOccupationName: "Food Preparation Workers", active: true },
+  { id: "driver", displayName: "Driver", category: "non medical", benchmarkRateUSD: 19.58, occupationCode: "53-3031", blsOccupationName: "Driver/Sales Workers", active: true },
+  { id: "security-volunteer", displayName: "Security Volunteer", category: "non medical", benchmarkRateUSD: 20.42, occupationCode: "33-9032", blsOccupationName: "Security Guards", active: true },
+  { id: "greeter", displayName: "Greeter", category: "non medical", benchmarkRateUSD: 18.97, occupationCode: "43-4171", blsOccupationName: "Receptionists and Information Clerks", active: true },
+  { id: "childcare-volunteer", displayName: "Childcare Volunteer", category: "non medical", benchmarkRateUSD: 16.84, occupationCode: "39-9011", blsOccupationName: "Childcare Workers", active: true },
+  { id: "event-volunteer", displayName: "Event Volunteer", category: "non medical", benchmarkRateUSD: 64.87, occupationCode: "11-1021", blsOccupationName: "General and Operations Managers", active: true },
+  { id: "board-member-advisor", displayName: "Board Member / Advisor", category: "non medical", benchmarkRateUSD: 64.87, occupationCode: "11-1021", blsOccupationName: "General and Operations Managers", active: true },
+  { id: "medical-student", displayName: "Medical Student", category: "medical professional", benchmarkRateUSD: 36.14, occupationCode: null, blsOccupationName: "General Volunteer / no direct BLS professional match", active: true },
+  { id: "resident-physician", displayName: "Resident Physician", category: "medical professional", benchmarkRateUSD: 125.98, occupationCode: "29-1229", blsOccupationName: "Physicians, All Other", active: true },
+  { id: "nursing-student", displayName: "Nursing Student", category: "medical professional", benchmarkRateUSD: 36.14, occupationCode: null, blsOccupationName: "General Volunteer / no direct BLS professional match", active: true },
+  { id: "physician-assistant-student", displayName: "Physician Assistant Student", category: "medical professional", benchmarkRateUSD: 36.14, occupationCode: null, blsOccupationName: "General Volunteer / no direct BLS professional match", active: true },
+  { id: "pharmacy-student", displayName: "Pharmacy Student", category: "medical professional", benchmarkRateUSD: 36.14, occupationCode: null, blsOccupationName: "General Volunteer / no direct BLS professional match", active: true },
+  { id: "dental-student", displayName: "Dental Student", category: "medical professional", benchmarkRateUSD: 36.14, occupationCode: null, blsOccupationName: "General Volunteer / no direct BLS professional match", active: true },
+  { id: "public-health-student", displayName: "Public Health Student", category: "medical professional", benchmarkRateUSD: 36.14, occupationCode: null, blsOccupationName: "General Volunteer / no direct BLS professional match", active: true },
+  { id: "social-work-student", displayName: "Social Work Student", category: "medical professional", benchmarkRateUSD: 36.14, occupationCode: null, blsOccupationName: "General Volunteer / no direct BLS professional match", active: true },
+  { id: "clinical-intern", displayName: "Clinical Intern", category: "medical professional", benchmarkRateUSD: 36.14, occupationCode: null, blsOccupationName: "General Volunteer / no direct BLS professional match", active: true },
+  { id: "general-volunteer", displayName: "General Volunteer", category: "non medical", benchmarkRateUSD: 36.14, occupationCode: null, blsOccupationName: "General Volunteer / no direct BLS professional match", active: true },
 ];
 
 // -----------------------------------------------------------------
@@ -119,17 +224,14 @@ const CLINICAL_SERVICES = [
 // Describes where the volunteer benchmark hourly values come from.
 // -----------------------------------------------------------------
 const VOLUNTEER_RATE_SOURCE = {
-  name: "Independent Sector / Do Good Institute",
-  publicationYear: 2025,
+  name: "U.S. Bureau of Labor Statistics; Independent Sector / Do Good Institute",
+  publicationYear: null,
   description:
-    "Volunteer contributions are assigned benchmark hourly values based on published volunteer " +
-    "labor valuation sources. The national average value of volunteer time ($36.14/hr for 2025 " +
-    "data) is published by Independent Sector and the Do Good Institute, derived from Bureau of " +
-    "Labor Statistics wage data plus fringe benefits. Skilled clinical volunteer roles are valued " +
-    "at higher replacement-cost rates consistent with guidance for grant applications and " +
-    "nonprofit accounting. These values represent an estimated economic value of donated time " +
-    "and are not wages paid by the clinic.",
-  url: "https://independentsector.org/research/value-of-volunteer-time/",
+    "Occupation-specific rates are hourly mean wages from U.S. Bureau of Labor Statistics " +
+    "occupational employment and wage data. Roles without an available occupation rate use the " +
+    "Current Estimated National Value of Each Volunteer Hour ($36.14). These values estimate " +
+    "the economic value of donated time and are not wages paid by the clinic.",
+  url: "https://www.bls.gov/oes/",
 };
 
 // -----------------------------------------------------------------
@@ -137,6 +239,14 @@ const VOLUNTEER_RATE_SOURCE = {
 // Data-driven list; never hard-code these into UI components.
 // -----------------------------------------------------------------
 const REFERENCES = [
+  {
+    id: "bls-oes",
+    title: "Occupational Employment and Wage Statistics",
+    organization: "U.S. Bureau of Labor Statistics",
+    description: "National occupational employment and hourly mean wage estimates.",
+    url: "https://www.bls.gov/oes/",
+    year: null,
+  },
   {
     id: "cms-pfs",
     title: "CMS Physician Fee Schedule Look-Up Tool",

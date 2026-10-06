@@ -44,7 +44,7 @@ const Calculator = (() => {
 
     const volunteerValue         = volunteerBreakdown.reduce((sum, r) => sum + r.estimatedValue, 0);
     const nonMedicalVolunteerValue = volunteerBreakdown
-      .filter(row => row.category === "nonMedical")
+      .filter(row => row.category === "non medical")
       .reduce((sum, row) => sum + row.estimatedValue, 0);
     const medicalProfessionalVolunteerValue = impactMethod === "volunteerHours"
       ? volunteerValue - nonMedicalVolunteerValue
