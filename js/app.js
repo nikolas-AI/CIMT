@@ -33,8 +33,8 @@
     impactMethod: "clinicalServices",
     volunteers: [],
     services: [
-      { id: "test-service-1", serviceId: "379921337", count: 25 },
-      { id: "test-service-2", serviceId: "379047137", count: 40 },
+      { id: "test-service-1", serviceId: "9992133", count: 25 },
+      { id: "test-service-2", serviceId: "9904711", count: 40 },
     ],
   };
 
