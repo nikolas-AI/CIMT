@@ -25,10 +25,13 @@ const ExportService = (() => {
       alert("Please allow pop-up windows to download the PDF summary.");
       return;
     }
+    win.addEventListener("pagehide", () => window.focus(), { once: true });
     win.document.write(_buildPrintHTML(summary));
     win.document.close();
     win.focus();
-    setTimeout(() => win.print(), 500);
+    setTimeout(() => {
+      if (!win.closed) win.print();
+    }, 500);
   }
 
   /**
@@ -472,12 +475,19 @@ const ExportService = (() => {
       `).join("")
       : "";
 
-    const volunteerBreakdownHTML = isVolunteerReport
+    const hasMedicalVolunteerHours = summary.volunteerBreakdown.some(
+      row => row.category === "medical professional" && row.hours > 0
+    );
+    const hasNonMedicalVolunteerHours = summary.volunteerBreakdown.some(
+      row => row.category === "non medical" && row.hours > 0
+    );
+    const volunteerBreakdownHTML = isVolunteerReport && hasMedicalVolunteerHours && hasNonMedicalVolunteerHours
       ? `<section class="report-section">
           <h2>Estimated value at a glance</h2>
-          <div class="metric-grid metric-grid--two">
-            ${summary.medicalProfessionalVolunteerValue > 0 ? metricCard("Estimated value of medical volunteer time", _fmt(summary.medicalProfessionalVolunteerValue)) : ""}
-            ${summary.nonMedicalVolunteerValue > 0 ? metricCard("Estimated value of non-medical volunteer time", _fmt(summary.nonMedicalVolunteerValue)) : ""}
+          <div class="metric-grid">
+            ${metricCard("Estimated value of medical volunteer time", _fmt(summary.medicalProfessionalVolunteerValue))}
+            ${metricCard("Estimated value of non-medical volunteer time", _fmt(summary.nonMedicalVolunteerValue))}
+            ${metricCard("Estimated value of total volunteer time", _fmt(summary.totalEstimatedValue))}
           </div>
         </section>`
       : "";

@@ -55,7 +55,6 @@ const ImpactSummaryView = (() => {
     detailGrid.appendChild(_buildWaysToUseSection());
     view.appendChild(detailGrid);
     view.appendChild(_buildReferences());
-    view.appendChild(_buildReferences());
     view.appendChild(_buildDownloadActions(summary));
 
     // Back returns to the last input step; Start Over is a separate callback
