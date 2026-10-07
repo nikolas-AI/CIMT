@@ -328,126 +328,382 @@ const ExportService = (() => {
   }
 
   function _buildPrintHTML(summary) {
-    // Build the printable page as HTML so browsers can preserve reference links
-    // when the user chooses "Save as PDF".
-    // Build the printable document as HTML so browsers can preserve clickable
-    // reference links when the user chooses "Save as PDF".
-    const svcRows = summary.serviceBreakdown.map(r => `
+    const isVolunteerReport = summary.impactMethod === "volunteerHours";
+    const serviceCount = summary.serviceBreakdown.reduce((sum, row) => sum + row.count, 0);
+    const volunteerHours = summary.volunteerBreakdown.reduce((sum, row) => sum + row.hours, 0);
+    const activityCount = isVolunteerReport
+      ? volunteerHours.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+      : serviceCount.toLocaleString("en-US");
+    const activityLabel = isVolunteerReport
+      ? AppCopy.summaryDashboard.volunteerHoursKpi
+      : AppCopy.summaryDashboard.clinicalServicesKpi;
+    const activityNote = isVolunteerReport
+      ? AppCopy.summaryDashboard.donatedTimeNote
+      : AppCopy.summaryDashboard.reportedActivityNote;
+    const totalLabel = isVolunteerReport
+      ? AppCopy.summaryDashboard.estimatedVolunteerValue
+      : AppCopy.summaryDashboard.estimatedServiceValue;
+    const period = `${_formatDate(summary.reportingPeriodFrom)}–${_formatDate(summary.reportingPeriodTo)}`;
+    const address = [summary.streetAddress, summary.city, summary.state, summary.zipCode]
+      .filter(Boolean)
+      .map(_escapeHTML)
+      .join(", ");
+    const estimateDetails = AppCopy.summaryDashboard.estimateDetails(summary.impactMethod);
+    const clinicName = summary.clinicName || "Your clinic";
+    const impactNarrative = isVolunteerReport
+      ? `During this reporting period, ${clinicName} reported ${activityCount} volunteer hours. Using reference hourly rates, the estimated value of that time is ${_fmt(summary.totalEstimatedValue)}.`
+      : serviceCount > 0
+        ? `During this reporting period, ${clinicName} reported ${activityCount} clinical services. Using national reference rates, the estimated value of those services is ${_fmt(summary.totalEstimatedValue)}.`
+        : AppCopy.summary.emptyState;
+    const topServiceSentence = summary.mostImpactfulService &&
+      Number(summary.mostImpactfulService.clinicalValueShare || 0) > 0
+      ? ` ${summary.mostImpactfulService.serviceName} represented ${summary.mostImpactfulService.clinicalValueShare.toFixed(1)}% of the estimated service value.`
+      : "";
+    const funderReadyStatement = isVolunteerReport
+      ? AppCopy.summary.funderReadyVolunteerStatement(
+        clinicName,
+        activityCount,
+        period.replace("–", " to "),
+        _fmt(summary.totalEstimatedValue)
+      )
+      : AppCopy.summary.funderReadyServicesStatement(
+        clinicName,
+        serviceCount > 0 ? `${activityCount} clinical services` : "clinical activity",
+        period.replace("–", " to "),
+        _fmt(summary.totalEstimatedValue),
+        topServiceSentence
+      );
+
+    const metricCard = (label, value, note = "") => `
+      <div class="metric-card">
+        <p class="metric-card__label">${_escapeHTML(label)}</p>
+        <p class="metric-card__value">${_escapeHTML(value)}</p>
+        ${note ? `<p class="metric-card__note">${_escapeHTML(note)}</p>` : ""}
+      </div>
+    `;
+
+    const svcRows = summary.serviceBreakdown.map(row => `
       <tr>
-        <td>${r.serviceName}</td><td>${r.code}</td>
-        <td style="text-align:right">${r.count}</td>
-        <td style="text-align:right">${_fmt(r.benchmarkRate)}</td>
-        <td style="text-align:right">${_fmt(r.estimatedValue)}</td>
+        <td>${_escapeHTML(row.serviceName)}</td>
+        <td>${_escapeHTML(row.code)}</td>
+        <td class="numeric">${row.count.toLocaleString("en-US")}</td>
+        <td class="numeric">${_fmt(row.benchmarkRate)}</td>
+        <td class="numeric">${_fmt(row.estimatedValue)}</td>
       </tr>
     `).join("");
 
-    const volRows = summary.volunteerBreakdown.map(r => `
+    const volRows = summary.volunteerBreakdown.map(row => `
       <tr>
-        <td>${r.roleName}</td>
-        <td>${r.category}</td>
-        <td style="text-align:right">${r.hours.toFixed(1)}</td>
-        <td style="text-align:right">${_fmt(r.benchmarkRate)}</td>
-        <td style="text-align:right">${_fmt(r.estimatedValue)}</td>
+        <td>${_escapeHTML(row.roleName)}</td>
+        <td>${_escapeHTML(row.category)}</td>
+        <td class="numeric">${row.hours.toFixed(1)}</td>
+        <td class="numeric">${_fmt(row.benchmarkRate)}</td>
+        <td class="numeric">${_fmt(row.estimatedValue)}</td>
       </tr>
     `).join("");
 
     const referenceItems = REFERENCES.map(ref => `
       <li>
         <a href="${_escapeHTML(ref.url)}">${_escapeHTML(ref.title)}</a>
-        — ${_escapeHTML(ref.organization)}${ref.year ? ` (${ref.year})` : ""}.
+        — ${_escapeHTML(ref.organization)}${ref.year ? ` (${_escapeHTML(ref.year)})` : ""}.
         ${ref.description ? `<br><span>${_escapeHTML(ref.description)}</span>` : ""}
       </li>
     `).join("");
 
     const budgetHTML = summary.reportingPeriodClinicCost !== null ? `
-      <h2>${AppCopy.summaryView.costHeading}</h2>
-      <table>
-        <tbody>
-          <tr><th>Reported clinic cost</th><td style="text-align:right">${_fmt(summary.reportingPeriodClinicCost)}</td></tr>
-          <tr><th>Estimated total value</th><td style="text-align:right">${_fmt(summary.totalEstimatedValue)}</td></tr>
-          <tr><th>${AppCopy.summaryView.valuePerDollarLabel}</th><td style="text-align:right">$${summary.valueToCostRatio.toFixed(2)}</td></tr>
-          <tr><th>Estimated value as a share of reported clinic cost</th><td style="text-align:right">${summary.reportingPeriodClinicCost > 0 ? (summary.totalEstimatedValue / summary.reportingPeriodClinicCost * 100).toFixed(1) : "0.0"}%</td></tr>
-        </tbody>
-      </table>
-      <p class="disclaimer">${AppCopy.summary.costComparisonNote}</p>
+      <section class="report-section">
+        <h2>${_escapeHTML(AppCopy.summaryView.costHeading)}</h2>
+        <p class="section-intro">${_escapeHTML(AppCopy.summaryView.costIntro(summary.reportingPeriodClinicCost))}</p>
+        <div class="metric-grid metric-grid--two">
+          ${metricCard("Reported clinic cost", _fmt(summary.reportingPeriodClinicCost), "Total clinic cost reported for this period.")}
+          ${metricCard("Estimated total value", _fmt(summary.totalEstimatedValue), "Estimated value of the activity entered.")}
+          ${metricCard(AppCopy.summaryView.valuePerDollarLabel, summary.valueToCostRatio === null ? "—" : `$${summary.valueToCostRatio.toFixed(2)}`, "Informational comparison, not ROI.")}
+          ${metricCard(AppCopy.summaryView.benchmarkComparisonLabel, `${Math.abs(summary.benchmarkValueROI || 0).toFixed(1)}% ${summary.benchmarkValueROI > 0 ? "higher" : summary.benchmarkValueROI < 0 ? "lower" : "equal"}`, "Estimated value compared with reported clinic cost.")}
+        </div>
+        <p class="callout callout--note">${_escapeHTML(AppCopy.summary.costComparisonNote)}</p>
+      </section>
     ` : "";
 
-    const activityCount = summary.impactMethod === "volunteerHours"
-      ? summary.volunteerBreakdown.reduce((sum, row) => sum + row.hours, 0).toFixed(1)
-      : summary.serviceBreakdown.reduce((sum, row) => sum + row.count, 0).toLocaleString("en-US");
-    const activityLabel = summary.impactMethod === "volunteerHours" ? "Volunteer hours reported" : "Clinical services reported";
-    const estimateBasis = summary.impactMethod === "volunteerHours"
-      ? "Reported volunteer hours multiplied by public reference hourly rates."
-      : "Reported service counts multiplied by public reference rates.";
+    const serviceImpactHTML = !isVolunteerReport && summary.mostImpactfulService
+      ? `<section class="report-section feature">
+          <h2>${_escapeHTML(AppCopy.metric.mostImpactful)}</h2>
+          <p class="feature__statement"><strong>${_escapeHTML(summary.mostImpactfulService.serviceName)}</strong> had the largest share of the estimated service value, with <strong>${summary.mostImpactfulService.count.toLocaleString("en-US")} services</strong> and an estimated value of <strong>${_fmt(summary.mostImpactfulService.estimatedValue)}</strong>.</p>
+          <p class="feature__meta">${_escapeHTML(AppCopy.summaryDashboard.topContributorStats(
+            summary.mostImpactfulService.count.toLocaleString("en-US"),
+            _fmt(summary.mostImpactfulService.estimatedValue),
+            summary.mostImpactfulService.clinicalValueShare.toFixed(1)
+          ))}</p>
+          <div class="value-track" role="img" aria-label="${_escapeHTML(summary.mostImpactfulService.serviceName)} contributed ${summary.mostImpactfulService.clinicalValueShare.toFixed(1)} percent of estimated service value">
+            <span style="width:${Math.min(100, Math.max(0, summary.mostImpactfulService.clinicalValueShare))}%"></span>
+          </div>
+        </section>`
+      : "";
 
-    const serviceImpactHTML = summary.impactMethod === "clinicalServices" && summary.mostImpactfulService
-      ? `<h2>${AppCopy.metric.mostImpactful}</h2><p><strong>${_escapeHTML(summary.mostImpactfulService.serviceName)}</strong> had the largest share of the estimated service value, with <strong>${summary.mostImpactfulService.count.toLocaleString("en-US")} services</strong> and an estimated value of <strong>${_fmt(summary.mostImpactfulService.estimatedValue)}</strong>.</p><p class="disclaimer">This service made up ${summary.mostImpactfulService.clinicalValueShare.toFixed(1)}% of the estimated service value reported for this period.</p>`
-      : summary.impactMethod === "clinicalServices"
-        ? `<h2>${AppCopy.metric.mostImpactful}</h2><p>${AppCopy.summary.emptyState}</p>`
-        : "";
+    const serviceChartHTML = !isVolunteerReport && summary.serviceImpactRanking?.byValue.length > 0
+      ? `<section class="report-section">
+          <h2>${_escapeHTML(AppCopy.summaryDashboard.valueChartHeading)}</h2>
+          <p class="section-intro">${_escapeHTML(AppCopy.summaryDashboard.valueChartIntro)}</p>
+          <div class="chart">
+            ${summary.serviceImpactRanking.byValue.map(row => {
+              const maximum = Math.max(...summary.serviceImpactRanking.byValue.map(item => item.estimatedValue), 1);
+              const width = Math.min(100, Math.max(0, row.estimatedValue / maximum * 100));
+              return `<div class="chart-row">
+                <div class="chart-row__label"><span>${_escapeHTML(row.serviceName)}</span><strong>${_fmt(row.estimatedValue)}</strong></div>
+                <div class="value-track" aria-hidden="true"><span style="width:${width}%"></span></div>
+              </div>`;
+            }).join("")}
+          </div>
+        </section>`
+      : "";
 
-    const serviceRankingHTML = summary.impactMethod === "clinicalServices" && summary.serviceImpactRanking?.byValue.length > 0
+    const serviceRankingHTML = !isVolunteerReport && summary.serviceImpactRanking?.byValue.length > 0
       ? [
         ["Services by estimated value", summary.serviceImpactRanking.byValue],
         ["Services by number reported", summary.serviceImpactRanking.byVisits],
       ].map(([heading, rows]) => `
-        <h2>${heading}</h2>
-        <table><thead><tr><th>Rank</th><th>Service</th><th style="text-align:right">Number reported</th><th style="text-align:right">Estimated value</th><th style="text-align:right">Share of total estimated service value</th></tr></thead>
-        <tbody>${rows.map((row, index) => `<tr><td>${index + 1}</td><td>${_escapeHTML(row.serviceName)}</td><td style="text-align:right">${row.count.toLocaleString("en-US")}</td><td style="text-align:right">${_fmt(row.estimatedValue)}</td><td style="text-align:right">${row.clinicalValueShare.toFixed(1)}%</td></tr>`).join("")}</tbody></table>
+        <section class="report-section">
+          <h2>${_escapeHTML(heading)}</h2>
+          <table>
+            <thead><tr><th>Rank</th><th>Service</th><th class="numeric">Number reported</th><th class="numeric">Estimated value</th><th class="numeric">Share of total estimated service value</th></tr></thead>
+            <tbody>${rows.map((row, index) => `<tr><td>${index + 1}</td><td>${_escapeHTML(row.serviceName)}</td><td class="numeric">${row.count.toLocaleString("en-US")}</td><td class="numeric">${_fmt(row.estimatedValue)}</td><td class="numeric">${row.clinicalValueShare.toFixed(1)}%</td></tr>`).join("")}</tbody>
+          </table>
+          <p class="section-note">${_escapeHTML(AppCopy.summary.rankingNote)}</p>
+        </section>
       `).join("")
+      : "";
+
+    const volunteerBreakdownHTML = isVolunteerReport
+      ? `<section class="report-section">
+          <h2>Estimated value at a glance</h2>
+          <div class="metric-grid metric-grid--two">
+            ${summary.medicalProfessionalVolunteerValue > 0 ? metricCard("Estimated value of medical volunteer time", _fmt(summary.medicalProfessionalVolunteerValue)) : ""}
+            ${summary.nonMedicalVolunteerValue > 0 ? metricCard("Estimated value of non-medical volunteer time", _fmt(summary.nonMedicalVolunteerValue)) : ""}
+          </div>
+        </section>`
+      : "";
+
+    const methodologyItems = AppCopy.summaryView.methodologyBullets
+      .map(item => `<li>${_escapeHTML(item)}</li>`)
+      .join("");
+    const volunteerSourceHTML = isVolunteerReport && VOLUNTEER_RATE_SOURCE
+      ? `<section class="report-section">
+          <h2>Volunteer Rate Source</h2>
+          <p class="source-box"><strong>${_escapeHTML(VOLUNTEER_RATE_SOURCE.name)}${VOLUNTEER_RATE_SOURCE.publicationYear ? ` (${VOLUNTEER_RATE_SOURCE.publicationYear})` : ""}</strong><br>${_escapeHTML(VOLUNTEER_RATE_SOURCE.description)}${VOLUNTEER_RATE_SOURCE.url ? `<br><a href="${_escapeHTML(VOLUNTEER_RATE_SOURCE.url)}">Learn more</a>` : ""}</p>
+        </section>`
       : "";
 
     return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8">
-<title>Impact Summary — ${summary.clinicName}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${_escapeHTML(AppCopy.exportCopy.pdfTitle)} — ${_escapeHTML(clinicName)}</title>
 <style>
-  @page { size: A4 portrait; margin: 0.5in; }
+  :root {
+    color-scheme: light;
+    --paper: #F7F6F0;
+    --surface: #FBFAF5;
+    --border: #D8D7CE;
+    --navy: #163238;
+    --slate: #46565A;
+    --muted: #788184;
+    --teal: #166D6A;
+    --oxblood: #7E2939;
+    --impact-bg: #F1E3DF;
+  }
+  @page { size: letter portrait; margin: 0.55in; }
+  * { box-sizing: border-box; }
   body {
-    font-family: Arial, sans-serif;
-    max-width: 720px;
-    margin: 40px auto;
-    color: #1A2340;
-    font-size: 13px;
+    max-width: 900px;
+    margin: 32px auto;
+    padding: 0 24px;
+    color: var(--navy);
+    background: var(--paper);
+    font: 13px/1.6 Inter, "Segoe UI", Arial, sans-serif;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  h1 { font-size: 1.6em; margin-bottom: 4px; }
-  h2 { font-size: 1em; text-transform: uppercase; letter-spacing: 0.06em; color: #8492B0; margin: 24px 0 8px; border-bottom: 1px solid #DDE2EE; padding-bottom: 4px; }
-  .total { font-size: 2.5em; font-weight: bold; color: #1A2340; margin: 8px 0 4px; }
-  .label { color: #475C8A; margin-bottom: 4px; }
-  .clinic-name { color: #C27A2B; font-size: 1.25em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 6px; }
-  .status { display: inline-block; color: #34664B; border: 1px solid #AFC7B6; border-radius: 999px; padding: 4px 10px; font-weight: 700; margin: 0 0 12px; }
-  .disclaimer { font-size: 0.85em; color: #8492B0; border: 1px solid #DDE2EE; padding: 10px 14px; border-radius: 6px; margin: 12px 0; }
-  .kpi-table { margin: 12px 0; }
-  .kpi-table th, .kpi-table td { background: #F8F9FC; border: 1px solid #DDE2EE; padding: 8px; text-align: left; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-  th { text-align: left; padding: 6px 8px; background: #F8F9FC; font-size: 0.8em; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #DDE2EE; }
-  td { padding: 6px 8px; border-bottom: 1px solid #F0F2F7; }
-  @media print { body { margin: 20px; } }
+  p { margin: 0 0 10px; }
+  .hero {
+    margin-bottom: 20px;
+    padding: 30px 28px;
+    text-align: center;
+    background: var(--impact-bg);
+    border: 1px solid rgba(57,125,92,.32);
+    box-shadow: 6px 6px 0 rgba(198,91,56,.12);
+  }
+  .status {
+    display: inline-block;
+    margin: 0 0 14px;
+    padding: 5px 12px;
+    color: #34664B;
+    background: rgba(251,250,245,.72);
+    border: 1px solid rgba(52,102,75,.35);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .eyebrow {
+    margin: 0 0 8px;
+    color: var(--slate);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  h1 {
+    margin: 0 auto 8px;
+    color: var(--oxblood);
+    font: 700 25px/1.2 "DM Serif Display", Georgia, serif;
+    overflow-wrap: anywhere;
+  }
+  .address, .period { color: var(--slate); font-size: 11px; }
+  .period { margin-bottom: 20px; }
+  .total {
+    margin: 0 0 5px;
+    color: var(--navy);
+    font: 48px/1.05 "DM Serif Display", Georgia, serif;
+  }
+  .total-label { margin: 0; color: var(--slate); font-size: 14px; }
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0 0 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .metric-grid--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .metric-card { min-width: 0; padding: 14px 16px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .metric-card:nth-child(3n) { border-right: 0; }
+  .metric-grid--two .metric-card:nth-child(3n) { border-right: 1px solid var(--border); }
+  .metric-grid--two .metric-card:nth-child(2n) { border-right: 0; }
+  .metric-card__label { min-height: 2.5em; margin: 0 0 5px; color: var(--slate); font-size: 9px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+  .metric-card__value { margin: 0 0 4px; color: var(--navy); font: 24px/1.1 "DM Serif Display", Georgia, serif; overflow-wrap: anywhere; }
+  .metric-card__note { margin: 0; color: var(--muted); font-size: 10px; }
+  .callout {
+    margin: 0 0 18px;
+    padding: 14px 16px;
+    color: var(--slate);
+    background: #F5F0E6;
+    border: 1px solid rgba(126,41,57,.2);
+    border-left: 5px solid var(--oxblood);
+  }
+  .callout strong { color: var(--navy); }
+  .callout--note { margin-top: 12px; font-size: 10px; }
+  .narrative { margin: 0 0 20px; color: var(--slate); font-size: 13px; line-height: 1.7; }
+  .funder-statement { padding: 16px 18px; color: var(--navy); background: rgba(30,107,99,.04); border: 1px solid rgba(30,107,99,.18); border-left: 4px solid var(--teal); }
+  .report-section { margin: 0 0 22px; break-inside: auto; }
+  h2 {
+    margin: 0 0 10px;
+    padding-bottom: 7px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    break-after: avoid;
+  }
+  .section-intro, .section-note { color: var(--slate); font-size: 11px; }
+  .section-note { margin: 8px 0 0; font-size: 10px; }
+  .feature {
+    padding: 18px;
+    background: var(--surface);
+    border: 1px solid rgba(198,91,56,.28);
+    border-left: 5px solid var(--oxblood);
+  }
+  .feature h2 { color: var(--oxblood); border-bottom-color: rgba(198,91,56,.25); }
+  .feature__statement { margin: 0; font: 17px/1.45 "DM Serif Display", Georgia, serif; }
+  .feature__statement strong { color: var(--oxblood); }
+  .feature__meta { margin: 10px 0 0; color: var(--slate); font-size: 10px; font-weight: 700; }
+  .chart { padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); }
+  .chart-row { margin-bottom: 12px; }
+  .chart-row:last-child { margin-bottom: 0; }
+  .chart-row__label { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 5px; color: var(--slate); font-size: 11px; }
+  .chart-row__label strong { flex-shrink: 0; color: var(--navy); }
+  .value-track { height: 7px; overflow: hidden; background: #DDE7DF; border-radius: 999px; }
+  .value-track span { display: block; height: 100%; background: var(--teal); border-radius: inherit; }
+  table { width: 100%; margin: 8px 0 0; border-collapse: collapse; font-size: 10px; }
+  thead { display: table-header-group; }
+  th { padding: 8px; color: var(--navy); background: #E9E4D7; font-size: 9px; font-weight: 700; text-align: left; }
+  td { padding: 7px 8px; color: var(--slate); border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+  .numeric { text-align: right; font-variant-numeric: tabular-nums; }
+  tfoot th { background: var(--impact-bg); }
+  .sources { padding-left: 18px; }
+  .sources li { margin: 0 0 9px; color: var(--slate); font-size: 10px; }
+  .sources a, .source-box a { color: var(--teal); overflow-wrap: anywhere; }
+  .sources span { color: var(--muted); }
+  .source-box { padding: 14px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--teal); }
+  .footer { margin-top: 24px; padding-top: 12px; color: var(--muted); border-top: 1px solid var(--border); font-size: 9px; }
+  @media screen and (max-width: 620px) {
+    body { margin: 12px auto; padding: 0 12px; }
+    .hero { padding: 24px 16px; }
+    .metric-grid, .metric-grid--two { grid-template-columns: 1fr; }
+    .metric-card, .metric-card:nth-child(3n), .metric-grid--two .metric-card:nth-child(3n) { border-right: 0; }
+    .total { font-size: 40px; }
+    .table-wrap { overflow-x: auto; }
+    table { min-width: 620px; }
+  }
+  @media print {
+    body { max-width: none; margin: 0; padding: 0; background: #fff; font-size: 10pt; }
+    .hero, .metric-grid, .feature, .chart, .source-box, .callout { break-inside: avoid; }
+    .report-section h2 { break-after: avoid; }
+    .report-section table tr { break-inside: avoid; }
+    a { color: inherit; text-decoration: none; }
+  }
 </style></head><body>
-<p class="status">&#10003; Report complete</p>
-<p class="clinic-name">${_escapeHTML(summary.clinicName)}</p>
-<p style="color:#475C8A;margin:0 0 4px">${_escapeHTML(summary.streetAddress)}, ${_escapeHTML(summary.city)}, ${_escapeHTML(summary.state)} ${_escapeHTML(summary.zipCode)}</p>
-<p style="color:#475C8A;margin:0 0 12px">Reporting period: ${_formatDate(summary.reportingPeriodFrom)} - ${_formatDate(summary.reportingPeriodTo)}</p>
-<h1 style="font-family:Georgia,serif">${AppCopy.exportCopy.pdfTitle}</h1>
-<p class="total">${_fmt(summary.totalEstimatedValue)}</p>
-<p class="label">${summary.impactMethod === "volunteerHours" ? "Estimated value of volunteer time" : "Estimated value of clinical services provded"}</p>
-<p class="label">Calculation option: ${_methodLabel(summary.impactMethod)}</p>
-<table class="kpi-table"><tbody><tr><th>${activityLabel}</th><td>${activityCount}</td><th>Estimate basis</th><td>${estimateBasis}</td></tr></tbody></table>
-<p class="disclaimer">${AppCopy.summary.shortDisclaimer}</p>
+<header class="hero">
+  <p class="status">&#10003; ${_escapeHTML(AppCopy.summaryDashboard.reportComplete)}</p>
+  <p class="eyebrow">${_escapeHTML(AppCopy.summaryDashboard.eyebrow)}</p>
+  <h1>${_escapeHTML(clinicName)}’s estimated community impact</h1>
+  <p class="address">${address}</p>
+  <p class="period">Reporting period: ${_escapeHTML(period)}</p>
+  <p class="total">${_fmt(summary.totalEstimatedValue)}</p>
+  <p class="total-label">${_escapeHTML(totalLabel)}</p>
+</header>
+<section class="metric-grid" aria-label="${_escapeHTML(AppCopy.summaryDashboard.kpiHeading)}">
+  ${metricCard(activityLabel, activityCount, activityNote)}
+  ${metricCard(AppCopy.summaryDashboard.estimatedCommunityValueKpi, _fmt(summary.totalEstimatedValue), AppCopy.summaryDashboard.estimatedCommunityValueNote)}
+  ${summary.reportingPeriodClinicCost !== null
+    ? metricCard(AppCopy.summaryDashboard.valuePerDollarKpi, summary.valueToCostRatio === null ? "—" : `$${summary.valueToCostRatio.toFixed(2)}`, AppCopy.summaryDashboard.valuePerDollarNote)
+    : ""}
+</section>
+<p class="callout"><strong>${_escapeHTML(AppCopy.summaryDashboard.estimateHeading)}.</strong> ${_escapeHTML(AppCopy.summaryDashboard.estimateIntro(summary.impactMethod))}<br><br>${_escapeHTML(estimateDetails)}</p>
+<p class="narrative">${_escapeHTML(impactNarrative)}</p>
+<p class="callout">${_escapeHTML(AppCopy.summary.shortDisclaimer)}</p>
 ${serviceImpactHTML}
-${serviceRankingHTML}
+${serviceChartHTML}
+${volunteerBreakdownHTML}
 ${budgetHTML}
-${summary.impactMethod === "clinicalServices" ? `<h2>Breakdown of Clinical Services</h2>
-<table><thead><tr><th>Service</th><th>Service code</th><th style="text-align:right">Number reported</th><th style="text-align:right">Reference rate</th><th style="text-align:right">Estimated value</th></tr></thead>
-<tbody>${svcRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Clinical services total</th><th style="text-align:right">${_fmt(summary.clinicalServiceValue)}</th></tr></tfoot></table>` : ""}
-${summary.impactMethod === "volunteerHours" ? `<h2>Volunteer Time</h2>
-<table><thead><tr><th>Role</th><th>Type</th><th style="text-align:right">Volunteer hours</th><th style="text-align:right">Reference rate / hour</th><th style="text-align:right">Estimated value</th></tr></thead>
-<tbody>${volRows}</tbody><tfoot><tr><th colspan="4" style="text-align:right">Total volunteer time value</th><th style="text-align:right">${_fmt(summary.volunteerValue)}</th></tr></tfoot></table>` : ""}
-<h2>Sources and references</h2>
-<ul style="font-size:0.85em;color:#475C8A;padding-left:20px">
-  ${referenceItems}
-</ul>
+${serviceRankingHTML}
+${!isVolunteerReport ? `<section class="report-section">
+  <h2>Breakdown of Clinical Services</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Service</th><th>Service code</th><th class="numeric">Number reported</th><th class="numeric">Reference rate</th><th class="numeric">Estimated value</th></tr></thead>
+    <tbody>${svcRows}</tbody>
+    <tfoot><tr><th colspan="4" class="numeric">Clinical services total</th><th class="numeric">${_fmt(summary.clinicalServiceValue)}</th></tr></tfoot>
+  </table></div>
+</section>` : ""}
+${isVolunteerReport ? `<section class="report-section">
+  <h2>Volunteer Time</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Role</th><th>Type</th><th class="numeric">Volunteer hours</th><th class="numeric">Reference rate / hour</th><th class="numeric">Estimated value</th></tr></thead>
+    <tbody>${volRows}</tbody>
+    <tfoot><tr><th colspan="4" class="numeric">Total volunteer time value</th><th class="numeric">${_fmt(summary.volunteerValue)}</th></tr></tfoot>
+  </table></div>
+</section>` : ""}
+<section class="report-section">
+  <h2>${_escapeHTML(AppCopy.summary.funderReadyTitle)}</h2>
+  <p class="funder-statement">${_escapeHTML(funderReadyStatement)}</p>
+</section>
+<section class="report-section">
+  <h2>${_escapeHTML(AppCopy.summaryView.methodologySectionTitle)}</h2>
+  <ul class="sources">${methodologyItems}</ul>
+</section>
+${volunteerSourceHTML}
+<section class="report-section">
+  <h2>Sources and references</h2>
+  <ul class="sources">${referenceItems}</ul>
+</section>
+<footer class="footer">${_escapeHTML(AppCopy.exportCopy.pdfFooter)}</footer>
 </body></html>`;
   }
 

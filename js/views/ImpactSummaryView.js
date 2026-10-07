@@ -47,14 +47,15 @@ const ImpactSummaryView = (() => {
       view.appendChild(_buildVolunteerRateSource());
     }
 
+    view.appendChild(_buildFunderReadyStatement(summary));
+
     const detailGrid = document.createElement("div");
     detailGrid.className = "summary-detail-grid";
     detailGrid.appendChild(_buildMethodologySection());
     detailGrid.appendChild(_buildWaysToUseSection());
     view.appendChild(detailGrid);
-
     view.appendChild(_buildReferences());
-    view.appendChild(_buildFunderReadyStatement(summary));
+    view.appendChild(_buildReferences());
     view.appendChild(_buildDownloadActions(summary));
 
     // Back returns to the last input step; Start Over is a separate callback
