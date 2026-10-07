@@ -27,7 +27,7 @@ const ImpactSummaryView = (() => {
     view.appendChild(_buildKpiStrip(summary));
     view.appendChild(_buildEstimateCallout(summary));
     view.appendChild(_buildImpactNarrative(summary));
-    if (summary.impactMethod === "volunteerHours") {
+    if (summary.impactMethod === "volunteerHours" && _hasBothVolunteerCategories(summary)) {
       view.appendChild(_buildBreakdown(summary));
     }
     if (summary.impactMethod === "clinicalServices" && _hasReportedServices(summary)) {
@@ -185,6 +185,16 @@ const ImpactSummaryView = (() => {
 
   function _totalVolunteerHours(summary) {
     return summary.volunteerBreakdown.reduce((sum, row) => sum + row.hours, 0);
+  }
+
+  function _hasBothVolunteerCategories(summary) {
+    const hasMedicalHours = summary.volunteerBreakdown.some(
+      row => row.category === "medical professional" && row.hours > 0
+    );
+    const hasNonMedicalHours = summary.volunteerBreakdown.some(
+      row => row.category === "non medical" && row.hours > 0
+    );
+    return hasMedicalHours && hasNonMedicalHours;
   }
 
   // ---------------------------------------------------------------
