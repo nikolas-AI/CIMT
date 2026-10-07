@@ -305,21 +305,33 @@ const ImpactSummaryView = (() => {
     const totalText = Formatting.currency(summary.totalEstimatedValue);
 
     if (summary.impactMethod === "volunteerHours") {
-      const volunteerHours = _totalVolunteerHours(summary);
-      return `${clinicName} reported ${Formatting.number(volunteerHours, 1)} volunteer hours during ${periodLabel}. Using reference hourly rates, the estimated value of this donated time was ${totalText}.`;
+      const volunteerHours = Formatting.number(_totalVolunteerHours(summary), 1);
+      return AppCopy.summary.funderReadyVolunteerStatement(clinicName, volunteerHours, periodLabel, totalText);
     }
 
     const serviceCount = _serviceCount(summary);
     const topService = summary.mostImpactfulService;
     const serviceSentence = topService && Number(topService.clinicalValueShare || 0) > 0
-      ? ` ${topService.serviceName} accounted for ${Formatting.number(topService.clinicalValueShare, 1)}% of the total estimated value.`
+      ? ` ${topService.serviceName} represented ${Formatting.number(topService.clinicalValueShare, 1)}% of the estimated service value.`
       : "";
 
     if (serviceCount > 0) {
-      return `${clinicName} reported ${Formatting.number(serviceCount, 0)} clinical services during ${periodLabel}. Using national reference rates, the estimated value of this care was ${totalText}.${serviceSentence}`;
+      return AppCopy.summary.funderReadyServicesStatement(
+        clinicName,
+        `${Formatting.number(serviceCount, 0)} clinical services`,
+        periodLabel,
+        totalText,
+        serviceSentence
+      );
     }
 
-    return `${clinicName} reported clinical activity during ${periodLabel}. Using national reference rates, the estimated value of this care was ${totalText}.`;
+    return AppCopy.summary.funderReadyServicesStatement(
+      clinicName,
+      "clinical activity",
+      periodLabel,
+      totalText,
+      serviceSentence
+    );
   }
 
   function _buildCard(label, value, note, variant, share = 0) {

@@ -33,6 +33,10 @@ const AppCopy = (() => {
     copySuccess: "Statement copied. Review it and adjust it for your organization.",
     impactStatementButton: "Copy impact statement",
     impactStatementButtonSecondary: "Copy for grant or donor use",
+    funderReadyVolunteerStatement: (clinicName, volunteerHours, periodLabel, totalText) =>
+      `${clinicName} received ${volunteerHours} hours of donated volunteer support during ${periodLabel}. Using public reference hourly rates, the estimated replacement value of this time is ${totalText}. This estimate represents donated time, not cash revenue, reimbursement, or patient outcomes.`,
+    funderReadyServicesStatement: (clinicName, reportedActivity, periodLabel, totalText, serviceSentence) =>
+      `${clinicName} reported ${reportedActivity} during ${periodLabel}. Using national reference rates, the estimated value of these services is ${totalText}.${serviceSentence} This is a planning estimate, not revenue, reimbursement, confirmed savings, or a measure of care quality.`,
   };
 
   const impactMethod = {
