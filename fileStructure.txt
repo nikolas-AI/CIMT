@@ -1,55 +1,40 @@
-clinic-impact-estimator/
-├── index.html                          # App shell, script load order
-├── css/styles.css                      # All styling, design tokens
-└── js/
-    ├── data.js                         # Benchmark rates, role/service catalogs, references
-    ├── utils.js                        # Formatting, validation, DOM helpers
-    ├── calculator.js                   # All math — zero DOM access
-    ├── app.js                          # State object + router (boots the app)
-    ├── components/
-    │   ├── ProgressIndicator.js        # Step dots nav
-    │   ├── NavigationButtons.js        # Back/Next row
-    │   └── EntryList.js               # Reusable add/remove row list
-    ├── views/
-    │   ├── WelcomeView.js               # Step 1 — introduction and privacy scope
-    │   ├── ClinicInformationView.js    # Step 2 — clinic details + cost
-    │   ├── ImpactMethodView.js         # Step 3 — choose the calculation method
-    │   ├── ImpactActivityView.js       # Step 4 — method-specific activity inputs
-    │   └── ImpactSummaryView.js        # Step 5 — method-specific totals, tables, references
-    └── services/
-        └── exportService.js            # PDF (print) + Excel (CSV) download stubs
+Care in Action — project file map
+================================
 
-    HOW THE APP WORKS
-    -----------------
-    This is a small browser app made with HTML, CSS, and JavaScript. It has no
-    build step or framework. Open index.html in a browser to run it.
+For user instructions and a quick start, see README.md.
+For architecture, workflows, calculations, validation, data catalogs, and exports,
+see PROJECT_REFERENCE.md.
 
-    The user moves through five screens:
-    1. Welcome: learn what the tool does and what information you need.
-    2. Clinic information: enter clinic details and the cost for the period.
-    3. Calculation option: choose Volunteer Hours or Clinical Services.
-    4. Activity: enter the information for your chosen option.
-    5. Impact summary: review and download the results.
+Repository files
+----------------
+index.html
+  HTML shell, shared header/footer, stylesheet link, and ordered script loading.
 
-    FILE RESPONSIBILITIES
-    ---------------------
-    - data.js holds service names, rates, volunteer roles, and source links.
-    - app.js holds the current answers and decides which screen is visible.
-    - views/ creates each screen and connects its form fields to the answers.
-    - components/ contains shared controls used by more than one screen.
-    - calculator.js does the math and does not create or change HTML.
-    - exportService.js creates the printable report and Excel workbook.
-    - utils.js contains small helpers used by several files.
-    - styles.css controls the appearance of every screen.
+assets/
+  cie-logo.png — application mark used in the header and favicon.
 
-    TYPICAL DATA FLOW
-    -----------------
-    1. A view creates a form field, such as an input or dropdown.
-    2. The user changes it, and the view saves the answer in app.js.
-    3. When the user continues, the view checks the answer before moving on.
-    4. calculator.js reads the saved answers and returns the results.
-    5. The summary view displays those results; it does not do the math.
+css/
+  styles.css — design tokens, layout, responsive styles, components, and print/
+  motion accessibility rules.
 
-    When adding a service or reference, start in data.js. When adding a screen, add
-    its rendering code in views/ and connect it to the step switch in app.js. Keep
-    calculations in calculator.js and avoid putting business rules in markup.
+js/
+  app.js — application state, step routing, validation gates, and boot.
+  calculator.js — pure impact calculation and summary shaping.
+  content.js — UI copy, validation messages, labels, and report text.
+  data.js — volunteer roles, clinical services, benchmark rates, and references.
+  utils.js — formatting, validation, and small DOM helpers.
+  components/
+    EntryList.js — reusable searchable add/remove input rows.
+    NavigationButtons.js — shared Back/Next button row.
+    ProgressIndicator.js — five-step progress navigation.
+  services/
+    exportService.js — browser print/PDF and XLSX workbook generation.
+  views/
+    WelcomeView.js — introduction and privacy scope.
+    ClinicInformationView.js — clinic identity, reporting period, and optional cost.
+    ImpactMethodView.js — volunteer-hours or clinical-services selection.
+    ImpactActivityView.js — method-specific aggregate activity entry.
+    ImpactSummaryView.js — computed results, methodology, references, and exports.
+
+No build configuration or package manifest is present. See README.md for running
+the application locally.
