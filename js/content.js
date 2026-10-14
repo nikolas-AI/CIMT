@@ -69,7 +69,7 @@ const AppCopy = (() => {
   const welcome = {
     eyebrow: "Care in Action",
     heading: "Show the value of your clinic’s work",
-    intro: "Use your clinic’s total service counts and volunteer hours to create a clear impact summary for a selected reporting period.",
+    intro: "Use your clinic’s total service counts or volunteer hours to create a clear impact summary for a selected reporting period.",
     description: "The estimator helps you communicate the estimated value of care, donated volunteer time, and reported clinic activity, without entering any patient information. Your completed summary can support grant applications, donor communications, board reports, and conversations about your clinic’s role in the community.",
     note: "Use the summary for grant applications, donor updates, board reports, and community conversations.",
     whatYouNeedTitle: "What you’ll need",

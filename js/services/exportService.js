@@ -132,7 +132,6 @@ const ExportService = (() => {
     let volunteerSectionRow = null;
     let volunteerHeaderRow = null;
     let volunteerTotalRow = null;
-    let nonMedicalVolunteerTotalRow = null;
     if (summary.impactMethod === "volunteerHours") {
       volunteerSectionRow = rows.length;
       rows.push(["Volunteer Time"]);
@@ -143,8 +142,6 @@ const ExportService = (() => {
         ]));
       volunteerTotalRow = rows.length;
       rows.push(["", "", "", "Total Volunteer Time Value", summary.volunteerValue]);
-      nonMedicalVolunteerTotalRow = rows.length;
-      rows.push(["", "", "", "Other Volunteer Time Value", summary.nonMedicalVolunteerValue]);
     }
     rows.push([]);
     const disclaimerSectionRow = rows.length;
@@ -153,9 +150,6 @@ const ExportService = (() => {
     rows.push([AppCopy.summary.shortDisclaimer]);
 
     const sheet = XLSX.utils.aoa_to_sheet(rows);
-    sheet["!cols"] = [
-      { wch: 30 }, { wch: 18 }, { wch: 16 }, { wch: 22 }, { wch: 32 },
-    ];
     sheet["!rows"] = rows.map((_, index) => ({ hpx: index === 0 ? 28 : 18 }));
     sheet["!autofilter"] = { ref: `A1:E${rows.length}` };
     sheet["!freeze"] = { xSplit: 0, ySplit: 1, topLeftCell: "A2", activePane: "bottomLeft", frozen: true };
@@ -177,6 +171,23 @@ const ExportService = (() => {
     ].filter((row) => Number.isInteger(row) && row >= 0);
     sheet["!merges"] = mergeRows.map(row => ({ s: { r: row, c: 0 }, e: { r: row, c: 4 } }));
 
+    const mergedRowSet = new Set(mergeRows);
+    sheet["!cols"] = [0, 1, 2, 3, 4].map(columnIndex => {
+      const maxLength = rows.reduce((max, row, rowIndex) => {
+        if (mergedRowSet.has(rowIndex)) return max;
+        const value = row[columnIndex];
+        return value === null || value === undefined
+          ? max
+          : Math.max(max, String(value).length);
+      }, 0);
+      return { wch: Math.min(Math.max(maxLength + 2, 12), 48) };
+    });
+
+    const disclaimerText = String(rows[disclaimerRow][0] || "");
+    const disclaimerWidth = sheet["!cols"].reduce((width, column) => width + column.wch, 0);
+    const disclaimerLineCount = Math.max(2, Math.ceil(disclaimerText.length / disclaimerWidth));
+    sheet["!rows"][disclaimerRow] = { hpx: disclaimerLineCount * 18 };
+
     const boldRows = [
       0,
       ...(serviceImpactSectionRow !== null && serviceImpactSectionRow >= 0 ? [serviceImpactSectionRow] : []),
@@ -184,7 +195,7 @@ const ExportService = (() => {
       ...(visitRankingSectionRow === null ? [] : [visitRankingSectionRow, visitRankingHeaderRow]),
       ...(clinicalSectionRow === null ? [] : [clinicalSectionRow]),
       ...(clinicalHeaderRow === null ? [] : [clinicalHeaderRow, clinicalTotalRow]),
-      ...(volunteerSectionRow === null ? [] : [volunteerSectionRow, volunteerHeaderRow, volunteerTotalRow, nonMedicalVolunteerTotalRow]),
+      ...(volunteerSectionRow === null ? [] : [volunteerSectionRow, volunteerHeaderRow, volunteerTotalRow]),
       disclaimerSectionRow,
     ].filter((row) => Number.isInteger(row) && row >= 0);
     if (budgetSectionRow !== null) boldRows.push(budgetSectionRow);
@@ -209,7 +220,7 @@ const ExportService = (() => {
     ].filter((row) => Number.isInteger(row) && row >= 0);
     headerRows.forEach(rowIndex => styleRow(rowIndex, headerStyle));
 
-    [volunteerHeaderRow, volunteerTotalRow, nonMedicalVolunteerTotalRow].filter((row) => Number.isInteger(row) && row >= 0).forEach(rowIndex => {
+    [volunteerHeaderRow, volunteerTotalRow].filter((row) => Number.isInteger(row) && row >= 0).forEach(rowIndex => {
       if (!sheet["!rows"]) sheet["!rows"] = [];
       sheet["!rows"][rowIndex] = { hpx: 24 };
       for (let columnIndex = 0; columnIndex < 5; columnIndex += 1) {
@@ -277,7 +288,6 @@ const ExportService = (() => {
         formatCurrency(rowIndex, 4);
       }
       formatCurrency(volunteerTotalRow, 4);
-      formatCurrency(nonMedicalVolunteerTotalRow, 4);
     }
 
     const workbook = XLSX.utils.book_new();

@@ -22,7 +22,7 @@ const WelcomeView = (() => {
       <section class="welcome-hero" aria-labelledby="welcome-heading">
         <h1 class="view-heading" id="welcome-heading">${AppCopy.welcome.heading}</h1>
         <p class="view-intro">${AppCopy.welcome.intro}</p>
-        <p class="welcome-hero__note">${AppCopy.welcome.description} ${AppCopy.welcome.note}</p>
+        <p class="welcome-hero__note">${AppCopy.welcome.description}</p>
 
         <details class="welcome-disclosure">
           <summary class="welcome-section-heading">${AppCopy.welcome.whatYouNeedTitle}</summary>
