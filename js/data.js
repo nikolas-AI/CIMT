@@ -246,6 +246,7 @@ const REFERENCES = [
     description: "National occupational employment and hourly mean wage estimates.",
     url: "https://www.bls.gov/oes/",
     year: null,
+    impactMethod: "volunteerHours",
   },
   {
     id: "cms-pfs",
@@ -254,23 +255,17 @@ const REFERENCES = [
     description: "Provides national and locality-specific Medicare payment rates for CPT/HCPCS codes.",
     url: "https://www.cms.gov/medicare/physician-fee-schedule/search",
     year: null,
+    impactMethod: "clinicalServices",
   },
-  // {
-  //   id: "independent-sector-2026",
-  //   title: "New Value of Volunteer Time of $36.14 Per Hour (2025 data)",
-  //   organization: "Independent Sector & Do Good Institute",
-  //   description: "Annual update to the national value-of-volunteer-time estimate.",
-  //   url: "https://independentsector.org/blog/2026-value-of-volunteer-time-release/",
-  //   year: 2026,
-  // },
-  // {
-  //   id: "independent-sector-methodology",
-  //   title: "Value of Volunteer Time — National and State Rates",
-  //   organization: "Independent Sector",
-  //   description: "National and state-level volunteer valuation rates and methodology.",
-  //   url: "https://independentsector.org/research/value-of-volunteer-time/",
-  //   year: null,
-  // },
+  {
+    id: "independent-sector-volunteer-time",
+    title: "Value of Volunteer Time",
+    organization: "Independent Sector / Do Good Institute",
+    description: "National and state-level volunteer valuation rates and methodology.",
+    url: "https://independentsector.org/research/value-of-volunteer-time/",
+    year: null,
+    impactMethod: "volunteerHours",
+  },
   // {
   //   id: "serve-love",
   //   title: "How to Calculate Volunteer Value for Grant Applications",
@@ -281,3 +276,7 @@ const REFERENCES = [
   //   year: null,
   // },
 ];
+
+function getRelevantReferences(impactMethod) {
+  return REFERENCES.filter(reference => reference.impactMethod === impactMethod);
+}

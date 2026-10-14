@@ -54,7 +54,7 @@ const ImpactSummaryView = (() => {
     detailGrid.appendChild(_buildMethodologySection());
     detailGrid.appendChild(_buildWaysToUseSection());
     view.appendChild(detailGrid);
-    view.appendChild(_buildReferences());
+    view.appendChild(_buildReferences(summary));
     view.appendChild(_buildDownloadActions(summary));
 
     // Back returns to the last input step; Start Over is a separate callback
@@ -649,11 +649,11 @@ const ImpactSummaryView = (() => {
   // ---------------------------------------------------------------
   // References
   // ---------------------------------------------------------------
-  function _buildReferences() {
+  function _buildReferences(summary) {
     const section = document.createElement("div");
     section.className = "summary-section summary-disclosure";
 
-    const items = REFERENCES.map(ref => `
+    const items = getRelevantReferences(summary.impactMethod).map(ref => `
       <li>
         <a href="${_escape(ref.url)}" target="_blank" rel="noopener noreferrer">${_escape(ref.title)}</a>
         — ${_escape(ref.organization)}${ref.year ? ` (${ref.year})` : ""}.

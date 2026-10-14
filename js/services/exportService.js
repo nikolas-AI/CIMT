@@ -405,7 +405,7 @@ const ExportService = (() => {
       </tr>
     `).join("");
 
-    const referenceItems = REFERENCES.map(ref => `
+    const referenceItems = getRelevantReferences(summary.impactMethod).map(ref => `
       <li>
         <a href="${_escapeHTML(ref.url)}">${_escapeHTML(ref.title)}</a>
         — ${_escapeHTML(ref.organization)}${ref.year ? ` (${_escapeHTML(ref.year)})` : ""}.

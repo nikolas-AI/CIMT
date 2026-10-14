@@ -90,11 +90,13 @@ architecture, input rules, formulas, data sources, and export details.
 ## Data, limitations, and licensing
 
 Benchmark rates and catalog entries are stored in `js/data.js`. The project
-currently cites U.S. Bureau of Labor Statistics occupational wage data for
-volunteer-role rates and the CMS Physician Fee Schedule Look-Up Tool for
-clinical-service reference rates. Rates are embedded in the application rather
-than fetched or refreshed at runtime; verify their year, methodology, and
-appropriateness before relying on them.
+cites U.S. Bureau of Labor Statistics occupational wage data and
+[Independent Sector's Value of Volunteer Time](https://independentsector.org/research/value-of-volunteer-time/)
+for volunteer-hour rates, and the CMS Physician Fee Schedule Look-Up Tool for
+clinical-service reference rates. The summary and printable report show only
+references relevant to the selected calculation method. Rates are embedded in
+the application rather than fetched or refreshed at runtime; verify their year,
+methodology, and appropriateness before relying on them.
 
 The repository currently contains no project license file. The service catalog
 includes CPT and HCPCS identifiers, and the project notes include an outstanding

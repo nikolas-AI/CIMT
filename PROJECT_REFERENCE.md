@@ -143,10 +143,13 @@ Each `VOLUNTEER_ROLES` item has:
 
 The `VOLUNTEER_RATE_SOURCE` text cites national BLS occupational wage data and
 states that roles without a direct occupation rate use the national volunteer
-hour estimate of `$36.14`. `REFERENCES` currently includes BLS Occupational
-Employment and Wage Statistics and the CMS Physician Fee Schedule Look-Up Tool.
-The source catalog is static; links do not indicate an automatic update cadence
-or the precise vintage/locality used for every embedded rate.
+hour estimate of `$36.14`. `REFERENCES` contains BLS Occupational Employment
+and Wage Statistics and Independent Sector / Do Good Institute's Value of
+Volunteer Time for volunteer-hour reports, and the CMS Physician Fee Schedule
+Look-Up Tool for clinical-service reports. Only references relevant to the
+selected calculation method appear in the summary and printable report. The
+source catalog is static; links do not indicate an automatic update cadence or
+the precise vintage/locality used for every embedded rate.
 
 ### Clinical services
 
