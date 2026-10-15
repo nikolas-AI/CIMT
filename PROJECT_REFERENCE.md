@@ -221,10 +221,11 @@ volunteer rate-source reference. See the `ImpactSummary` typedef at the end of
 ## Summary and exports
 
 `ImpactSummaryView` renders the completed estimate, method-appropriate KPI,
-methodology and caution text, reference rates used, service value chart/rankings,
-optional cost comparison, source links, and a generated statement for grants or
-donors. The copy action uses the Clipboard API with a legacy document-copy
-fallback.
+methodology and caution text, service value chart/rankings or volunteer rate
+details, optional cost comparison, source links, and a generated statement for
+grants or donors. Methodology and disclaimer text describe only the selected
+reporting mode. The copy action uses the Clipboard API with a legacy
+document-copy fallback.
 
 ### Print/PDF
 
@@ -232,6 +233,7 @@ fallback.
 window and opens the browser print dialog. The user chooses “Save as PDF” in the
 browser. Pop-ups must be allowed. The output contains report details, estimate
 and cost comparison where available, methodology, references, and disclaimers.
+The methodology and disclaimers are specific to the selected reporting mode.
 Clinical-service PDFs show a chart of up to five services ranked by estimated
 value and one full-detail table with reported units, reference rates, estimated
 values, and value shares. Volunteer PDFs show the volunteer detail table.
@@ -240,7 +242,8 @@ values, and value shares. Volunteer PDFs show the volunteer detail table.
 
 `ExportService.downloadExcel` generates a single-sheet `.xlsx` workbook with
 clinic/report details, activity totals, method-specific detail, clinical
-rankings when applicable, optional cost metrics, and a disclaimer. The workbook
+rankings when applicable, optional cost metrics, and a mode-specific estimate
+basis and disclaimer. The workbook
 is assembled in the browser using `xlsx-js-style` 1.2.0 loaded from jsDelivr;
 report data is not posted to a workbook service. If the `XLSX` global is
 unavailable, the app alerts the user that the workbook cannot be prepared.

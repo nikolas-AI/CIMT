@@ -25,8 +25,9 @@ const AppCopy = (() => {
   const summary = {
     emptyState: "Enter services provided or volunteer hours donated to create a summary for this reporting period.",
     fiShortDisclaimer: "Important: Dollar amounts are estimates based on reported totals and reference rates. They are not revenue, payments, profit, or confirmed savings.",
-    methodologyNote: "Reported service counts are multiplied by reference rates. Volunteer hours are multiplied by reference hourly rates. The rates are national estimates and are not adjusted for your ZIP code.",
-    shortDisclaimer: "Important: This is an estimate of the value of services and volunteer contributions. It does not represent actual revenue, reimbursement, profit, or confirmed savings.",
+    shortDisclaimer: (impactMethod) => impactMethod === "volunteerHours"
+      ? "Important: This is an estimate of the value of donated volunteer time based on reported hours and role-specific hourly benchmarks. It is not cash revenue, reimbursement, profit, or confirmed savings."
+      : "Important: This is an estimate of the value of reported clinical services based on service counts and reference rates. It is not revenue, reimbursement, profit, or confirmed savings.",
     costComparisonNote: "Important: This compares your reported clinic cost with the estimated value provided by your clinic. It is not actual financial ROI, revenue, reimbursement, profit, or confirmed healthcare savings.",
     rankingNote: "Rankings show the relative estimated value of the services you reported. They do not measure clinical importance, quality of care, patient need, reimbursement, or actual savings.",
     rankingByCountNote: "Services ranked based on reported units. This view shows each service’s share of all reported units. Counts do not indicate clinical importance, quality of care, or patient need.",
@@ -193,10 +194,13 @@ const AppCopy = (() => {
     ],
     fundingNote: "Review the report alongside your organization’s financial records, program outcomes, and funder requirements before submitting it externally.",
     methodologySectionTitle: "How these estimates are calculated",
-    methodologyBullets: [
-      "Service totals are multiplied by reference rates.",
-      "Volunteer hours are multiplied by reference hourly rates.",
-      "The total combines the estimated value of the activity you entered. Volunteer roles are kept separate from clinical services when the volunteer option is used.",
+    methodologyBullets: (impactMethod) => [
+      impactMethod === "volunteerHours"
+        ? "Reported volunteer hours are multiplied by the hourly benchmark for each volunteer role."
+        : "Reported clinical service units are multiplied by the reference rate for each service.",
+      impactMethod === "volunteerHours"
+        ? "The total is the estimated value of donated volunteer time across the reported roles."
+        : "The total is the estimated value of the reported clinical services.",
       "When clinic cost is provided, the report compares that cost with the total estimated value.",
       "Reference rates are national estimates and are not adjusted for your ZIP code.",
       "Only combined activity totals are needed. Do not enter patient information.",
@@ -233,7 +237,9 @@ const AppCopy = (() => {
   const exportCopy = {
     pdfTitle: "Estimated Clinic Impact Summary",
     pdfSubtitle: "Activity summary using reference-rate estimates",
-    pdfFooter: "Important: This report uses combined activity totals and reference rates. It does not represent revenue, payments, profit, confirmed savings, or patient outcomes.",
+    pdfFooter: (impactMethod) => impactMethod === "volunteerHours"
+      ? "Important: This report estimates donated volunteer time from reported hours and hourly benchmarks. It does not represent cash revenue, payments, profit, confirmed savings, or patient outcomes."
+      : "Important: This report estimates clinical services from reported units and reference rates. It does not represent revenue, payments, profit, confirmed savings, or patient outcomes.",
     workbookSummary: "Impact Summary",
     workbookClinical: "Clinical Services",
     workbookVolunteer: "Volunteer Contributions",

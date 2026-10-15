@@ -62,8 +62,8 @@ const ExportService = (() => {
         ? summary.volunteerBreakdown.reduce((sum, row) => sum + row.hours, 0)
         : summary.serviceBreakdown.reduce((sum, row) => sum + row.count, 0)]);
     rows.push(["Estimate Basis", summary.impactMethod === "volunteerHours"
-      ? "Reported volunteer hours multiplied by public reference hourly rates"
-      : "Reported service counts multiplied by public reference rates"]);
+      ? "Reported volunteer hours multiplied by role-specific hourly benchmarks"
+      : "Reported clinical service units multiplied by public clinical reference rates"]);
     if (summary.impactMethod === "volunteerHours") {
       rows.push(["Medical Professional Volunteer Value", summary.medicalProfessionalVolunteerValue]);
       rows.push(["Non-Medical Volunteer Value", summary.nonMedicalVolunteerValue]);
@@ -147,7 +147,7 @@ const ExportService = (() => {
     const disclaimerSectionRow = rows.length;
     rows.push(["Disclaimer"]);
     const disclaimerRow = rows.length;
-    rows.push([AppCopy.summary.shortDisclaimer]);
+    rows.push([AppCopy.summary.shortDisclaimer(summary.impactMethod)]);
 
     const sheet = XLSX.utils.aoa_to_sheet(rows);
     sheet["!rows"] = rows.map((_, index) => ({ hpx: index === 0 ? 28 : 18 }));
@@ -504,7 +504,7 @@ const ExportService = (() => {
         </section>`
       : "";
 
-    const methodologyItems = AppCopy.summaryView.methodologyBullets
+    const methodologyItems = AppCopy.summaryView.methodologyBullets(summary.impactMethod)
       .map(item => `<li>${_escapeHTML(item)}</li>`)
       .join("");
     const volunteerSourceHTML = isVolunteerReport && VOLUNTEER_RATE_SOURCE
@@ -693,7 +693,7 @@ const ExportService = (() => {
 </section>
 <p class="callout"><strong>${_escapeHTML(AppCopy.summaryDashboard.estimateHeading)}.</strong> ${_escapeHTML(AppCopy.summaryDashboard.estimateIntro(summary.impactMethod))}<br><br>${_escapeHTML(estimateDetails)}</p>
 <p class="narrative">${_escapeHTML(impactNarrative)}</p>
-<p class="callout">${_escapeHTML(AppCopy.summary.shortDisclaimer)}</p>
+<p class="callout">${_escapeHTML(AppCopy.summary.shortDisclaimer(summary.impactMethod))}</p>
 ${serviceImpactHTML}
 ${serviceChartHTML}
 ${volunteerBreakdownHTML}
@@ -727,7 +727,7 @@ ${volunteerSourceHTML}
   <h2>Sources and references</h2>
   <ul class="sources">${referenceItems}</ul>
 </section>
-<footer class="footer">${_escapeHTML(AppCopy.exportCopy.pdfFooter)}</footer>
+<footer class="footer">${_escapeHTML(AppCopy.exportCopy.pdfFooter(summary.impactMethod))}</footer>
 </body></html>`;
   }
 

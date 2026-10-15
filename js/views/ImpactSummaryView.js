@@ -27,6 +27,7 @@ const ImpactSummaryView = (() => {
     view.appendChild(_buildKpiStrip(summary));
     view.appendChild(_buildEstimateCallout(summary));
     view.appendChild(_buildImpactNarrative(summary));
+    view.appendChild(_buildDisclaimer(summary));
     if (summary.impactMethod === "volunteerHours" && _hasBothVolunteerCategories(summary)) {
       view.appendChild(_buildBreakdown(summary));
     }
@@ -51,7 +52,7 @@ const ImpactSummaryView = (() => {
 
     const detailGrid = document.createElement("div");
     detailGrid.className = "summary-detail-grid";
-    detailGrid.appendChild(_buildMethodologySection());
+    detailGrid.appendChild(_buildMethodologySection(summary));
     detailGrid.appendChild(_buildWaysToUseSection());
     view.appendChild(detailGrid);
     view.appendChild(_buildReferences(summary));
@@ -199,11 +200,11 @@ const ImpactSummaryView = (() => {
   // ---------------------------------------------------------------
   // Disclaimer
   // ---------------------------------------------------------------
-  function _buildDisclaimer() {
+  function _buildDisclaimer(summary) {
     const d = document.createElement("p");
     d.className = "impact-disclaimer";
     d.setAttribute("role", "note");
-    d.textContent = AppCopy.summary.shortDisclaimer;
+    d.textContent = AppCopy.summary.shortDisclaimer(summary.impactMethod);
     return d;
   }
 
@@ -631,10 +632,12 @@ const ImpactSummaryView = (() => {
   // ---------------------------------------------------------------
   // Download actions (stubs connected to ExportService)
   // ---------------------------------------------------------------
-  function _buildMethodologySection() {
+  function _buildMethodologySection(summary) {
     const section = document.createElement("section");
     section.className = "summary-section summary-disclosure";
-    const list = AppCopy.summaryView.methodologyBullets.map(item => `<li>${item}</li>`).join("");
+    const list = AppCopy.summaryView.methodologyBullets(summary.impactMethod)
+      .map(item => `<li>${item}</li>`)
+      .join("");
     section.innerHTML = `
       <details>
         <summary class="summary-section__heading">${AppCopy.summaryView.methodologySectionTitle}</summary>
