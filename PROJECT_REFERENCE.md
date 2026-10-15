@@ -231,8 +231,10 @@ fallback.
 `ExportService.downloadPDF` builds a standalone print-ready HTML report in a new
 window and opens the browser print dialog. The user chooses “Save as PDF” in the
 browser. Pop-ups must be allowed. The output contains report details, estimate
-and cost comparison where available, service or volunteer tables, methodology,
-references, and disclaimers.
+and cost comparison where available, methodology, references, and disclaimers.
+Clinical-service PDFs show a chart of up to five services ranked by estimated
+value and one full-detail table with reported units, reference rates, estimated
+values, and value shares. Volunteer PDFs show the volunteer detail table.
 
 ### Excel workbook
 

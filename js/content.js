@@ -203,7 +203,7 @@ const AppCopy = (() => {
   };
 
   const summaryDashboard = {
-    reportComplete: "Report complete",
+    reportComplete: "Complete report",
     eyebrow: "Community impact summary",
     estimatedServiceValue: "Estimated value of clinical services",
     estimatedVolunteerValue: "Estimated value of volunteer time",

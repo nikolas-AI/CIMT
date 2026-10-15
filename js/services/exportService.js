@@ -398,10 +398,13 @@ const ExportService = (() => {
     const svcRows = summary.serviceBreakdown.map(row => `
       <tr>
         <td>${_escapeHTML(row.serviceName)}</td>
-        <td>${_escapeHTML(row.code)}</td>
+        <td class="service-code">${_escapeHTML(row.code)}</td>
         <td class="numeric">${row.count.toLocaleString("en-US")}</td>
         <td class="numeric">${_fmt(row.benchmarkRate)}</td>
         <td class="numeric">${_fmt(row.estimatedValue)}</td>
+        <td class="numeric">${summary.clinicalServiceValue > 0
+          ? (row.estimatedValue / summary.clinicalServiceValue * 100).toFixed(1)
+          : "0.0"}%</td>
       </tr>
     `).join("");
 
@@ -437,29 +440,25 @@ const ExportService = (() => {
       </section>
     ` : "";
 
-    const serviceImpactHTML = !isVolunteerReport && summary.mostImpactfulService
-      ? `<section class="report-section feature">
-          <h2>${_escapeHTML(AppCopy.metric.mostImpactful)}</h2>
-          <p class="feature__statement"><strong>${_escapeHTML(summary.mostImpactfulService.serviceName)}</strong> had the largest share of the estimated service value, with <strong>${summary.mostImpactfulService.count.toLocaleString("en-US")} services</strong> and an estimated value of <strong>${_fmt(summary.mostImpactfulService.estimatedValue)}</strong>.</p>
-          <p class="feature__meta">${_escapeHTML(AppCopy.summaryDashboard.topContributorStats(
-            summary.mostImpactfulService.count.toLocaleString("en-US"),
-            _fmt(summary.mostImpactfulService.estimatedValue),
-            summary.mostImpactfulService.clinicalValueShare.toFixed(1)
-          ))}</p>
-          <div class="value-track" role="img" aria-label="${_escapeHTML(summary.mostImpactfulService.serviceName)} contributed ${summary.mostImpactfulService.clinicalValueShare.toFixed(1)} percent of estimated service value">
-            <span style="width:${Math.min(100, Math.max(0, summary.mostImpactfulService.clinicalValueShare))}%"></span>
-          </div>
-        </section>`
-      : "";
-
-    const serviceChartHTML = !isVolunteerReport && summary.serviceImpactRanking?.byValue.length > 0
+    const rankedServices = summary.serviceImpactRanking?.byValue || [];
+    const topServices = rankedServices.slice(0, 5);
+    const serviceChartHeading = rankedServices.length > 5
+      ? "Top five services by estimated value"
+      : "Services by estimated value";
+    const serviceChartIntro = rankedServices.length > 5
+      ? "Showing the five highest-value reported services."
+      : "Reported services ranked by estimated value.";
+    const maximumServiceValue = Math.max(
+      ...topServices.map(service => service.estimatedValue),
+      1
+    );
+    const serviceChartHTML = !isVolunteerReport && topServices.length > 0
       ? `<section class="report-section">
-          <h2>${_escapeHTML(AppCopy.summaryDashboard.valueChartHeading)}</h2>
-          <p class="section-intro">${_escapeHTML(AppCopy.summaryDashboard.valueChartIntro)}</p>
+          <h2>${serviceChartHeading}</h2>
+          <p class="section-intro">${serviceChartIntro}</p>
           <div class="chart">
-            ${summary.serviceImpactRanking.byValue.map(row => {
-              const maximum = Math.max(...summary.serviceImpactRanking.byValue.map(item => item.estimatedValue), 1);
-              const width = Math.min(100, Math.max(0, row.estimatedValue / maximum * 100));
+            ${topServices.map(row => {
+              const width = Math.min(100, Math.max(0, row.estimatedValue / maximumServiceValue * 100));
               return `<div class="chart-row">
                 <div class="chart-row__label"><span>${_escapeHTML(row.serviceName)}</span><strong>${_fmt(row.estimatedValue)}</strong></div>
                 <div class="value-track" aria-hidden="true"><span style="width:${width}%"></span></div>
@@ -467,22 +466,6 @@ const ExportService = (() => {
             }).join("")}
           </div>
         </section>`
-      : "";
-
-    const serviceRankingHTML = !isVolunteerReport && summary.serviceImpactRanking?.byValue.length > 0
-      ? [
-        ["Services by estimated value", summary.serviceImpactRanking.byValue],
-        ["Services by number reported", summary.serviceImpactRanking.byVisits],
-      ].map(([heading, rows]) => `
-        <section class="report-section">
-          <h2>${_escapeHTML(heading)}</h2>
-          <table>
-            <thead><tr><th>Rank</th><th>Service</th><th class="numeric">Number reported</th><th class="numeric">Estimated value</th><th class="numeric">Share of total estimated service value</th></tr></thead>
-            <tbody>${rows.map((row, index) => `<tr><td>${index + 1}</td><td>${_escapeHTML(row.serviceName)}</td><td class="numeric">${row.count.toLocaleString("en-US")}</td><td class="numeric">${_fmt(row.estimatedValue)}</td><td class="numeric">${row.clinicalValueShare.toFixed(1)}%</td></tr>`).join("")}</tbody>
-          </table>
-          <p class="section-note">${_escapeHTML(AppCopy.summary.rankingNote)}</p>
-        </section>
-      `).join("")
       : "";
 
     const hasMedicalVolunteerHours = summary.volunteerBreakdown.some(
@@ -645,6 +628,7 @@ const ExportService = (() => {
   thead { display: table-header-group; }
   th { padding: 8px; color: var(--navy); background: #E9E4D7; font-size: 9px; font-weight: 700; text-align: left; }
   td { padding: 7px 8px; color: var(--slate); border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+  .service-code { width: 6em; min-width: 6em; white-space: nowrap; }
   .numeric { text-align: right; font-variant-numeric: tabular-nums; }
   tfoot th { background: var(--impact-bg); }
   .sources { padding-left: 18px; }
@@ -667,6 +651,8 @@ const ExportService = (() => {
     .hero, .metric-grid, .feature, .chart, .source-box, .callout { break-inside: avoid; }
     .report-section h2 { break-after: avoid; }
     .report-section table tr { break-inside: avoid; }
+    thead { display: table-row-group; }
+    tfoot { display: table-row-group; }
     a { color: inherit; text-decoration: none; }
   }
 </style></head><body>
@@ -689,17 +675,15 @@ const ExportService = (() => {
 <p class="callout"><strong>${_escapeHTML(AppCopy.summaryDashboard.estimateHeading)}.</strong> ${_escapeHTML(AppCopy.summaryDashboard.estimateIntro(summary.impactMethod))}<br><br>${_escapeHTML(estimateDetails)}</p>
 <p class="narrative">${_escapeHTML(impactNarrative)}</p>
 <p class="callout">${_escapeHTML(AppCopy.summary.shortDisclaimer)}</p>
-${serviceImpactHTML}
 ${serviceChartHTML}
 ${volunteerBreakdownHTML}
 ${budgetHTML}
-${serviceRankingHTML}
 ${!isVolunteerReport ? `<section class="report-section">
-  <h2>Breakdown of Clinical Services</h2>
+  <h2>Clinical services</h2>
   <div class="table-wrap"><table>
-    <thead><tr><th>Service</th><th>Service code</th><th class="numeric">Number reported</th><th class="numeric">Reference rate</th><th class="numeric">Estimated value</th></tr></thead>
+    <thead><tr><th>Service</th><th class="service-code">Code</th><th class="numeric">Reported units</th><th class="numeric">Reference rate</th><th class="numeric">Estimated value</th><th class="numeric">Value share</th></tr></thead>
     <tbody>${svcRows}</tbody>
-    <tfoot><tr><th colspan="4" class="numeric">Clinical services total</th><th class="numeric">${_fmt(summary.clinicalServiceValue)}</th></tr></tfoot>
+    <tfoot><tr><th colspan="4" class="numeric">Clinical services total</th><th class="numeric">${_fmt(summary.clinicalServiceValue)}</th><th class="numeric">${summary.clinicalServiceValue > 0 ? "100.0%" : "0.0%"}</th></tr></tfoot>
   </table></div>
 </section>` : ""}
 ${isVolunteerReport ? `<section class="report-section">
