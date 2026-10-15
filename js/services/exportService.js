@@ -313,6 +313,10 @@ const ExportService = (() => {
       : value;
   }
 
+  function _sharePercent(value) {
+    return value > 0 && value < 0.1 ? "<0.1" : value.toFixed(1);
+  }
+
   function _methodLabel(method) {
     return method === "volunteerHours"
       ? "Volunteer hours"
@@ -370,7 +374,7 @@ const ExportService = (() => {
         : AppCopy.summary.emptyState;
     const topServiceSentence = summary.mostImpactfulService &&
       Number(summary.mostImpactfulService.clinicalValueShare || 0) > 0
-      ? ` ${summary.mostImpactfulService.serviceName} represented ${summary.mostImpactfulService.clinicalValueShare.toFixed(1)}% of the estimated service value.`
+      ? ` ${summary.mostImpactfulService.serviceName} represented ${_sharePercent(summary.mostImpactfulService.clinicalValueShare)}% of the estimated service value.`
       : "";
     const funderReadyStatement = isVolunteerReport
       ? AppCopy.summary.funderReadyVolunteerStatement(
@@ -402,9 +406,9 @@ const ExportService = (() => {
         <td class="numeric">${row.count.toLocaleString("en-US")}</td>
         <td class="numeric">${_fmt(row.benchmarkRate)}</td>
         <td class="numeric">${_fmt(row.estimatedValue)}</td>
-        <td class="numeric">${summary.clinicalServiceValue > 0
-          ? (row.estimatedValue / summary.clinicalServiceValue * 100).toFixed(1)
-          : "0.0"}%</td>
+        <td class="numeric">${_escapeHTML(_sharePercent(summary.clinicalServiceValue > 0
+          ? row.estimatedValue / summary.clinicalServiceValue * 100
+          : 0))}%</td>
       </tr>
     `).join("");
 
@@ -447,9 +451,9 @@ const ExportService = (() => {
           <p class="feature__meta">${_escapeHTML(AppCopy.summaryDashboard.topContributorStats(
             summary.mostImpactfulService.count.toLocaleString("en-US"),
             _fmt(summary.mostImpactfulService.estimatedValue),
-            summary.mostImpactfulService.clinicalValueShare.toFixed(1)
+            _sharePercent(summary.mostImpactfulService.clinicalValueShare)
           ))}</p>
-          <div class="value-track" role="img" aria-label="${_escapeHTML(summary.mostImpactfulService.serviceName)} contributed ${summary.mostImpactfulService.clinicalValueShare.toFixed(1)} percent of estimated service value">
+          <div class="value-track" role="img" aria-label="${_escapeHTML(summary.mostImpactfulService.serviceName)} contributed ${_escapeHTML(_sharePercent(summary.mostImpactfulService.clinicalValueShare))} percent of estimated service value">
             <span style="width:${Math.min(100, Math.max(0, summary.mostImpactfulService.clinicalValueShare))}%"></span>
           </div>
         </section>`

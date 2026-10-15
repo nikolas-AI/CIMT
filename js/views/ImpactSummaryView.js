@@ -474,22 +474,25 @@ const ImpactSummaryView = (() => {
             </tr>
           </thead>
           <tbody>
-            ${rows.map((row, index) => `
-              <tr>
-                <td class="service-ranking__rank">${index + 1}</td>
-                <td>${_escape(row.serviceName)}</td>
-                <td><code>${_escape(row.code)}</code></td>
-                <td>${Formatting.number(row.count, 0)}</td>
-                <td>${Formatting.currency(row.benchmarkRate)}</td>
-                <td>${Formatting.currency(row.estimatedValue)}</td>
-                <td>${Formatting.number(
-                  mode === "visits"
-                    ? (totalReportedUnits > 0 ? row.count / totalReportedUnits * 100 : 0)
-                    : row.clinicalValueShare,
-                  1
-                )}%</td>
-              </tr>
-            `).join("")}
+            ${rows.map((row, index) => {
+              const share = mode === "visits"
+                ? (totalReportedUnits > 0 ? row.count / totalReportedUnits * 100 : 0)
+                : row.clinicalValueShare;
+              const shareLabel = share > 0 && share < 0.1
+                ? "&lt;0.1%"
+                : `${Formatting.number(share, 1)}%`;
+              return `
+                <tr>
+                  <td class="service-ranking__rank">${index + 1}</td>
+                  <td>${_escape(row.serviceName)}</td>
+                  <td><code>${_escape(row.code)}</code></td>
+                  <td>${Formatting.number(row.count, 0)}</td>
+                  <td>${Formatting.currency(row.benchmarkRate)}</td>
+                  <td>${Formatting.currency(row.estimatedValue)}</td>
+                  <td>${shareLabel}</td>
+                </tr>
+              `;
+            }).join("")}
           </tbody>
         </table>
       `;
