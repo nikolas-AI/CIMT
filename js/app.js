@@ -35,6 +35,14 @@
     services: [
       { id: "test-service-1", serviceId: "9992133", count: 25 },
       { id: "test-service-2", serviceId: "9904711", count: 40 },
+      { id: "test-service-3", serviceId: "1119811", count: 18 },
+      { id: "test-service-4", serviceId: "1119822", count: 12 },
+      { id: "test-service-5", serviceId: "1119833", count: 8 },
+      { id: "test-service-6", serviceId: "5583011", count: 15 },
+      { id: "test-service-7", serviceId: "7766411", count: 10 },
+      { id: "test-service-8", serviceId: "7766422", count: 7 },
+      { id: "test-service-9", serviceId: "7770655", count: 20 },
+      { id: "test-service-10", serviceId: "7770666", count: 16 },
     ],
   };
 

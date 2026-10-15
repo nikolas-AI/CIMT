@@ -440,6 +440,21 @@ const ExportService = (() => {
       </section>
     ` : "";
 
+    const serviceImpactHTML = !isVolunteerReport && summary.mostImpactfulService
+      ? `<section class="report-section feature">
+          <h2>${_escapeHTML(AppCopy.metric.mostImpactful)}</h2>
+          <p class="feature__statement"><strong>${_escapeHTML(summary.mostImpactfulService.serviceName)}</strong> had the highest estimated value, with <strong>${summary.mostImpactfulService.count.toLocaleString("en-US")} reported units</strong> and an estimated value of <strong>${_fmt(summary.mostImpactfulService.estimatedValue)}</strong>.</p>
+          <p class="feature__meta">${_escapeHTML(AppCopy.summaryDashboard.topContributorStats(
+            summary.mostImpactfulService.count.toLocaleString("en-US"),
+            _fmt(summary.mostImpactfulService.estimatedValue),
+            summary.mostImpactfulService.clinicalValueShare.toFixed(1)
+          ))}</p>
+          <div class="value-track" role="img" aria-label="${_escapeHTML(summary.mostImpactfulService.serviceName)} contributed ${summary.mostImpactfulService.clinicalValueShare.toFixed(1)} percent of estimated service value">
+            <span style="width:${Math.min(100, Math.max(0, summary.mostImpactfulService.clinicalValueShare))}%"></span>
+          </div>
+        </section>`
+      : "";
+
     const rankedServices = summary.serviceImpactRanking?.byValue || [];
     const topServices = rankedServices.slice(0, 5);
     const serviceChartHeading = rankedServices.length > 5
@@ -675,6 +690,7 @@ const ExportService = (() => {
 <p class="callout"><strong>${_escapeHTML(AppCopy.summaryDashboard.estimateHeading)}.</strong> ${_escapeHTML(AppCopy.summaryDashboard.estimateIntro(summary.impactMethod))}<br><br>${_escapeHTML(estimateDetails)}</p>
 <p class="narrative">${_escapeHTML(impactNarrative)}</p>
 <p class="callout">${_escapeHTML(AppCopy.summary.shortDisclaimer)}</p>
+${serviceImpactHTML}
 ${serviceChartHTML}
 ${volunteerBreakdownHTML}
 ${budgetHTML}
