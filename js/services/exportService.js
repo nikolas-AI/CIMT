@@ -695,7 +695,7 @@ ${serviceChartHTML}
 ${volunteerBreakdownHTML}
 ${budgetHTML}
 ${!isVolunteerReport ? `<section class="report-section">
-  <h2>Clinical services</h2>
+  <h2>Clinical Services Breakdown</h2>
   <div class="table-wrap"><table>
     <thead><tr><th>Service</th><th class="service-code">Code</th><th class="numeric">Reported units</th><th class="numeric">Reference rate</th><th class="numeric">Estimated value</th><th class="numeric">Value share</th></tr></thead>
     <tbody>${svcRows}</tbody>

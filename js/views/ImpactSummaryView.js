@@ -466,6 +466,7 @@ const ImpactSummaryView = (() => {
             <tr>
               <th scope="col">Rank</th>
               <th scope="col">Service</th>
+              <th scope="col">Code</th>
               <th scope="col">Number reported</th>
               <th scope="col">Reference rate</th>
               <th scope="col">Estimated value</th>
@@ -477,6 +478,7 @@ const ImpactSummaryView = (() => {
               <tr>
                 <td class="service-ranking__rank">${index + 1}</td>
                 <td>${_escape(row.serviceName)}</td>
+                <td><code>${_escape(row.code)}</code></td>
                 <td>${Formatting.number(row.count, 0)}</td>
                 <td>${Formatting.currency(row.benchmarkRate)}</td>
                 <td>${Formatting.currency(row.estimatedValue)}</td>
@@ -548,89 +550,33 @@ const ImpactSummaryView = (() => {
   // Reference rate table
   // ---------------------------------------------------------------
   function _buildRateTable(summary) {
-    // Only selected services and roles appear here. The calculator has already
-    // removed entries that do not match a catalog item.
-    // Only selected services and roles appear here; the calculator has already
-    // removed invalid or unknown entries before this view receives the summary.
+    if (summary.volunteerBreakdown.length === 0) return null;
+
     const section = document.createElement("div");
     section.className = "summary-section";
-
-    if (summary.serviceBreakdown.length > 0) {
-      section.innerHTML = `
-        <h2 class="summary-section__heading">Reference rates used</h2>
-        <p class="summary-section__intro">
-          Clinical service values use publicly available reference rates. These rates provide a consistent way to estimate the value of the services reported.
-        </p>
-      `;
-    }
-
-    const tableWrap = document.createElement("div");
-    tableWrap.style.overflowX = "auto";
-
-    // Services table
-    if (summary.serviceBreakdown.length > 0) {
-      const svcTable = document.createElement("table");
-      svcTable.className = "rate-table";
-      svcTable.setAttribute("aria-label", "Clinical service reference rates");
-      svcTable.innerHTML = `
-        <thead>
-          <tr>
-            <th scope="col">Service</th>
-            <th scope="col">Service code</th>
-            <th scope="col">Reference rate</th>
-            <th scope="col">Number reported</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${summary.serviceBreakdown.map(row => `
+    section.innerHTML = `
+      <h2 class="summary-section__heading">Volunteer time reference rates</h2>
+      <div style="overflow-x:auto">
+        <table class="rate-table" aria-label="Volunteer time reference rates">
+          <thead>
             <tr>
-              <td>${_escape(row.serviceName)}</td>
-              <td><code>${_escape(row.code)}</code></td>
-              <td>${Formatting.currency(row.benchmarkRate)}</td>
-              <td>${Formatting.number(row.count, 0)}</td>
+              <th scope="col">Role</th>
+              <th scope="col">Rate / Hour</th>
+              <th scope="col">Hours</th>
             </tr>
-          `).join("")}
-        </tbody>
-      `;
-      tableWrap.appendChild(svcTable);
-    }
-
-    // Volunteer table
-    if (summary.volunteerBreakdown.length > 0) {
-      const volHeading = document.createElement("h3");
-      volHeading.style.cssText = "font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-muted);margin:1.5rem 0 0.75rem;";
-      volHeading.textContent = "Volunteer time reference rates";
-      tableWrap.appendChild(volHeading);
-
-      const volTable = document.createElement("table");
-      volTable.className = "rate-table";
-      volTable.setAttribute("aria-label", "Volunteer time reference rates");
-      volTable.innerHTML = `
-        <thead>
-          <tr>
-            <th scope="col">Role</th>
-            <th scope="col">Rate / Hour</th>
-            <th scope="col">Hours</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${summary.volunteerBreakdown.map(row => `
-            <tr>
-              <td>${_escape(row.roleName)}</td>
-              <td>${Formatting.currency(row.benchmarkRate)}</td>
-              <td>${Formatting.number(row.hours, 1)}</td>
-            </tr>
-          `).join("")}
-        </tbody>
-      `;
-      tableWrap.appendChild(volTable);
-    }
-
-    if (summary.serviceBreakdown.length === 0 && summary.volunteerBreakdown.length === 0) {
-      return null;
-    }
-
-    section.appendChild(tableWrap);
+          </thead>
+          <tbody>
+            ${summary.volunteerBreakdown.map(row => `
+              <tr>
+                <td>${_escape(row.roleName)}</td>
+                <td>${Formatting.currency(row.benchmarkRate)}</td>
+                <td>${Formatting.number(row.hours, 1)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
     return section;
   }
 
