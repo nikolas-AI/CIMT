@@ -445,7 +445,7 @@ const ImpactSummaryView = (() => {
         </div>
       </div>
       <div class="service-ranking__table-wrap"></div>
-      <p class="summary-section__intro">${AppCopy.summary.rankingNote}</p>
+      <p class="summary-section__intro service-ranking__note">${AppCopy.summary.rankingNote}</p>
     `;
 
     const tableWrap = section.querySelector(".service-ranking__table-wrap");
@@ -453,9 +453,13 @@ const ImpactSummaryView = (() => {
     const buttons = section.querySelectorAll("[data-ranking-mode]");
     const renderRows = (mode) => {
       const rows = ranking[mode === "visits" ? "byVisits" : "byValue"];
+      const totalReportedUnits = ranking.byVisits.reduce((sum, row) => sum + row.count, 0);
       title.textContent = mode === "visits"
         ? "Top services by number reported"
         : "Top services by estimated value";
+      section.querySelector(".service-ranking__note").textContent = mode === "visits"
+        ? AppCopy.summary.rankingByCountNote
+        : AppCopy.summary.rankingNote;
       tableWrap.innerHTML = `
         <table class="rate-table service-ranking__table" aria-label="Clinical service impact ranking">
           <thead>
@@ -465,7 +469,7 @@ const ImpactSummaryView = (() => {
               <th scope="col">Number reported</th>
               <th scope="col">Reference rate</th>
               <th scope="col">Estimated value</th>
-              <th scope="col">Share of total estimated service value</th>
+              <th scope="col">${mode === "visits" ? "Share of reported units" : "Share of total estimated service value"}</th>
             </tr>
           </thead>
           <tbody>
@@ -476,7 +480,12 @@ const ImpactSummaryView = (() => {
                 <td>${Formatting.number(row.count, 0)}</td>
                 <td>${Formatting.currency(row.benchmarkRate)}</td>
                 <td>${Formatting.currency(row.estimatedValue)}</td>
-                <td>${Formatting.number(row.clinicalValueShare, 1)}%</td>
+                <td>${Formatting.number(
+                  mode === "visits"
+                    ? (totalReportedUnits > 0 ? row.count / totalReportedUnits * 100 : 0)
+                    : row.clinicalValueShare,
+                  1
+                )}%</td>
               </tr>
             `).join("")}
           </tbody>

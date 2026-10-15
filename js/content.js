@@ -29,6 +29,7 @@ const AppCopy = (() => {
     shortDisclaimer: "Important: This is an estimate of the value of services and volunteer contributions. It does not represent actual revenue, reimbursement, profit, or confirmed savings.",
     costComparisonNote: "Important: This compares your reported clinic cost with the estimated value provided by your clinic. It is not actual financial ROI, revenue, reimbursement, profit, or confirmed healthcare savings.",
     rankingNote: "Rankings show the relative estimated value of the services you reported. They do not measure clinical importance, quality of care, patient need, reimbursement, or actual savings.",
+    rankingByCountNote: "This view ranks services by reported units and shows each service’s share of all reported units. Counts do not indicate clinical importance, quality of care, or patient need.",
     funderReadyTitle: "Impact statement for grants and donors",
     copySuccess: "Statement copied. Review it and adjust it for your organization.",
     impactStatementButton: "Copy impact statement",
