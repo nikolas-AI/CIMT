@@ -10,6 +10,10 @@ const exportServiceSource = fs.readFileSync(
   path.join(__dirname, "../js/services/exportService.js"),
   "utf8"
 );
+const impactSummaryViewSource = fs.readFileSync(
+  path.join(__dirname, "../js/views/ImpactSummaryView.js"),
+  "utf8"
+);
 
 function makeSummary(serviceCount) {
   const serviceBreakdown = Array.from({ length: serviceCount }, (_, index) => ({
@@ -138,10 +142,10 @@ test("chart heading and description are protected with the chart, and table pagi
   assert.match(chartSection[1], /<h2>Services by estimated value<\/h2>/);
   assert.match(chartSection[1], /<p class="section-intro">/);
   assert.match(chartSection[1], /<div class="chart">/);
-  assert.match(html, /\.chart-section,\s*\.source-box, \.callout,[\s\S]*?break-inside: avoid;/);
-  assert.match(html, /thead \{ display: table-header-group; \}/);
+  assert.match(html, /\.chart-section, \.callout,[\s\S]*?break-inside: avoid;/);
+  assert.match(html, /thead \{ display: table-header-group; break-after: avoid; page-break-after: avoid; \}/);
   assert.doesNotMatch(html, /thead \{ display: table-row-group; \}/);
-  assert.match(html, /\.service-breakdown \{ break-before: page; page-break-before: always; \}/);
+  assert.doesNotMatch(html, /\.service-breakdown \{ break-before: page; page-break-before: always; \}/);
 });
 
 for (const serviceCount of [0, 1, 2, 5, 10, 30]) {
@@ -152,6 +156,7 @@ for (const serviceCount of [0, 1, 2, 5, 10, 30]) {
     );
 
     assert.ok(table);
+    assert.ok(table[1].indexOf("<h2>Clinical Services Breakdown</h2>") < table[1].indexOf("<thead>"));
     assert.equal((table[1].match(/Clinical services total/g) || []).length, 1);
     assert.match(table[1], /<tbody class="table-opening/);
     assert.match(table[1], /<tbody class="[^"]*table-ending/);
@@ -159,8 +164,11 @@ for (const serviceCount of [0, 1, 2, 5, 10, 30]) {
     assert.ok(endingGroup);
     assert.ok(endingGroup[1].indexOf("Clinical services total") >= 0);
 
-    if (serviceCount > 2) {
-      assert.match(table[1], /<tbody class="table-opening">[\s\S]*Test service 1[\s\S]*Test service 2[\s\S]*<\/tbody>/);
+    if (serviceCount > 1) {
+      const openingGroup = table[1].match(/<tbody class="table-opening">([\s\S]*?)<\/tbody>/);
+      assert.ok(openingGroup);
+      assert.match(openingGroup[1], /Test service 1/);
+      assert.doesNotMatch(openingGroup[1], /Test service 2/);
       assert.ok(endingGroup[1].indexOf(`Test service ${serviceCount}`) < endingGroup[1].indexOf("Clinical services total"));
     } else if (serviceCount > 0) {
       assert.ok(endingGroup[1].indexOf(`Test service ${serviceCount}`) < endingGroup[1].indexOf("Clinical services total"));
@@ -180,4 +188,22 @@ test("volunteer table keeps the final row with its single total", () => {
   const endingGroup = table[1].match(/<tbody class="table-ending">([\s\S]*?)<\/tbody>/);
   assert.ok(endingGroup);
   assert.ok(endingGroup[1].indexOf("Volunteer role 5") < endingGroup[1].indexOf("Total volunteer time value"));
+});
+
+test("volunteer rate source uses normal, unhighlighted report text", () => {
+  const html = buildPrintHTML(makeVolunteerSummary(1));
+  const sourceSection = html.match(
+    /<h2>Volunteer Rate Source<\/h2>([\s\S]*?)<\/section>/
+  );
+
+  assert.ok(sourceSection);
+  assert.match(sourceSection[1], /<p class="source-attribution">/);
+  assert.match(html, /\.source-attribution \{ color: var\(--slate\); \}/);
+  assert.match(html, /\.source-attribution strong \{ color: inherit; font-weight: inherit; \}/);
+  assert.doesNotMatch(sourceSection[1], /class="source-box"/);
+});
+
+test("on-screen volunteer role ranking omits the total row while PDF retains it", () => {
+  assert.doesNotMatch(impactSummaryViewSource, /Total volunteer time value/);
+  assert.match(exportServiceSource, /Total volunteer time value/);
 });

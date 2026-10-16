@@ -416,9 +416,9 @@ const ExportService = (() => {
     `);
 
     const tableBodyHTML = (rows, totalRow) => {
-      if (rows.length > 2) {
-        return `<tbody class="table-opening">${rows.slice(0, 2).join("")}</tbody>
-          ${rows.length > 3 ? `<tbody>${rows.slice(2, -1).join("")}</tbody>` : ""}
+      if (rows.length > 1) {
+        return `<tbody class="table-opening">${rows[0]}</tbody>
+          ${rows.length > 2 ? `<tbody>${rows.slice(1, -1).join("")}</tbody>` : ""}
           <tbody class="table-ending">${rows[rows.length - 1]}${totalRow}</tbody>`;
       }
       return `<tbody class="table-opening table-ending">${rows.join("")}${totalRow}</tbody>`;
@@ -512,7 +512,7 @@ const ExportService = (() => {
     const volunteerSourceHTML = isVolunteerReport && VOLUNTEER_RATE_SOURCE
       ? `<section class="report-section">
           <h2>Volunteer Rate Source</h2>
-          <p class="source-box"><strong>${_escapeHTML(VOLUNTEER_RATE_SOURCE.name)}${VOLUNTEER_RATE_SOURCE.publicationYear ? ` (${VOLUNTEER_RATE_SOURCE.publicationYear})` : ""}</strong><br>${_escapeHTML(VOLUNTEER_RATE_SOURCE.description)}</p>
+          <p class="source-attribution"><strong>${_escapeHTML(VOLUNTEER_RATE_SOURCE.name)}${VOLUNTEER_RATE_SOURCE.publicationYear ? ` (${VOLUNTEER_RATE_SOURCE.publicationYear})` : ""}</strong><br>${_escapeHTML(VOLUNTEER_RATE_SOURCE.description)}</p>
         </section>`
       : "";
 
@@ -646,7 +646,7 @@ const ExportService = (() => {
   .value-track { height: 7px; overflow: hidden; background: #DDE7DF; border-radius: 999px; }
   .value-track span { display: block; height: 100%; background: var(--teal); border-radius: inherit; }
   table { width: 100%; margin: 8px 0 0; border-collapse: collapse; font-size: 10px; }
-  thead { display: table-header-group; }
+  thead { display: table-header-group; break-after: avoid; page-break-after: avoid; }
   tbody.table-opening, tbody.table-ending { break-inside: avoid; page-break-inside: avoid; }
   th { padding: 8px; color: var(--navy); background: #E9E4D7; font-size: 9px; font-weight: 700; text-align: left; }
   td { padding: 7px 8px; color: var(--slate); border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
@@ -655,9 +655,10 @@ const ExportService = (() => {
   .table-total th { background: var(--impact-bg); }
   .sources { padding-left: 18px; }
   .sources li { margin: 0 0 9px; color: var(--slate); font-size: 10px; }
-  .sources a, .source-box a { color: var(--teal); overflow-wrap: anywhere; }
+  .sources a { color: var(--teal); overflow-wrap: anywhere; }
   .sources span { color: var(--muted); }
-  .source-box { padding: 14px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--teal); }
+  .source-attribution { color: var(--slate); }
+  .source-attribution strong { color: inherit; font-weight: inherit; }
   @media screen and (max-width: 620px) {
     body { margin: 12px auto; padding: 0 12px; }
     .hero { padding: 24px 16px; }
@@ -669,7 +670,7 @@ const ExportService = (() => {
   }
   @media print {
     body { max-width: none; margin: 0; padding: 0; background: #fff; font-size: 10pt; }
-    .hero, .metric-grid, .feature, .chart-section, .source-box, .callout,
+    .hero, .metric-grid, .feature, .chart-section, .callout,
     .cost-comparison, .funder-section { break-inside: avoid; page-break-inside: avoid; }
     .report-section h2, .report-section .section-intro { break-after: avoid; page-break-after: avoid; }
     table { break-inside: auto; page-break-inside: auto; }
@@ -677,7 +678,6 @@ const ExportService = (() => {
     tr, .sources li { break-inside: avoid; page-break-inside: avoid; }
     .table-wrap { overflow: visible; }
     p { orphans: 2; widows: 2; }
-    .service-breakdown { break-before: page; page-break-before: always; }
     a { color: inherit; text-decoration: none; }
   }
 </style></head><body>

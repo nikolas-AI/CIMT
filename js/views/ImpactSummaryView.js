@@ -585,13 +585,6 @@ const ImpactSummaryView = (() => {
               `;
             }).join("")}
           </tbody>
-          <tfoot>
-            <tr>
-              <th scope="row" colspan="5">Total volunteer time value</th>
-              <td>${Formatting.currency(summary.volunteerValue)}</td>
-              <td>${summary.volunteerValue > 0 ? "100.0%" : "0.0%"}</td>
-            </tr>
-          </tfoot>
         </table>
       </div>
     `;

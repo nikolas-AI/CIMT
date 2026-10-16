@@ -237,12 +237,13 @@ The methodology and disclaimers are specific to the selected reporting mode.
 Clinical-service PDFs show a chart of up to five services ranked by estimated
 value and one full-detail table with reported units, reference rates, estimated
 values, and value shares. Volunteer PDFs show the volunteer detail table.
-The chart heading and description are kept with the chart, and the detailed
-clinical-services table starts on a fresh page. Long tables can continue across
-pages with repeated column headings; the opening rows and final row with its
-single total are protected as groups where the browser print engine supports
-those rules. Pagination is CSS-driven, so exact page breaks can vary by browser
-and print settings. Run the structural regression checks with
+The chart heading and description are kept with the chart. The detailed tables
+can begin in the remaining page space; each section heading is kept with its
+table, column headings, and first data row where the browser print engine
+supports those rules. Long tables can continue across pages with repeated
+column headings, and the final row is grouped with its single total. Pagination
+is CSS-driven, so exact page breaks can vary by browser and print settings. Run
+the structural regression checks with
 `node --test tests/pdf-pagination.test.js`; still inspect saved PDFs in the
 supported browser when validating print-engine-specific behavior.
 
