@@ -180,18 +180,24 @@ body {
   max-width: 1180px;
   margin: 0 auto;
   padding: var(--space-8) var(--space-6);
-  display: grid;
-  grid-template-columns: 1fr;
-  justify-items: center;
-  gap: var(--space-2);
   color: var(--color-muted);
   font-size: var(--text-xs);
   line-height: 1.7;
   text-align: center;
 }
 
+.footer-branding {
+  display: grid;
+  grid-template-columns: 64px max-content 110px;
+  align-items: center;
+  gap: var(--space-4);
+  justify-content: center;
+}
+
 .footer-brand {
-  display: block;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
 }
 
 .footer-brand strong {
@@ -200,7 +206,17 @@ body {
   font-weight: 600;
 }
 
-.footer-descriptor { color: var(--color-muted); }
+.footer-descriptor {
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+}
+
+.footer-details {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  margin: var(--space-4) auto 0;
+}
 
 .footer-attribution {
   max-width: 72ch;
@@ -222,15 +238,6 @@ body {
   font-size: 0.7rem;
 }
 
-.footer-partner-logos {
-  display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) 120px;
-  align-items: center;
-  column-gap: var(--space-4);
-  width: 100%;
-  margin-top: var(--space-4);
-}
-
 .footer-partner-logo {
   display: block;
   object-fit: contain;
@@ -241,18 +248,15 @@ body {
 .footer-partner-logo--thrc {
   width: 64px;
   height: 64px;
+  justify-self: end;
   border-radius: var(--radius-md);
 }
 
 .footer-partner-logo--txacc {
   width: 110px;
   height: 64px;
+  justify-self: start;
   border-radius: var(--radius-md);
-}
-
-.footer-partner-logos .footer-attribution {
-  justify-self: center;
-  text-align: center;
 }
 
 /* ---------------------------------------------------------
@@ -1652,20 +1656,22 @@ body {
   .header-inner { padding: var(--space-4); }
   .header-context { display: none; }
   .footer-inner {
-    grid-template-columns: 1fr;
     padding: var(--space-6) var(--space-4);
   }
-  .footer-partner-logos {
-    grid-template-columns: 48px minmax(0, 1fr) 88px;
-    column-gap: var(--space-2);
+  .footer-branding {
+    grid-template-columns: 48px minmax(0, max-content) 76px;
+    gap: var(--space-3);
+    justify-content: center;
   }
   .footer-partner-logo--thrc {
     width: 48px;
     height: 48px;
+    justify-self: center;
   }
   .footer-partner-logo--txacc {
-    width: 82px;
+    width: 76px;
     height: 48px;
+    justify-self: center;
   }
   .footer-meta {
     margin: 0;
