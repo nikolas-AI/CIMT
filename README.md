@@ -105,7 +105,9 @@ before distribution or production use. This README is not a license opinion;
 confirm the project's own license terms and obtain any necessary permissions and
 legal review.
 
-No automated test or build command is currently configured in the repository.
+There is no build step. Run the PDF pagination markup regression checks with
+`node --test tests/pdf-pagination.test.js`. Print-to-PDF pagination is browser
+dependent, so visually inspect exported PDFs in the browser used for release.
 
 ## Project map
 

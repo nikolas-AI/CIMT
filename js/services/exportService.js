@@ -403,7 +403,7 @@ const ExportService = (() => {
           ? row.estimatedValue / summary.clinicalServiceValue * 100
           : 0))}%</td>
       </tr>
-    `).join("");
+    `);
 
     const volRows = summary.volunteerBreakdown.map(row => `
       <tr>
@@ -413,7 +413,16 @@ const ExportService = (() => {
         <td class="numeric">${_fmt(row.benchmarkRate)}</td>
         <td class="numeric">${_fmt(row.estimatedValue)}</td>
       </tr>
-    `).join("");
+    `);
+
+    const tableBodyHTML = (rows, totalRow) => {
+      if (rows.length > 2) {
+        return `<tbody class="table-opening">${rows.slice(0, 2).join("")}</tbody>
+          ${rows.length > 3 ? `<tbody>${rows.slice(2, -1).join("")}</tbody>` : ""}
+          <tbody class="table-ending">${rows[rows.length - 1]}${totalRow}</tbody>`;
+      }
+      return `<tbody class="table-opening table-ending">${rows.join("")}${totalRow}</tbody>`;
+    };
 
     const referenceItems = getRelevantReferences(summary.impactMethod).map(ref => `
       <li>
@@ -424,7 +433,7 @@ const ExportService = (() => {
     `).join("");
 
     const budgetHTML = summary.reportingPeriodClinicCost !== null ? `
-      <section class="report-section">
+      <section class="report-section cost-comparison">
         <h2>${_escapeHTML(AppCopy.summaryView.costHeading)}</h2>
         <p class="section-intro">${_escapeHTML(AppCopy.summaryView.costIntro(summary.reportingPeriodClinicCost))}</p>
         <div class="metric-grid metric-grid--two">
@@ -465,7 +474,7 @@ const ExportService = (() => {
       1
     );
     const serviceChartHTML = !isVolunteerReport && topServices.length > 0
-      ? `<section class="report-section">
+      ? `<section class="report-section chart-section">
           <h2>${serviceChartHeading}</h2>
           <p class="section-intro">${serviceChartIntro}</p>
           <div class="chart">
@@ -605,7 +614,7 @@ const ExportService = (() => {
   .callout--note { margin-top: 12px; font-size: 10px; }
   .narrative { margin: 0 0 20px; color: var(--slate); font-size: 13px; line-height: 1.7; }
   .funder-statement { padding: 16px 18px; color: var(--navy); background: rgba(30,107,99,.04); border: 1px solid rgba(30,107,99,.18); border-left: 4px solid var(--teal); }
-  .report-section { margin: 0 0 22px; break-inside: auto; }
+  .report-section { margin: 0 0 22px; break-inside: auto; page-break-inside: auto; }
   h2 {
     margin: 0 0 10px;
     padding-bottom: 7px;
@@ -638,11 +647,12 @@ const ExportService = (() => {
   .value-track span { display: block; height: 100%; background: var(--teal); border-radius: inherit; }
   table { width: 100%; margin: 8px 0 0; border-collapse: collapse; font-size: 10px; }
   thead { display: table-header-group; }
+  tbody.table-opening, tbody.table-ending { break-inside: avoid; page-break-inside: avoid; }
   th { padding: 8px; color: var(--navy); background: #E9E4D7; font-size: 9px; font-weight: 700; text-align: left; }
   td { padding: 7px 8px; color: var(--slate); border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
   .service-code { width: 6em; min-width: 6em; white-space: nowrap; }
   .numeric { text-align: right; font-variant-numeric: tabular-nums; }
-  tfoot th { background: var(--impact-bg); }
+  .table-total th { background: var(--impact-bg); }
   .sources { padding-left: 18px; }
   .sources li { margin: 0 0 9px; color: var(--slate); font-size: 10px; }
   .sources a, .source-box a { color: var(--teal); overflow-wrap: anywhere; }
@@ -659,11 +669,15 @@ const ExportService = (() => {
   }
   @media print {
     body { max-width: none; margin: 0; padding: 0; background: #fff; font-size: 10pt; }
-    .hero, .metric-grid, .feature, .chart, .source-box, .callout { break-inside: avoid; }
-    .report-section h2 { break-after: avoid; }
-    .report-section table tr { break-inside: avoid; }
-    thead { display: table-row-group; }
-    tfoot { display: table-row-group; }
+    .hero, .metric-grid, .feature, .chart-section, .source-box, .callout,
+    .cost-comparison, .funder-section { break-inside: avoid; page-break-inside: avoid; }
+    .report-section h2, .report-section .section-intro { break-after: avoid; page-break-after: avoid; }
+    table { break-inside: auto; page-break-inside: auto; }
+    tbody.table-opening, tbody.table-ending { break-inside: avoid; page-break-inside: avoid; }
+    tr, .sources li { break-inside: avoid; page-break-inside: avoid; }
+    .table-wrap { overflow: visible; }
+    p { orphans: 2; widows: 2; }
+    .service-breakdown { break-before: page; page-break-before: always; }
     a { color: inherit; text-decoration: none; }
   }
 </style></head><body>
@@ -689,23 +703,21 @@ ${serviceImpactHTML}
 ${serviceChartHTML}
 ${volunteerBreakdownHTML}
 ${budgetHTML}
-${!isVolunteerReport ? `<section class="report-section">
+${!isVolunteerReport ? `<section class="report-section service-breakdown">
   <h2>Clinical Services Breakdown</h2>
   <div class="table-wrap"><table>
-    <thead><tr><th>Service</th><th class="service-code">Code</th><th class="numeric">Reported units</th><th class="numeric">Reference rate</th><th class="numeric">Estimated value</th><th class="numeric">Value share</th></tr></thead>
-    <tbody>${svcRows}</tbody>
-    <tfoot><tr><th colspan="4" class="numeric">Clinical services total</th><th class="numeric">${_fmt(summary.clinicalServiceValue)}</th><th class="numeric">${summary.clinicalServiceValue > 0 ? "100.0%" : "0.0%"}</th></tr></tfoot>
+    <thead><tr><th scope="col">Service</th><th class="service-code" scope="col">Code</th><th class="numeric" scope="col">Reported units</th><th class="numeric" scope="col">Reference rate</th><th class="numeric" scope="col">Estimated value</th><th class="numeric" scope="col">Value share</th></tr></thead>
+    ${tableBodyHTML(svcRows, `<tr class="table-total"><th colspan="4" class="numeric" scope="row">Clinical services total</th><th class="numeric">${_fmt(summary.clinicalServiceValue)}</th><th class="numeric">${summary.clinicalServiceValue > 0 ? "100.0%" : "0.0%"}</th></tr>`)}
   </table></div>
 </section>` : ""}
 ${isVolunteerReport ? `<section class="report-section">
   <h2>Volunteer Time</h2>
   <div class="table-wrap"><table>
-    <thead><tr><th>Role</th><th>Type</th><th class="numeric">Volunteer hours</th><th class="numeric">Reference rate / hour</th><th class="numeric">Estimated value</th></tr></thead>
-    <tbody>${volRows}</tbody>
-    <tfoot><tr><th colspan="4" class="numeric">Total volunteer time value</th><th class="numeric">${_fmt(summary.volunteerValue)}</th></tr></tfoot>
+    <thead><tr><th scope="col">Role</th><th scope="col">Type</th><th class="numeric" scope="col">Volunteer hours</th><th class="numeric" scope="col">Reference rate / hour</th><th class="numeric" scope="col">Estimated value</th></tr></thead>
+    ${tableBodyHTML(volRows, `<tr class="table-total"><th colspan="4" class="numeric" scope="row">Total volunteer time value</th><th class="numeric">${_fmt(summary.volunteerValue)}</th></tr>`)}
   </table></div>
 </section>` : ""}
-<section class="report-section">
+<section class="report-section funder-section">
   <h2>${_escapeHTML(AppCopy.summary.funderReadyTitle)}</h2>
   <p class="funder-statement">${_escapeHTML(funderReadyStatement)}</p>
 </section>
