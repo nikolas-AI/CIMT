@@ -68,6 +68,8 @@ features need network access. If the XLSX library is unavailable, Excel export
 reports that it cannot prepare the download. PDF export opens a print-ready
 browser window; allow pop-ups and use the browser's print dialog to save as PDF.
 
+Make sure `TESTING_DEFAULTS_ENABLED` is false before you use the tool. 
+
 ## Using the estimator
 
 - Choose the method that matches the activity you want to report.
@@ -105,9 +107,9 @@ before distribution or production use. This README is not a license opinion;
 confirm the project's own license terms and obtain any necessary permissions and
 legal review.
 
-There is no build step. Run the PDF pagination markup regression checks with
-`node --test tests/pdf-pagination.test.js`. Print-to-PDF pagination is browser
-dependent, so visually inspect exported PDFs in the browser used for release.
+There is no build step or automated test suite in this checkout. Print-to-PDF
+pagination is browser dependent, so visually inspect exported PDFs in the
+browser used for release.
 
 ## Project map
 

@@ -88,6 +88,11 @@ The router's zero-based steps are:
 - `impact`: most recently calculated `ImpactSummary` or `null`.
 - `currentStep`: active step index.
 
+`TESTING_DEFAULTS_ENABLED` is currently `true` in `js/app.js`, so the clinic,
+method, and service entries start with TXST Clinic sample values. Set it to
+`false` for a blank start before production use. “Create another report” resets
+the in-memory state to blank values.
+
 Views render from the state and update it as the user edits. The app checks prior
 steps when the progress control is used to move forward. Switching methods asks
 for confirmation if any activity rows exist, removes activity for the inactive
@@ -225,7 +230,8 @@ methodology and caution text, service value chart/rankings or volunteer rate
 details, optional cost comparison, source links, and a generated statement for
 grants or donors. Methodology and disclaimer text describe only the selected
 reporting mode. The copy action uses the Clipboard API with a legacy
-document-copy fallback.
+document-copy fallback. The on-screen volunteer-role table does not display an
+aggregate total row; the PDF and Excel detail tables retain the volunteer total.
 
 ### Print/PDF
 
@@ -242,8 +248,7 @@ can begin in the remaining page space; each section heading is kept with its
 table, column headings, and first data row where the browser print engine
 supports those rules. Long tables can continue across pages with repeated
 column headings, and the final row is grouped with its single total. Pagination
-is CSS-driven, so exact page breaks can vary by browser and print settings. Run
-the structural regression checks with
+is CSS-driven, so exact page breaks can vary by browser and print settings.
 
 
 ### Excel workbook
@@ -284,9 +289,11 @@ properties at the top are the shared visual tokens.
 - **Change layout or styling:** edit `css/styles.css`, including responsive,
   focus, reduced-motion, and print behavior where relevant.
 
-There is no configured test/build runner. After changes, run the app in a browser
-and manually exercise both calculation methods, invalid inputs, backward/forward
-navigation, method switching, start-over, copy, print/PDF, and Excel export.
+There is no configured test or build runner in this checkout. After changes, run
+the app in a browser and manually exercise both calculation methods, invalid
+inputs, backward/forward navigation, method switching, start-over, copy,
+print/PDF, and Excel export. Visually inspect saved PDFs in the target browser
+because pagination behavior is renderer-specific.
 
 ## Known project/release checks
 
