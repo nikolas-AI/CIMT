@@ -101,7 +101,7 @@ const AppCopy = (() => {
     fromLabel: "From",
     toLabel: "To",
     costLabel: "Total clinic cost for this reporting period",
-    costHelp: "Include the clinic costs you report for this period, such as supplies, facilities, staffing, technology, administration, or other operating expenses.",
+    costHelp: "Include the clinic costs for this reporting period, such as supplies, facilities, staffing, technology, administration, or other operating expenses if available. This is optional, but it allows the report to compare your reported investment with an estimated value provided by your clinic.",
     next: "Next",
     back: "Back",
   };
