@@ -24,21 +24,20 @@ const AppCopy = (() => {
 
   const summary = {
     emptyState: "Enter services provided or volunteer hours donated to create a summary for this reporting period.",
-    fiShortDisclaimer: "Important: Dollar amounts are estimates based on reported totals and reference rates. They are not revenue, payments, profit, or confirmed savings.",
     shortDisclaimer: (impactMethod) => impactMethod === "volunteerHours"
-      ? "Important: This is an estimate of the value of donated volunteer time based on reported hours and role-specific hourly benchmarks. It is not cash revenue, reimbursement, profit, or confirmed savings."
-      : "Important: This is an estimate of the value of reported clinical services based on service counts and reference rates. It is not revenue, reimbursement, profit, or confirmed savings.",
-    costComparisonNote: "Important: This compares your reported clinic cost with the estimated value provided by your clinic. It is not actual financial ROI, revenue, reimbursement, profit, or confirmed healthcare savings.",
-    rankingNote: "Rankings show the relative estimated value of the services you reported. They do not measure clinical importance, quality of care, patient need, reimbursement, or actual savings.",
-    rankingByCountNote: "Services ranked based on reported units. This view shows each service’s share of all reported units. Counts do not indicate clinical importance, quality of care, or patient need.",
+      ? "Estimated value is based on reference rates and reported volunteer hours; it represents the replacement value of donated time. This is a planning and communication estimate, not revenue, reimbursement, savings, financial ROI, or a measure of care quality."
+      : "Estimated value is based on reference rates and reported service counts. This is a planning and communication estimate, not revenue, reimbursement, savings, financial ROI, or a measure of care quality.",
+    costComparisonNote: "Compares reported clinic costs for this period with the estimated value of the activity entered; it is not actual financial ROI, revenue, reimbursement, profit, or confirmed healthcare savings.",
+    rankingNote: "Ranked by estimated value using the reported activity and reference rates.",
+    rankingByCountNote: "Ranked by reported units; share shows each service’s portion of all reported units.",
     funderReadyTitle: "Impact statement for grants and donors",
     copySuccess: "Statement copied. Review it and adjust it for your organization.",
     impactStatementButton: "Copy impact statement",
     impactStatementButtonSecondary: "Copy for grant or donor use",
     funderReadyVolunteerStatement: (clinicName, volunteerHours, periodLabel, totalText) =>
-      `${clinicName} received ${volunteerHours} hours of donated volunteer support during ${periodLabel}. Using public reference hourly rates, the estimated replacement value of this time is ${totalText}. This estimate represents donated time, not cash revenue, reimbursement, or patient outcomes.`,
+      `${clinicName} received ${volunteerHours} hours of donated volunteer support during ${periodLabel}. Using public reference hourly rates, the estimated replacement value of this time is ${totalText}.`,
     funderReadyServicesStatement: (clinicName, reportedActivity, periodLabel, totalText, serviceSentence) =>
-      `${clinicName} reported ${reportedActivity} during ${periodLabel}. Using national reference rates, the estimated value of these services is ${totalText}.${serviceSentence} This is a planning estimate, not revenue, reimbursement, confirmed savings, or a measure of care quality.`,
+      `${clinicName} reported ${reportedActivity} during ${periodLabel}. Using national reference rates, the estimated value of these services is ${totalText}.${serviceSentence}`,
   };
 
   const impactMethod = {
@@ -192,18 +191,20 @@ const AppCopy = (() => {
       "Community presentations",
       "Internal planning discussions",
     ],
-    fundingNote: "Review the report alongside your organization’s financial records, program outcomes, and funder requirements before submitting it externally.",
+    fundingNote: "Adapt the wording and detail to fit your organization’s audience and reporting requirements.",
     methodologySectionTitle: "How these estimates are calculated",
     methodologyBullets: (impactMethod) => [
+      "The estimate uses only aggregate activity totals reported for the selected method and reporting period.",
       impactMethod === "volunteerHours"
         ? "Reported volunteer hours are multiplied by the hourly benchmark for each volunteer role."
         : "Reported clinical service units are multiplied by the reference rate for each service.",
       impactMethod === "volunteerHours"
-        ? "The total is the estimated value of donated volunteer time across the reported roles."
-        : "The total is the estimated value of the reported clinical services.",
-      "When clinic cost is provided, the report compares that cost with the total estimated value.",
-      "Reference rates are national estimates and are not adjusted for your ZIP code.",
-      "Only combined activity totals are needed. Do not enter patient information.",
+        ? "The total estimates the replacement value of donated time; it is not cash received by the clinic."
+        : "The total estimates the value of reported services, not the clinic’s actual charges or reimbursement.",
+      "Rates are public national references, are not adjusted for ZIP code, and may differ from local costs or payment rates.",
+      "The estimate does not establish revenue, profit, financial return, savings, patient outcomes, care quality, or patient need.",
+      "If clinic cost is provided, it is compared with the activity estimate for the same period; this is not a measure of actual financial return or confirmed savings.",
+      "Use aggregate totals only; patient-level information is not needed.",
     ],
   };
 
@@ -220,13 +221,7 @@ const AppCopy = (() => {
     estimatedCommunityValueKpi: "Estimated community value",
     estimatedCommunityValueNote: "Based on reported activity and reference rates",
     valuePerDollarKpi: "Estimated value per $1 of cost",
-    valuePerDollarNote: "Informational comparison, not ROI",
-    estimateHeading: "About this estimate",
-    estimateIntro: (impactMethod) => `Calculated from aggregate ${impactMethod === "volunteerHours" ? "volunteer hours" : "service counts"} and publicly available reference rates. This is a planning and communication estimate, not revenue, reimbursement, savings, financial ROI, or a measure of care quality.`,
-    estimateDetailsLabel: "How this estimate is calculated",
-    estimateDetails: (impactMethod) => `${impactMethod === "volunteerHours"
-      ? "Reported volunteer hours are multiplied by the applicable reference hourly rate for each role."
-      : "Reported service counts are multiplied by the applicable reference rate for each service."} Patient information is not collected or required.`,
+    valuePerDollarNote: "Calculated from reported cost and estimated activity value",
     topContributorStats: (count, value, share) => `${count} reported services · ${value} estimated value · ${share}% of total`,
     valueChartHeading: "Estimated value by service",
     valueChartIntro: "The bars show the estimated value of each reported service. Numeric labels provide the same information without relying on color.",
@@ -237,14 +232,10 @@ const AppCopy = (() => {
   const exportCopy = {
     pdfTitle: "Estimated Clinic Impact Summary",
     pdfSubtitle: "Activity summary using reference-rate estimates",
-    pdfFooter: (impactMethod) => impactMethod === "volunteerHours"
-      ? "Important: This report estimates donated volunteer time from reported hours and hourly benchmarks. It does not represent cash revenue, payments, profit, confirmed savings, or patient outcomes."
-      : "Important: This report estimates clinical services from reported units and reference rates. It does not represent revenue, payments, profit, confirmed savings, or patient outcomes.",
     workbookSummary: "Impact Summary",
     workbookClinical: "Clinical Services",
     workbookVolunteer: "Volunteer Contributions",
     workbookAssumptions: "Assumptions & Sources",
-    summaryNote: "Important: Dollar amounts are estimates based on reported activity and reference rates. They are not revenue, payments, profit, or confirmed savings.",
     labels: {
       serviceCount: "Reported Service Count",
       rate: "Reference Rate",

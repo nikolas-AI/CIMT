@@ -24,10 +24,9 @@ const ImpactSummaryView = (() => {
     view.setAttribute("aria-label", "Impact summary");
 
     view.appendChild(_buildHero(summary));
-    view.appendChild(_buildKpiStrip(summary));
-    view.appendChild(_buildEstimateCallout(summary));
-    view.appendChild(_buildImpactNarrative(summary));
     view.appendChild(_buildDisclaimer(summary));
+    view.appendChild(_buildKpiStrip(summary));
+    view.appendChild(_buildImpactNarrative(summary));
     if (summary.impactMethod === "volunteerHours" && _hasBothVolunteerCategories(summary)) {
       view.appendChild(_buildBreakdown(summary));
     }
@@ -126,24 +125,6 @@ const ImpactSummaryView = (() => {
             <p class="summary-kpi__note">${_escape(note)}</p>
           </div>
         `).join("")}
-      </div>
-    `;
-    return section;
-  }
-
-  function _buildEstimateCallout(summary) {
-    const section = document.createElement("section");
-    section.className = "estimate-callout";
-    section.setAttribute("aria-labelledby", "estimate-callout-heading");
-    section.innerHTML = `
-      <div class="estimate-callout__icon" aria-hidden="true">i</div>
-      <div>
-        <h2 id="estimate-callout-heading">${_escape(AppCopy.summaryDashboard.estimateHeading)}</h2>
-        <p>${_escape(AppCopy.summaryDashboard.estimateIntro(summary.impactMethod))}</p>
-        <details>
-          <summary>${_escape(AppCopy.summaryDashboard.estimateDetailsLabel)}</summary>
-          <p>${_escape(AppCopy.summaryDashboard.estimateDetails(summary.impactMethod))}</p>
-        </details>
       </div>
     `;
     return section;
@@ -554,30 +535,63 @@ const ImpactSummaryView = (() => {
   // Reference rate table
   // ---------------------------------------------------------------
   function _buildRateTable(summary) {
-    if (summary.volunteerBreakdown.length === 0) return null;
+    const rows = summary.volunteerBreakdown
+      .filter(row => row.hours > 0)
+      .slice()
+      .sort((a, b) =>
+        b.hours - a.hours ||
+        b.estimatedValue - a.estimatedValue ||
+        a.roleName.localeCompare(b.roleName)
+      );
+    if (rows.length === 0) return null;
 
-    const section = document.createElement("div");
-    section.className = "summary-section";
+    const section = document.createElement("section");
+    section.className = "summary-section service-ranking";
+    section.setAttribute("aria-labelledby", "volunteer-ranking-heading");
     section.innerHTML = `
-      <h2 class="summary-section__heading">Volunteer time reference rates</h2>
-      <div style="overflow-x:auto">
-        <table class="rate-table" aria-label="Volunteer time reference rates">
+      <h2 class="summary-section__heading" id="volunteer-ranking-heading">Volunteer roles ranked by total hours</h2>
+      <p class="summary-section__intro">Roles are ranked by reported volunteer hours. Share shows each role’s portion of the total estimated volunteer value.</p>
+      <div class="service-ranking__table-wrap">
+        <table class="rate-table service-ranking__table" aria-label="Volunteer role ranking by total hours">
           <thead>
             <tr>
+              <th scope="col">Rank</th>
               <th scope="col">Role</th>
-              <th scope="col">Rate / Hour</th>
-              <th scope="col">Hours</th>
+              <th scope="col">Type</th>
+              <th scope="col">Volunteer hours</th>
+              <th scope="col">Reference rate / hour</th>
+              <th scope="col">Estimated value</th>
+              <th scope="col">Share of total estimated volunteer value</th>
             </tr>
           </thead>
           <tbody>
-            ${summary.volunteerBreakdown.map(row => `
+            ${rows.map((row, index) => {
+              const share = summary.volunteerValue > 0
+                ? row.estimatedValue / summary.volunteerValue * 100
+                : 0;
+              const shareLabel = share > 0 && share < 0.1
+                ? "&lt;0.1%"
+                : `${Formatting.number(share, 1)}%`;
+              return `
               <tr>
+                <td class="service-ranking__rank">${index + 1}</td>
                 <td>${_escape(row.roleName)}</td>
-                <td>${Formatting.currency(row.benchmarkRate)}</td>
+                <td>${_escape(row.category)}</td>
                 <td>${Formatting.number(row.hours, 1)}</td>
+                <td>${Formatting.currency(row.benchmarkRate)}</td>
+                <td>${Formatting.currency(row.estimatedValue)}</td>
+                <td>${shareLabel}</td>
               </tr>
-            `).join("")}
+              `;
+            }).join("")}
           </tbody>
+          <tfoot>
+            <tr>
+              <th scope="row" colspan="5">Total volunteer time value</th>
+              <td>${Formatting.currency(summary.volunteerValue)}</td>
+              <td>${summary.volunteerValue > 0 ? "100.0%" : "0.0%"}</td>
+            </tr>
+          </tfoot>
         </table>
       </div>
     `;
@@ -599,7 +613,7 @@ const ImpactSummaryView = (() => {
       <div class="rate-source-box">
         <strong>${_escape(src.name)}${src.publicationYear ? ` (${src.publicationYear})` : ""}</strong><br>
         ${_escape(src.description)}
-        ${src.url ? `<br><a href="${_escape(src.url)}" target="_blank" rel="noopener noreferrer">Learn more →</a>` : ""}
+
       </div>
     `;
     return section;

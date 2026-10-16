@@ -57,6 +57,8 @@ const ExportService = (() => {
     ];
     const totalEstimatedValueRow = rows.length;
     rows.push([AppCopy.exportCopy.labels.total, summary.totalEstimatedValue]);
+    const disclaimerRow = rows.length;
+    rows.push([AppCopy.summary.shortDisclaimer(summary.impactMethod)]);
     rows.push([summary.impactMethod === "volunteerHours" ? "Reported Volunteer Hours" : "Reported Clinical Services",
       summary.impactMethod === "volunteerHours"
         ? summary.volunteerBreakdown.reduce((sum, row) => sum + row.hours, 0)
@@ -143,12 +145,6 @@ const ExportService = (() => {
       volunteerTotalRow = rows.length;
       rows.push(["", "", "", "Total Volunteer Time Value", summary.volunteerValue]);
     }
-    rows.push([]);
-    const disclaimerSectionRow = rows.length;
-    rows.push(["Disclaimer"]);
-    const disclaimerRow = rows.length;
-    rows.push([AppCopy.summary.shortDisclaimer(summary.impactMethod)]);
-
     const sheet = XLSX.utils.aoa_to_sheet(rows);
     sheet["!rows"] = rows.map((_, index) => ({ hpx: index === 0 ? 28 : 18 }));
     sheet["!autofilter"] = { ref: `A1:E${rows.length}` };
@@ -166,7 +162,6 @@ const ExportService = (() => {
       ...(visitRankingSectionRow === null ? [] : [visitRankingSectionRow]),
       ...(clinicalSectionRow === null ? [] : [clinicalSectionRow]),
       ...(volunteerSectionRow === null ? [] : [volunteerSectionRow]),
-      disclaimerSectionRow,
       disclaimerRow,
     ].filter((row) => Number.isInteger(row) && row >= 0);
     sheet["!merges"] = mergeRows.map(row => ({ s: { r: row, c: 0 }, e: { r: row, c: 4 } }));
@@ -196,7 +191,6 @@ const ExportService = (() => {
       ...(clinicalSectionRow === null ? [] : [clinicalSectionRow]),
       ...(clinicalHeaderRow === null ? [] : [clinicalHeaderRow, clinicalTotalRow]),
       ...(volunteerSectionRow === null ? [] : [volunteerSectionRow, volunteerHeaderRow, volunteerTotalRow]),
-      disclaimerSectionRow,
     ].filter((row) => Number.isInteger(row) && row >= 0);
     if (budgetSectionRow !== null) boldRows.push(budgetSectionRow);
 
@@ -365,7 +359,6 @@ const ExportService = (() => {
       .filter(Boolean)
       .map(_escapeHTML)
       .join(", ");
-    const estimateDetails = AppCopy.summaryDashboard.estimateDetails(summary.impactMethod);
     const clinicName = summary.clinicName || "Your clinic";
     const impactNarrative = isVolunteerReport
       ? `During this reporting period, ${clinicName} reported ${activityCount} volunteer hours. Using reference hourly rates, the estimated value of that time is ${_fmt(summary.totalEstimatedValue)}.`
@@ -510,7 +503,7 @@ const ExportService = (() => {
     const volunteerSourceHTML = isVolunteerReport && VOLUNTEER_RATE_SOURCE
       ? `<section class="report-section">
           <h2>Volunteer Rate Source</h2>
-          <p class="source-box"><strong>${_escapeHTML(VOLUNTEER_RATE_SOURCE.name)}${VOLUNTEER_RATE_SOURCE.publicationYear ? ` (${VOLUNTEER_RATE_SOURCE.publicationYear})` : ""}</strong><br>${_escapeHTML(VOLUNTEER_RATE_SOURCE.description)}${VOLUNTEER_RATE_SOURCE.url ? `<br><a href="${_escapeHTML(VOLUNTEER_RATE_SOURCE.url)}">Learn more</a>` : ""}</p>
+          <p class="source-box"><strong>${_escapeHTML(VOLUNTEER_RATE_SOURCE.name)}${VOLUNTEER_RATE_SOURCE.publicationYear ? ` (${VOLUNTEER_RATE_SOURCE.publicationYear})` : ""}</strong><br>${_escapeHTML(VOLUNTEER_RATE_SOURCE.description)}</p>
         </section>`
       : "";
 
@@ -655,7 +648,6 @@ const ExportService = (() => {
   .sources a, .source-box a { color: var(--teal); overflow-wrap: anywhere; }
   .sources span { color: var(--muted); }
   .source-box { padding: 14px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--teal); }
-  .footer { margin-top: 24px; padding-top: 12px; color: var(--muted); border-top: 1px solid var(--border); font-size: 9px; }
   @media screen and (max-width: 620px) {
     body { margin: 12px auto; padding: 0 12px; }
     .hero { padding: 24px 16px; }
@@ -684,6 +676,7 @@ const ExportService = (() => {
   <p class="total">${_fmt(summary.totalEstimatedValue)}</p>
   <p class="total-label">${_escapeHTML(totalLabel)}</p>
 </header>
+<p class="callout">${_escapeHTML(AppCopy.summary.shortDisclaimer(summary.impactMethod))}</p>
 <section class="metric-grid" aria-label="${_escapeHTML(AppCopy.summaryDashboard.kpiHeading)}">
   ${metricCard(activityLabel, activityCount, activityNote)}
   ${metricCard(AppCopy.summaryDashboard.estimatedCommunityValueKpi, _fmt(summary.totalEstimatedValue), AppCopy.summaryDashboard.estimatedCommunityValueNote)}
@@ -691,9 +684,7 @@ const ExportService = (() => {
     ? metricCard(AppCopy.summaryDashboard.valuePerDollarKpi, summary.valueToCostRatio === null ? "—" : `$${summary.valueToCostRatio.toFixed(2)}`, AppCopy.summaryDashboard.valuePerDollarNote)
     : ""}
 </section>
-<p class="callout"><strong>${_escapeHTML(AppCopy.summaryDashboard.estimateHeading)}.</strong> ${_escapeHTML(AppCopy.summaryDashboard.estimateIntro(summary.impactMethod))}<br><br>${_escapeHTML(estimateDetails)}</p>
 <p class="narrative">${_escapeHTML(impactNarrative)}</p>
-<p class="callout">${_escapeHTML(AppCopy.summary.shortDisclaimer(summary.impactMethod))}</p>
 ${serviceImpactHTML}
 ${serviceChartHTML}
 ${volunteerBreakdownHTML}
@@ -727,7 +718,6 @@ ${volunteerSourceHTML}
   <h2>Sources and references</h2>
   <ul class="sources">${referenceItems}</ul>
 </section>
-<footer class="footer">${_escapeHTML(AppCopy.exportCopy.pdfFooter(summary.impactMethod))}</footer>
 </body></html>`;
   }
 
