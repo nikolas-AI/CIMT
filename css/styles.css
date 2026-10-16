@@ -163,10 +163,12 @@ body {
 }
 
 .app-body {
-  /* The shell uses the full canvas; ordinary views constrain themselves below. */
+  /* Keep the footer below the first screen, even when the current view is short. */
   flex: 1;
   max-width: 1180px;
   width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0 auto;
   padding: var(--space-8) var(--space-6) var(--space-12);
 }
