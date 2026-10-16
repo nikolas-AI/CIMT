@@ -28,6 +28,7 @@ generated locally in the browser.
 | --- | --- |
 | `index.html` | Document shell, accessible landmarks, app header/footer, CSS, and dependency order. |
 | `assets/cie-logo.png` | Logo displayed in the header; also referenced as the page icon. |
+| `assets/thrc-logo.jpg`, `assets/TXACC-logo.png` | Partner logos displayed at opposite ends of the footer. |
 | `css/styles.css` | Global design tokens, responsive layouts, components, focus/error states, reduced-motion behavior, and print styles. |
 | `js/data.js` | `VOLUNTEER_ROLES`, `CLINICAL_SERVICES`, `VOLUNTEER_RATE_SOURCE`, and `REFERENCES`. |
 | `js/content.js` | `AppCopy`: user-facing copy, validation strings, report labels, and export text. |

@@ -5,6 +5,8 @@ clinical-service counts or donated volunteer hours into a reference-rate estimat
 for a selected reporting period. The resulting summary is intended to support
 planning and communication, such as grant applications, donor updates, board
 reports, and community presentations.
+Developed by the Translational Health Research Center at Texas State University,
+in partnership with the Texas Association of Charitable Clinics.
 
 > **Important:** The displayed amounts are estimates, not clinic revenue,
 > reimbursement, profit, confirmed savings, patient outcomes, or a measure of
