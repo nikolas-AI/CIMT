@@ -244,8 +244,7 @@ supports those rules. Long tables can continue across pages with repeated
 column headings, and the final row is grouped with its single total. Pagination
 is CSS-driven, so exact page breaks can vary by browser and print settings. Run
 the structural regression checks with
-`node --test tests/pdf-pagination.test.js`; still inspect saved PDFs in the
-supported browser when validating print-engine-specific behavior.
+
 
 ### Excel workbook
 
