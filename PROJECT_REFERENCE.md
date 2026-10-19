@@ -1,311 +1,378 @@
-# Care in Action — Project Reference
+# Care in Action Project Reference
 
-This document describes the current implementation in this repository. It is
-intended as a technical reference for maintaining the application and checking
-whether its behavior and claims match the source code.
+This file is the beginner-friendly guide to the project. It explains what the app does, how the code is organized, and where to look when you want to change behavior.
 
-## Product scope
+## 1) What this project is
 
-Care in Action is a single-page, client-side estimator for aggregate clinic
-activity. A user enters either (not both in one report):
+Care in Action is a browser-based clinic impact estimator. It helps a clinic estimate the value of activity it already tracks, such as:
 
-- donated volunteer hours by role, or
-- delivered clinical service counts by catalog service.
+- donated volunteer hours
+- clinical service counts
+- clinic reporting period info
+- optional clinic cost comparison
 
-The tool multiplies those quantities by static reference rates and formats a
-summary. It is not a clinical system, billing application, financial accounting
-system, or source of patient outcome data.
+It does not collect patient-level data and it does not require a backend database. The app works entirely in the browser as a static website.
 
-The current application does not send report fields to an application server or
-persist them between page loads. Values are kept in JavaScript state in the open
-page. The app does load external Google Fonts and `xlsx-js-style` 1.2.0 from jsDelivr;
-the browser makes normal requests to those providers. An exported report is
-generated locally in the browser.
+The goal is to support planning and communication. The numbers are estimates based on benchmark reference rates, not exact financial results.
 
-## Repository map
+---
 
-| Path | Responsibility |
-| --- | --- |
-| `index.html` | Document shell, accessible landmarks, app header/footer, CSS, and dependency order. |
-| `assets/cie-logo.png` | Logo displayed in the header; also referenced as the page icon. |
-| `assets/thrc-logo.jpg`, `assets/TXACC-logo.png` | Partner logos displayed at opposite ends of the footer. |
-| `css/styles.css` | Global design tokens, responsive layouts, components, focus/error states, reduced-motion behavior, and print styles. |
-| `js/data.js` | `VOLUNTEER_ROLES`, `CLINICAL_SERVICES`, `VOLUNTEER_RATE_SOURCE`, and `REFERENCES`. |
-| `js/content.js` | `AppCopy`: user-facing copy, validation strings, report labels, and export text. |
-| `js/utils.js` | `Formatting`, `Validation`, and `DOM` browser helpers. |
-| `js/calculator.js` | `Calculator.computeImpact(state)` and the `ImpactSummary` output shape. Contains no DOM access. |
-| `js/app.js` | In-memory application state, navigation, step gating, summary calculation, and boot. |
-| `js/components/ProgressIndicator.js` | Five-step progress navigation and blocked-step warning. |
-| `js/components/NavigationButtons.js` | Reusable Back/forward button row. |
-| `js/components/EntryList.js` | Searchable role/service selector rows, duplicate prevention, add/remove, and row validation. |
-| `js/views/WelcomeView.js` | Purpose, privacy/interpretation scope, and start action. |
-| `js/views/ClinicInformationView.js` | Clinic details, dates, optional cost, input synchronization, and validation. |
-| `js/views/ImpactMethodView.js` | Calculation method choice and method-switch behavior. |
-| `js/views/ImpactActivityView.js` | Method-specific activity entry and validation before calculation. |
-| `js/views/ImpactSummaryView.js` | Summary rendering, charts/tables, references, copy action, and download controls. |
-| `js/services/exportService.js` | Print-ready report and formatted XLSX workbook generation. |
-| `fileStructure.txt` | Compact repository map linking to these project documents. |
+## 2) What the app does
 
-There is no package manifest, bundler, framework, build configuration, or
-automated test suite in the current repository.
+The tool guides the user through a five-step flow:
 
-## Runtime and dependency order
+1. Welcome
+2. Clinic information
+3. Method selection
+4. Activity entry
+5. Impact summary
 
-`index.html` loads classic scripts in dependency order, with `app.js` last because
-it starts the application after `DOMContentLoaded`:
+The user picks one calculation method for the report:
 
-1. `js/data.js` declares rate/catalog globals.
-2. `js/content.js` declares `AppCopy`.
-3. `js/utils.js` declares `Formatting`, `Validation`, and `DOM`.
-4. `js/calculator.js` declares `Calculator`.
-5. Shared components are loaded.
-6. The five view modules are loaded.
-7. `xlsx-js-style` 1.2.0 is loaded from jsDelivr, followed by `exportService.js`.
-8. `app.js` initializes and renders the first step.
+- volunteer hours
+- clinical services
 
-These files use browser global bindings rather than modules/imports. Preserve the
-script order when adding scripts or moving code. The application can be opened as
-a local file or served as static files. External network access is used for the
-web fonts and the XLSX library.
+The report does not mix both methods in one run. One report is based on one method at a time.
 
-## User journey and state
+After the user enters totals, the app calculates an estimated value using benchmark rates from the catalog and then shows the summary, references, and export options.
 
-The router's zero-based steps are:
+---
 
-| Index | Screen | View module |
-| --- | --- | --- |
-| 0 | Welcome | `WelcomeView` |
-| 1 | Clinic information | `ClinicInformationView` |
-| 2 | Method selection | `ImpactMethodView` |
-| 3 | Activity entry | `ImpactActivityView` |
-| 4 | Impact summary | `ImpactSummaryView` |
+## 3) High-level architecture
 
-`app.js` owns one state object for the lifetime of the page:
+This is a simple front-end project with no build system, no framework, and no server-side app.
 
-- `clinic`: name, street, city, state, ZIP, start/end dates, optional cost.
-- `impactMethod`: `"volunteerHours"`, `"clinicalServices"`, or `null`.
-- `volunteers`: rows containing an id, `roleId`, and hours.
-- `services`: rows containing an id, `serviceId`, and count.
-- `impact`: most recently calculated `ImpactSummary` or `null`.
-- `currentStep`: active step index.
+Core structure:
 
-`TESTING_DEFAULTS_ENABLED` is currently `true` in `js/app.js`, so the clinic,
-method, and service entries start with TXST Clinic sample values. Set it to
-`false` for a blank start before production use. “Create another report” resets
-the in-memory state to blank values.
+- `index.html` — page shell and script loading order
+- `css/styles.css` — styling and layout
+- `js/` — all app logic
+- `assets/` — logos and branding
 
-Views render from the state and update it as the user edits. The app checks prior
-steps when the progress control is used to move forward. Switching methods asks
-for confirmation if any activity rows exist, removes activity for the inactive
-method, and clears the previous impact result. “Create another report” resets
-every answer and returns to step 0. No state is written to local storage, cookies,
-or a backend.
+The project follows a common static web pattern:
 
-Activity must include at least one positive amount for the selected method.
-Blank additional rows do not count as activity. The selected method is the
-source of truth for calculation: volunteer mode ignores service rows and service
-mode ignores volunteer rows.
+- page loads
+- state holds the form answers
+- a screen renders based on the current step
+- validation checks inputs
+- calculator computes totals
+- summary screen shows results
+- export service creates PDF or Excel output
 
-## Input and validation rules
+---
 
-Validation is primarily implemented in `Validation` in `js/utils.js`, with
-reusable row checks in `js/components/EntryList.js` and navigation gating in
-`js/app.js`.
+## 4) Main files and what they do
 
-| Input | Current rule |
-| --- | --- |
-| Clinic name | Required; whitespace-only values are rejected. |
-| Street address and city | Required non-empty text. |
-| State | Required two-letter U.S. state abbreviation or `DC`; normalized to uppercase. |
-| ZIP code | Required five digits or ZIP+4 (`12345` or `12345-6789`). |
-| Reporting dates | Both required, real `YYYY-MM-DD` dates, start date not later than end date. |
-| Clinic cost | Optional; if entered, positive, at most `$1,000,000,000,000`, and up to two decimal places. |
-| Volunteer role | Required per row and chosen from active catalog entries; duplicates are disabled. |
-| Volunteer hours | Required per row, non-negative, in 0.5-hour increments; at least one row must be greater than zero. |
-| Clinical service | Required per row and chosen from active catalog entries; duplicates are disabled. |
-| Service count | Required per row, non-negative whole number; at least one row must be greater than zero. |
+### `index.html`
 
-The progress component exposes step navigation, but forward navigation is gated
-by required earlier information. Inline messages are connected to controls and
-invalid controls receive focus when a screen cannot advance.
+This is the app entry point.
 
-## Catalogs and reference rates
+It does a few important jobs:
 
-`js/data.js` is the editable source of truth for service/role IDs, display labels,
-rate values, categories, active flags, and citations. Each role or service has an
-`active` flag; the entry view only offers active catalog items.
+- creates the shared header/footer shell
+- loads the stylesheet
+- loads the JavaScript files in the correct order
+- creates the main app area where screens are rendered
 
-### Volunteer roles
+The scripts are loaded in a specific order so dependencies exist before use.
 
-Each `VOLUNTEER_ROLES` item has:
+### `css/styles.css`
 
-- `id`: stable internal key stored in activity state.
-- `displayName`: role label in selection and report.
-- `category`: `"medical professional"` or `"non medical"`, used to split totals.
-- `benchmarkRateUSD`: hourly benchmark in U.S. dollars.
-- `occupationCode` and `blsOccupationName`: BLS occupational mapping metadata;
-  some roles use `null` where no direct occupation code is supplied.
-- `active`: whether the role can be selected.
+This file stores the visual design for the whole app.
 
-The `VOLUNTEER_RATE_SOURCE` text cites national BLS occupational wage data and
-states that roles without a direct occupation rate use the national volunteer
-hour estimate of `$36.14`. `REFERENCES` contains BLS Occupational Employment
-and Wage Statistics and Independent Sector / Do Good Institute's Value of
-Volunteer Time for volunteer-hour reports, and the CMS Physician Fee Schedule
-Look-Up Tool for clinical-service reports. Only references relevant to the
-selected calculation method appear in the summary and printable report. The
-source catalog is static; links do not indicate an automatic update cadence or
-the precise vintage/locality used for every embedded rate.
+It includes:
 
-### Clinical services
+- design tokens (colors, spacing, fonts)
+- layout and page structure
+- form styling
+- buttons and cards
+- responsive behavior
+- print styling for PDF export
 
-Each `CLINICAL_SERVICES` item has:
+### `js/app.js`
 
-- `id`: internal value stored in activity state.
-- `description` and `displayName`: explanatory text and user-facing label.
-- `code` and `codeSystem`: service code and identifier system, including CPT or
-  HCPCS entries.
-- `referenceRateUSD`: reference value per reported service.
-- `active`: whether it is selectable.
+This is the main application controller.
 
-The source metadata points to the CMS Physician Fee Schedule Look-Up Tool.
-Catalog rates are hard-coded, not fetched per ZIP code or refreshed at runtime.
-Treat them as estimates, not the clinic's actual charge, payment, or revenue.
+It stores the app state in one object named `state` and decides which screen to show next.
 
-When modifying catalog data, preserve unique IDs and valid rates, confirm the
-source and rate context, and review the displayed source material. Any use or
-distribution involving CPT/code content requires a separate licensing and
-copyright review; do not infer permission from the public availability of a
-reference link.
+Important ideas in this file:
 
-## Calculation behavior
+- `state.clinic` stores clinic info
+- `state.impactMethod` stores the chosen method
+- `state.volunteers` stores volunteer entries
+- `state.services` stores service entries
+- `state.impact` stores the final calculated summary
+- `state.currentStep` tracks the current screen
 
-All benchmark math belongs in `js/calculator.js`. It receives the state and
-returns a summary object; views and exports consume that result rather than
-recalculating totals.
+Functions in this file include:
 
-For a selected volunteer role \(r\):
+- `goTo(step)` — move to a step
+- `advance()` — go one step forward
+- `retreat()` — go one step back
+- `startOver()` — clear all state and return to the start
+- `_render()` — choose which screen to display
+- `_computeAndShowImpact()` — run the calculator and move to the summary
 
-```text
-role estimated value = reported hours[r] × benchmark hourly rate[r]
-total estimated value = sum(role estimated values)
+This file is the best place to start if you want to understand screen flow.
+
+### `js/calculator.js`
+
+This is the calculation engine.
+
+It does not create UI elements and does not read from the DOM. It only receives `state` and returns a summary object.
+
+Main function:
+
+- `Calculator.computeImpact(state)`
+
+This function:
+
+- checks the current method
+- selects the correct entries for the chosen method
+- looks up each item in the catalog
+- multiplies quantity by benchmark rate
+- sums totals
+- returns a summary object for the UI
+
+The calculator uses two main breakdown helpers:
+
+- `_computeVolunteerBreakdown(volunteers)`
+- `_computeServiceBreakdown(services)`
+
+### `js/data.js`
+
+This file stores the benchmark data.
+
+It contains:
+
+- `VOLUNTEER_ROLES` — job roles and hourly benchmark rates
+- `CLINICAL_SERVICES` — service types and per-service reference rates
+- `VOLUNTEER_RATE_SOURCE` — source metadata for volunteer rates
+- `REFERENCES` — reference list used in the report
+
+This is the project’s data layer. If a rate changes, this is usually the place to update it.
+
+### `js/content.js`
+
+This file stores all of the copy used by the application.
+
+It includes:
+
+- button labels
+- form text
+- validation messages
+- summary wording
+- export labels
+- screen-specific copy
+
+This is the place to tweak wording without touching view logic.
+
+### `js/utils.js`
+
+This file contains shared helpers.
+
+There are two groups here:
+
+- `Formatting` — currency and numeric formatting
+- `Validation` — name, address, ZIP, date, cost, hours, and count validation
+
+It also includes a small `DOM` helper module for common DOM tasks such as creating elements, showing/hiding elements, and error display.
+
+### `js/components/`
+
+These are small reusable UI pieces.
+
+Files in this folder include:
+
+- `ProgressIndicator.js` — the five-step progress bar
+- `NavigationButtons.js` — shared back/next controls
+- `EntryList.js` — dynamic list for adding/removing repeating entries
+
+These components keep the repeated UI patterns consistent.
+
+### `js/views/`
+
+Each step of the app has a dedicated view file.
+
+View files include:
+
+- `WelcomeView.js`
+- `ClinicInformationView.js`
+- `ImpactMethodView.js`
+- `ImpactActivityView.js`
+- `ImpactSummaryView.js`
+
+These view files render the screen content and attach actions such as next/back or save.
+
+### `js/services/exportService.js`
+
+This file handles export actions.
+
+It supports:
+
+- PDF export using the browser print flow
+- Excel export using `xlsx-js-style`
+
+This keeps report generation separate from the calculation and display logic.
+
+---
+
+## 5) How the app state flows
+
+A beginner-friendly way to think about this app is:
+
+1. the user fills out a form
+2. the values are stored in `state`
+3. the view renders from that state
+4. the user advances through the steps
+5. the calculator turns the input into an estimated value
+6. the summary screen shows results and export options
+
+The most important pattern is this:
+
+- `app.js` owns the global state
+- `views` read and write to that state
+- `calculator.js` computes the result from that state
+- `exportService.js` packages that result for export
+
+---
+
+## 6) Validation rules
+
+The app validates important inputs before moving forward.
+
+Examples include:
+
+- clinic name is required
+- street address and city are required
+- ZIP code must be valid
+- state must be a valid US state abbreviation
+- reporting dates must be valid and ordered
+- clinic cost must be a positive number if supplied
+- volunteer hours must be non-negative and in half-hour increments
+- service counts must be non-negative whole numbers
+
+Validation is mostly handled in `js/utils.js` and some view logic.
+
+---
+
+## 7) How calculations work
+
+The main calculation model is simple:
+
+- volunteer estimate = hours x volunteer hourly benchmark rate
+- clinical estimate = service count x service benchmark rate
+
+The app then sums totals for each method and displays:
+
+- total estimated value
+- value by role or service
+- cost comparison
+- ratio or comparison metrics
+- relevant source references
+
+This logic is intentionally separated from the UI so it can be easier to understand and maintain.
+
+---
+
+## 8) Data and sources
+
+The app uses benchmark reference rates embedded in the code, rather than fetching live data at runtime.
+
+Sources referenced by the project include:
+
+- U.S. Bureau of Labor Statistics wage data
+- Independent Sector volunteer time value data
+- CMS Physician Fee Schedule reference data
+
+The actual catalog and source metadata are in `js/data.js`.
+
+This means the project is reliant on embedded references and should be reviewed before major external use.
+
+---
+
+## 9) Running the project locally
+
+There is no build step or package install needed.
+
+You can open the app directly in a browser:
+
+- open `index.html` in a current browser
+
+Or serve it locally:
+
+```bash
+python3 -m http.server 8000
 ```
 
-Medical and non-medical volunteer totals are separately summed using the role
-`category`. Volunteer rows are the only contributor to `totalEstimatedValue` in
-this mode.
-
-For a selected clinical service \(s\):
+Then visit:
 
 ```text
-service estimated value = reported count[s] × reference rate[s]
-clinical service value = sum(service estimated values)
-total estimated value = clinical service value
-service value share (%) = service estimated value / clinical service value × 100
+http://localhost:8000
 ```
 
-Services are ranked independently by estimated value and by reported count.
-Ties use the other measure, then service name. `mostImpactfulService` is the
-first item by estimated value, or `null` when there is no positive service.
+The app uses a CDN for `xlsx-js-style` and Google Fonts, so internet access is needed for those features.
 
-If a valid optional clinic cost \(C\) is available, the summary also contains:
+---
 
-```text
-estimated value per $1 of cost = total estimated value / C
-comparison percentage = (total estimated value - C) / C × 100
-```
+## 10) Important project notes
 
-The UI intentionally describes the comparison as informational and explicitly
-not financial ROI. Invalid/missing cost yields `null` metrics. Reporting-period
-days are calculated inclusively (both endpoints count).
+### This app is static
+There is no backend, no database, and no server-side processing.
 
-The result includes clinic/report metadata, method, totals, row-level breakdowns,
-service rankings, optional cost comparison, inclusive period days, and the
-volunteer rate-source reference. See the `ImpactSummary` typedef at the end of
-`js/calculator.js` for the field names and nullability.
+### State is stored in memory
+The app keeps the current data in browser memory. Refreshing or closing the page clears the current report.
 
-## Summary and exports
+### The chosen method is the source of truth
+The user can only report one method at a time. The chosen method drives the entire report.
 
-`ImpactSummaryView` renders the completed estimate, method-appropriate KPI,
-methodology and caution text, service value chart/rankings or volunteer rate
-details, optional cost comparison, source links, and a generated statement for
-grants or donors. Methodology and disclaimer text describe only the selected
-reporting mode. The copy action uses the Clipboard API with a legacy
-document-copy fallback. The on-screen volunteer-role table does not display an
-aggregate total row; the PDF and Excel detail tables retain the volunteer total.
+### Export is browser-based
+PDF and Excel export rely on the browser environment and pop-up settings.
 
-### Print/PDF
+### Numbers are estimates
+The output is for planning and communication. It is not revenue, reimbursement, confirmed savings, or patient-outcome data.
 
-`ExportService.downloadPDF` builds a standalone print-ready HTML report in a new
-window and opens the browser print dialog. The user chooses “Save as PDF” in the
-browser. Pop-ups must be allowed. The output contains report details, estimate
-and cost comparison where available, methodology, references, and disclaimers.
-The methodology and disclaimers are specific to the selected reporting mode.
-Clinical-service PDFs show a chart of up to five services ranked by estimated
-value and one full-detail table with reported units, reference rates, estimated
-values, and value shares. Volunteer PDFs show the volunteer detail table.
-The chart heading and description are kept with the chart. The detailed tables
-can begin in the remaining page space; each section heading is kept with its
-table, column headings, and first data row where the browser print engine
-supports those rules. Long tables can continue across pages with repeated
-column headings, and the final row is grouped with its single total. Pagination
-is CSS-driven, so exact page breaks can vary by browser and print settings.
+---
 
+## 11) Good places to start learning the code
 
-### Excel workbook
+If you are new to the project, read these files in order:
 
-`ExportService.downloadExcel` generates a single-sheet `.xlsx` workbook with
-clinic/report details, activity totals, method-specific detail, clinical
-rankings when applicable, optional cost metrics, and a mode-specific estimate
-basis and disclaimer. The workbook
-is assembled in the browser using `xlsx-js-style` 1.2.0 loaded from jsDelivr;
-report data is not posted to a workbook service. If the `XLSX` global is
-unavailable, the app alerts the user that the workbook cannot be prepared.
+1. `README.md` — overview and quick start
+2. `index.html` — app entry and dependencies
+3. `js/app.js` — state and navigation flow
+4. `js/calculator.js` — the math engine
+5. `js/data.js` — benchmark values and references
+6. `js/views/` — user screens
+7. `js/services/exportService.js` — export features
 
-## Accessibility and presentation
+That path gives the clearest mental model of the app.
 
-The app uses landmark elements, labeled controls, semantic tables, `aria-current`
-for the active progress step, alert roles for validation messages, and
-text alternatives for chart graphics. It includes keyboard-accessible buttons,
-visible focus/error state styling, responsive layouts, and reduced-motion
-handling. The stylesheet is centralized in `css/styles.css`; its custom
-properties at the top are the shared visual tokens.
+---
 
-## Maintenance guide
+## 12) Beginner mental model
 
-- **Adjust rates or catalogs:** edit `js/data.js`; check duplicate IDs, activity
-  flags, source text, and both summary and exports.
-- **Change copy or validation messages:** edit `js/content.js`; keep both
-  on-screen and exported descriptions/disclaimers aligned.
-- **Change a calculation:** update `js/calculator.js` and inspect both UI and
-  workbook/print consumers of the affected summary fields.
-- **Change a flow or state field:** update `js/app.js` and the appropriate view;
-  check progress navigation, backward navigation, method switching, and reset.
-- **Add or alter a screen:** create/update its renderer in `js/views/` and wire
-  the step into `app.js`, `ProgressIndicator.js`, and `index.html` script order.
-- **Change repeatable form rows:** update `EntryList.js` and verify both
-  volunteer and service entry behavior.
-- **Change output:** update `ImpactSummaryView.js` and `exportService.js`
-  together so displayed and downloaded reports remain consistent.
-- **Change layout or styling:** edit `css/styles.css`, including responsive,
-  focus, reduced-motion, and print behavior where relevant.
+Think of the project like this:
 
-There is no configured test or build runner in this checkout. After changes, run
-the app in a browser and manually exercise both calculation methods, invalid
-inputs, backward/forward navigation, method switching, start-over, copy,
-print/PDF, and Excel export. Visually inspect saved PDFs in the target browser
-because pagination behavior is renderer-specific.
+- the browser loads the app shell
+- the user fills in a form
+- the app stores answers in one object
+- the app validates each step
+- the app calculates an estimated value
+- the app displays the summary and lets the user export it
 
-## Known project/release checks
+That is the core architecture of this project.
 
-- There is no project license file in the current repository; establish and
-  include the intended license before distributing the application.
-- Confirm CPT and other third-party code/content licensing before distributing
-  or deploying the service catalog; this review is not complete merely because
-  the codes appear in the app.
-- Confirm the source date, methodology, and applicability of each embedded
-  reference rate. The current catalog has no runtime update or provenance
-  versioning mechanism.
-- The application is not a financial, clinical, reimbursement, or patient
-  outcome authority; retain the estimates' qualifications in all future UI and
-  exported formats.
+---
+
+## 13) Final takeaway
+
+Care in Action is a small, clean static web app for community clinic reporting. It is easy to understand because it follows a straightforward pattern:
+
+- state management
+- step-based screens
+- shared validation
+- benchmark-based calculations
+- final report display and export
+
+This simplicity makes it a good codebase for beginners to explore, especially if you want to learn how a small front-end application is structured.

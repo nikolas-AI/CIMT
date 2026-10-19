@@ -1,40 +1,57 @@
 Care in Action — project file map
 ================================
 
-For user instructions and a quick start, see README.md.
-For architecture, workflows, calculations, validation, data catalogs, and exports,
-see PROJECT_REFERENCE.md.
+For quick start instructions, see README.md.
+For a beginner-friendly overview of the project architecture and flow, see
+PROJECT_REFERENCE.md.
 
 Repository files
 ----------------
+README.md
+  Main project overview, purpose, usage guidance, data-source notes, and local run
+  instructions.
+
+PROJECT_REFERENCE.md
+  Beginner-friendly technical reference covering architecture, state flow,
+  validation, calculation logic, and export behavior.
+
 index.html
-  HTML shell, shared header/footer, stylesheet link, and ordered script loading.
+  Application shell, shared header/footer, stylesheet link, and ordered script
+  loading for the browser app.
 
 assets/
-  cie-logo.png — application mark used in the header and favicon.
+  cie-logo.png — primary app branding/logo.
+  TXACC-logo.png — Texas Association of Charitable Clinics branding.
+  thrc-logo.jpg — Translational Health Research Center branding.
 
 css/
-  styles.css — design tokens, layout, responsive styles, components, and print/
-  motion accessibility rules.
+  styles.css — design tokens, layout, accessibility styling, responsive rules,
+  and print-ready presentation.
 
 js/
-  app.js — application state, step routing, validation gates, and boot.
-  calculator.js — pure impact calculation and summary shaping.
+  app.js — in-memory state, wizard navigation, validation gates, and startup.
+  calculator.js — pure impact calculation engine and summary shaping.
   content.js — UI copy, validation messages, labels, and report text.
-  data.js — volunteer roles, clinical services, benchmark rates, and references.
-  utils.js — formatting, validation, and small DOM helpers.
+  data.js — benchmark rates, service catalogs, source metadata, and references.
+  utils.js — formatting helpers, validation rules, and small DOM utilities.
+
   components/
-    EntryList.js — reusable searchable add/remove input rows.
-    NavigationButtons.js — shared Back/Next button row.
-    ProgressIndicator.js — five-step progress navigation.
+    EntryList.js — reusable add/remove input rows for activity entries.
+    NavigationButtons.js — shared Back/Next actions used across the flow.
+    ProgressIndicator.js — the five-step progress indicator UI.
+
   services/
-    exportService.js — browser print/PDF and XLSX workbook generation.
+    exportService.js — print/PDF and XLSX export logic.
+
   views/
-    WelcomeView.js — introduction and privacy scope.
-    ClinicInformationView.js — clinic identity, reporting period, and optional cost.
-    ImpactMethodView.js — volunteer-hours or clinical-services selection.
-    ImpactActivityView.js — method-specific aggregate activity entry.
-    ImpactSummaryView.js — computed results, methodology, references, and exports.
+    WelcomeView.js — intro screen and privacy/context messaging.
+    ClinicInformationView.js — clinic details, reporting period, and optional costs.
+    ImpactMethodView.js — selection between volunteer and service-based methods.
+    ImpactActivityView.js — entry form for aggregate totals.
+    ImpactSummaryView.js — final estimate, methodology, references, and exports.
+
+plans4nxt.txt
+  Working notes and planning material for future improvements or feature work.
 
 No build configuration or package manifest is present. See README.md for running
-the application locally.
+the app locally in a browser.
