@@ -66,6 +66,11 @@ const ExportService = (() => {
     rows.push(["Estimate Basis", summary.impactMethod === "volunteerHours"
       ? "Reported volunteer hours multiplied by role-specific hourly benchmarks"
       : "Reported clinical service units multiplied by public clinical reference rates"]);
+    const rateDataSectionRow = rows.length;
+    rows.push(["Rate Data Sources"]);
+    getRelevantReferences(summary.impactMethod).forEach(ref => {
+      rows.push([ref.organization, ref.ratePeriod, ref.title, ref.url]);
+    });
     if (summary.impactMethod === "volunteerHours") {
       rows.push(["Medical Professional Volunteer Value", summary.medicalProfessionalVolunteerValue]);
       rows.push(["Non-Medical Volunteer Value", summary.nonMedicalVolunteerValue]);
@@ -157,6 +162,7 @@ const ExportService = (() => {
     const mergeRows = [
       0,
       ...(budgetSectionRow === null ? [] : [budgetSectionRow]),
+      rateDataSectionRow,
       ...(serviceImpactSectionRow !== null && serviceImpactSectionRow >= 0 ? [serviceImpactSectionRow] : []),
       ...(valueRankingSectionRow === null ? [] : [valueRankingSectionRow]),
       ...(visitRankingSectionRow === null ? [] : [visitRankingSectionRow]),
@@ -185,6 +191,7 @@ const ExportService = (() => {
 
     const boldRows = [
       0,
+      rateDataSectionRow,
       ...(serviceImpactSectionRow !== null && serviceImpactSectionRow >= 0 ? [serviceImpactSectionRow] : []),
       ...(valueRankingSectionRow === null ? [] : [valueRankingSectionRow, valueRankingHeaderRow]),
       ...(visitRankingSectionRow === null ? [] : [visitRankingSectionRow, visitRankingHeaderRow]),
@@ -427,10 +434,11 @@ const ExportService = (() => {
     const referenceItems = getRelevantReferences(summary.impactMethod).map(ref => `
       <li>
         <a href="${_escapeHTML(ref.url)}">${_escapeHTML(ref.title)}</a>
-        — ${_escapeHTML(ref.organization)}${ref.year ? ` (${_escapeHTML(ref.year)})` : ""}.
+        — ${_escapeHTML(ref.organization)} (${_escapeHTML(ref.ratePeriod)}).
         ${ref.description ? `<br><span>${_escapeHTML(ref.description)}</span>` : ""}
       </li>
     `).join("");
+    const rateDataNote = `Reference rate data: ${getRateDataSummary(summary.impactMethod)}.`;
 
     const budgetHTML = summary.reportingPeriodClinicCost !== null ? `
       <section class="report-section cost-comparison">
@@ -628,6 +636,7 @@ const ExportService = (() => {
   }
   .section-intro, .section-note { color: var(--slate); font-size: 11px; }
   .section-note { margin: 8px 0 0; font-size: 10px; }
+  .rate-data-note { margin-bottom: 28px; }
   .feature {
     padding: 18px;
     background: var(--surface);
@@ -717,6 +726,7 @@ ${isVolunteerReport ? `<section class="report-section">
     ${tableBodyHTML(volRows, `<tr class="table-total"><th colspan="4" class="numeric" scope="row">Total volunteer time value</th><th class="numeric">${_fmt(summary.volunteerValue)}</th></tr>`)}
   </table></div>
 </section>` : ""}
+<p class="section-note rate-data-note">${_escapeHTML(rateDataNote)}</p>
 <section class="report-section funder-section">
   <h2>${_escapeHTML(AppCopy.summary.funderReadyTitle)}</h2>
   <p class="funder-statement">${_escapeHTML(funderReadyStatement)}</p>

@@ -245,7 +245,7 @@ const REFERENCES = [
     organization: "U.S. Bureau of Labor Statistics",
     description: "National occupational employment and hourly mean wage estimates.",
     url: "https://www.bls.gov/oes/",
-    year: null,
+    ratePeriod: "May 2025",
     impactMethod: "volunteerHours",
   },
   {
@@ -254,7 +254,7 @@ const REFERENCES = [
     organization: "Centers for Medicare & Medicaid Services (CMS)",
     description: "Provides national and locality-specific Medicare payment rates for CPT/HCPCS codes.",
     url: "https://www.cms.gov/medicare/physician-fee-schedule/search",
-    year: null,
+    ratePeriod: "2026",
     impactMethod: "clinicalServices",
   },
   {
@@ -263,7 +263,7 @@ const REFERENCES = [
     organization: "Independent Sector / Do Good Institute",
     description: "National and state-level volunteer valuation rates and methodology.",
     url: "https://independentsector.org/research/value-of-volunteer-time/",
-    year: null,
+    ratePeriod: "April 21, 2026",
     impactMethod: "volunteerHours",
   },
   // {
@@ -279,4 +279,11 @@ const REFERENCES = [
 
 function getRelevantReferences(impactMethod) {
   return REFERENCES.filter(reference => reference.impactMethod === impactMethod);
+}
+
+function getRateDataSummary(impactMethod) {
+  return getRelevantReferences(impactMethod)
+    .filter(reference => reference.ratePeriod)
+    .map(reference => `${reference.organization} (${reference.ratePeriod})`)
+    .join("; ");
 }

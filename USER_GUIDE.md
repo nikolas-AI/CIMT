@@ -76,7 +76,7 @@ The estimator applies embedded reference rates to your reported totals:
 
 The results are **estimates for planning and communication**. They are not clinic revenue, charges, reimbursement, profit, confirmed savings, financial return on investment, patient outcomes, or a measure of care quality.
 
-Rates are embedded in the application and are not refreshed live. The project references U.S. Bureau of Labor Statistics data and Independent Sector’s Value of Volunteer Time for volunteer estimates, and CMS Physician Fee Schedule information for clinical-service reference rates. Review the sources and rate year shown in the report before relying on an estimate externally.
+Rates are embedded in the application and are not refreshed live. The current reference periods are U.S. Bureau of Labor Statistics wage data from **May 2025**, Independent Sector / Do Good Institute volunteer rates **as of April 21, 2026**, and the **2026** CMS Physician Fee Schedule. The summary and downloaded reports identify the applicable reference period for each source. Review the linked sources and confirm that the rates remain appropriate before relying on an estimate externally.
 
 ### Optional clinic-cost comparison
 

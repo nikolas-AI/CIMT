@@ -43,6 +43,9 @@ const ImpactSummaryView = (() => {
     }
     const rateTable = _buildRateTable(summary);
     if (rateTable) view.appendChild(rateTable);
+    if (summary.impactMethod === "volunteerHours") {
+      view.appendChild(_buildRateDataNote(summary));
+    }
     if (summary.volunteerBreakdown.length > 0) {
       view.appendChild(_buildVolunteerRateSource());
     }
@@ -439,9 +442,11 @@ const ImpactSummaryView = (() => {
       title.textContent = mode === "visits"
         ? "Top services by number reported"
         : "Top services by estimated value";
-      section.querySelector(".service-ranking__note").textContent = mode === "visits"
+      const rankingNote = mode === "visits"
         ? AppCopy.summary.rankingByCountNote
         : AppCopy.summary.rankingNote;
+      section.querySelector(".service-ranking__note").textContent =
+        `${rankingNote} Reference rate data: ${getRateDataSummary("clinicalServices")}.`;
       tableWrap.innerHTML = `
         <table class="rate-table service-ranking__table" aria-label="Clinical service impact ranking">
           <thead>
@@ -591,6 +596,13 @@ const ImpactSummaryView = (() => {
     return section;
   }
 
+  function _buildRateDataNote(summary) {
+    const note = document.createElement("p");
+    note.className = "summary-section__note";
+    note.textContent = `Reference rate data: ${getRateDataSummary(summary.impactMethod)}.`;
+    return note;
+  }
+
   // ---------------------------------------------------------------
   // Volunteer rate source info box
   // ---------------------------------------------------------------
@@ -622,7 +634,7 @@ const ImpactSummaryView = (() => {
     const items = getRelevantReferences(summary.impactMethod).map(ref => `
       <li>
         <a href="${_escape(ref.url)}" target="_blank" rel="noopener noreferrer">${_escape(ref.title)}</a>
-        — ${_escape(ref.organization)}${ref.year ? ` (${ref.year})` : ""}.
+        — ${_escape(ref.organization)} (${_escape(ref.ratePeriod)}).
         ${ref.description ? `<br><span style="color:var(--color-muted)">${_escape(ref.description)}</span>` : ""}
       </li>
     `).join("");
