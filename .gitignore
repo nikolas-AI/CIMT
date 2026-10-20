@@ -13,3 +13,5 @@ TechWriting.txt
 *.csv
 !README.md
 !PROJECT_REFERENCE.md
+!USER_GUIDE.md
+
