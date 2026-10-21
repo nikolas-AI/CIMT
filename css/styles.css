@@ -190,7 +190,7 @@ body {
 
 .footer-branding {
   display: grid;
-  grid-template-columns: 64px max-content 110px;
+  grid-template-columns: 120px max-content 110px;
   align-items: center;
   gap: var(--space-4);
   justify-content: center;
@@ -248,10 +248,9 @@ body {
 }
 
 .footer-partner-logo--thrc {
-  width: 64px;
-  height: 64px;
+  width: 120px;
+  height: auto;
   justify-self: end;
-  border-radius: var(--radius-md);
 }
 
 .footer-partner-logo--txacc {
@@ -1667,7 +1666,7 @@ body {
   }
   .footer-partner-logo--thrc {
     width: 48px;
-    height: 48px;
+    height: auto;
     justify-self: center;
   }
   .footer-partner-logo--txacc {
