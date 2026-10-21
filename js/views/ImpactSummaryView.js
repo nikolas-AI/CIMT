@@ -436,7 +436,7 @@ const ImpactSummaryView = (() => {
     section.setAttribute("aria-labelledby", "volunteer-value-chart-heading");
     const maximum = Math.max(...rows.map(row => row.estimatedValue), 1);
     section.innerHTML = `
-      <h2 class="summary-section__heading" id="volunteer-value-chart-heading">Volunteer role value by role</h2>
+      <h2 class="summary-section__heading" id="volunteer-value-chart-heading">Volunteer roles by value</h2>
       <p class="summary-section__intro">Roles are ranked by estimated value. Reported hours are shown for each role.</p>
       <div class="service-value-chart__rows">
         ${rows.map(row => {

@@ -469,6 +469,61 @@ const ExportService = (() => {
         </section>`
       : "";
 
+    const rankedVolunteerRoles = isVolunteerReport
+      ? summary.volunteerBreakdown
+        .filter(role => role.hours > 0)
+        .slice()
+        .sort((a, b) =>
+          b.estimatedValue - a.estimatedValue ||
+          b.hours - a.hours ||
+          a.roleName.localeCompare(b.roleName)
+        )
+      : [];
+    const mostImpactfulVolunteerRole = rankedVolunteerRoles[0] || null;
+    const volunteerRoleShare = mostImpactfulVolunteerRole && summary.volunteerValue > 0
+      ? mostImpactfulVolunteerRole.estimatedValue / summary.volunteerValue * 100
+      : 0;
+    const volunteerImpactHTML = mostImpactfulVolunteerRole
+      ? `<section class="report-section feature">
+          <h2>Most impactful volunteer role</h2>
+          <p class="feature__statement"><strong>${_escapeHTML(mostImpactfulVolunteerRole.roleName)}</strong> contributed the largest share of the estimated volunteer value, with <strong>${mostImpactfulVolunteerRole.hours.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} volunteer hours</strong> and an estimated value of <strong>${_fmt(mostImpactfulVolunteerRole.estimatedValue)}</strong>.</p>
+          <p class="feature__meta">${_escapeHTML(_sharePercent(volunteerRoleShare))}% of total estimated volunteer value</p>
+          <div class="value-track" role="img" aria-label="${_escapeHTML(mostImpactfulVolunteerRole.roleName)} contributed ${_escapeHTML(_sharePercent(volunteerRoleShare))} percent of estimated volunteer value">
+            <span style="width:${Math.min(100, Math.max(0, volunteerRoleShare))}%"></span>
+          </div>
+        </section>`
+      : "";
+
+    const topVolunteerRoles = rankedVolunteerRoles.slice(0, 5);
+    const volunteerChartHeading = rankedVolunteerRoles.length > 5
+      ? "Top five volunteer roles by estimated value"
+      : "Volunteer roles by estimated value";
+    const volunteerChartIntro = rankedVolunteerRoles.length > 5
+      ? "Showing the five highest-value reported volunteer roles."
+      : "Reported volunteer roles ranked by estimated value.";
+    const maximumVolunteerValue = Math.max(
+      ...topVolunteerRoles.map(role => role.estimatedValue),
+      1
+    );
+    const volunteerChartHTML = topVolunteerRoles.length > 0
+      ? `<section class="report-section chart-section">
+          <h2>${volunteerChartHeading}</h2>
+          <p class="section-intro">${volunteerChartIntro}</p>
+          <div class="chart">
+            ${topVolunteerRoles.map(role => {
+              const width = Math.min(100, Math.max(0, role.estimatedValue / maximumVolunteerValue * 100));
+              const hours = role.hours.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+              return `<div class="chart-row">
+                <div class="chart-row__label"><span>${_escapeHTML(role.roleName)} (${hours} volunteer hours)</span><strong>${_fmt(role.estimatedValue)}</strong></div>
+                <div class="value-track" role="img" aria-label="${_escapeHTML(role.roleName)}: ${_fmt(role.estimatedValue)} estimated value from ${hours} volunteer hours">
+                  <span style="width:${width}%"></span>
+                </div>
+              </div>`;
+            }).join("")}
+          </div>
+        </section>`
+      : "";
+
     const rankedServices = summary.serviceImpactRanking?.byValue || [];
     const topServices = rankedServices.slice(0, 5);
     const serviceChartHeading = rankedServices.length > 5
@@ -644,7 +699,7 @@ const ExportService = (() => {
     border-left: 5px solid var(--oxblood);
   }
   .feature h2 { color: var(--oxblood); border-bottom-color: rgba(198,91,56,.25); }
-  .feature__statement { margin: 0; font: 17px/1.45 "DM Serif Display", Georgia, serif; }
+  .feature__statement { margin: 0; font: 16px/1.6 Inter, "Segoe UI", Arial, sans-serif; }
   .feature__statement strong { color: var(--oxblood); }
   .feature__meta { margin: 10px 0 0; color: var(--slate); font-size: 10px; font-weight: 700; }
   .chart { padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); }
@@ -666,8 +721,8 @@ const ExportService = (() => {
   .sources li { margin: 0 0 9px; color: var(--slate); font-size: 10px; }
   .sources a { color: var(--teal); overflow-wrap: anywhere; }
   .sources span { color: var(--muted); }
-  .source-attribution { color: var(--slate); }
-  .source-attribution strong { color: inherit; font-weight: inherit; }
+  .source-attribution { color: var(--slate); font-size: 10px; }
+  .source-attribution strong { color: inherit; font-weight: 700; }
   @media screen and (max-width: 620px) {
     body { margin: 12px auto; padding: 0 12px; }
     .hero { padding: 24px 16px; }
@@ -710,6 +765,8 @@ const ExportService = (() => {
 <p class="narrative">${_escapeHTML(impactNarrative)}</p>
 ${serviceImpactHTML}
 ${serviceChartHTML}
+${volunteerImpactHTML}
+${volunteerChartHTML}
 ${volunteerBreakdownHTML}
 ${budgetHTML}
 ${!isVolunteerReport ? `<section class="report-section service-breakdown">
