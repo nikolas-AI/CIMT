@@ -42,9 +42,11 @@ const ImpactSummaryView = (() => {
       view.appendChild(_buildBudgetMetrics(summary));
     }
     const rateTable = _buildRateTable(summary);
-    if (rateTable) view.appendChild(rateTable);
-    if (summary.impactMethod === "volunteerHours") {
-      view.appendChild(_buildRateDataNote(summary));
+    if (rateTable) {
+      if (summary.impactMethod === "volunteerHours") {
+        rateTable.appendChild(_buildRateDataNote(summary));
+      }
+      view.appendChild(rateTable);
     }
     if (summary.volunteerBreakdown.length > 0) {
       view.appendChild(_buildVolunteerRateSource());
@@ -598,7 +600,7 @@ const ImpactSummaryView = (() => {
 
   function _buildRateDataNote(summary) {
     const note = document.createElement("p");
-    note.className = "summary-section__note";
+    note.className = "summary-section__intro volunteer-rate-data-note";
     note.textContent = `Reference rate data: ${getRateDataSummary(summary.impactMethod)}.`;
     return note;
   }

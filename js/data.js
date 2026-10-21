@@ -263,7 +263,7 @@ const REFERENCES = [
     organization: "Independent Sector / Do Good Institute",
     description: "National and state-level volunteer valuation rates and methodology.",
     url: "https://independentsector.org/research/value-of-volunteer-time/",
-    ratePeriod: "April 21, 2026",
+    ratePeriod: "April, 2026",
     impactMethod: "volunteerHours",
   },
   // {

@@ -1296,6 +1296,10 @@ body {
   max-width: none;
 }
 
+.volunteer-rate-data-note {
+  margin: 0;
+}
+
 .impact-narrative,
 .summary-section__note {
   width: 100%;
