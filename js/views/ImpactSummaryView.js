@@ -27,6 +27,10 @@ const ImpactSummaryView = (() => {
     view.appendChild(_buildDisclaimer(summary));
     view.appendChild(_buildKpiStrip(summary));
     view.appendChild(_buildImpactNarrative(summary));
+    if (summary.impactMethod === "volunteerHours" && _hasReportedVolunteers(summary)) {
+      view.appendChild(_buildVolunteerImpact(summary));
+      view.appendChild(_buildVolunteerValueChart(summary));
+    }
     if (summary.impactMethod === "volunteerHours" && _hasBothVolunteerCategories(summary)) {
       view.appendChild(_buildBreakdown(summary));
     }
@@ -171,6 +175,21 @@ const ImpactSummaryView = (() => {
 
   function _totalVolunteerHours(summary) {
     return summary.volunteerBreakdown.reduce((sum, row) => sum + row.hours, 0);
+  }
+
+  function _hasReportedVolunteers(summary) {
+    return summary.volunteerBreakdown.some(row => row.hours > 0);
+  }
+
+  function _volunteerValueRanking(summary) {
+    return summary.volunteerBreakdown
+      .filter(row => row.hours > 0)
+      .slice()
+      .sort((a, b) =>
+        b.estimatedValue - a.estimatedValue ||
+        b.hours - a.hours ||
+        a.roleName.localeCompare(b.roleName)
+      );
   }
 
   function _hasBothVolunteerCategories(summary) {
@@ -379,6 +398,63 @@ const ImpactSummaryView = (() => {
           <p class="summary-section__intro">${AppCopy.summary.emptyState}</p>
         </div>
       `;
+    return section;
+  }
+
+  function _buildVolunteerImpact(summary) {
+    const section = document.createElement("section");
+    section.className = "summary-section service-impact";
+    section.setAttribute("aria-labelledby", "volunteer-impact-heading");
+
+    const role = _volunteerValueRanking(summary)[0];
+    const share = summary.volunteerValue > 0
+      ? role.estimatedValue / summary.volunteerValue * 100
+      : 0;
+    section.innerHTML = `
+      <div class="service-impact__box">
+        <h2 class="summary-section__heading" id="volunteer-impact-heading">Most impactful volunteer role</h2>
+        <p class="service-impact__statement">
+          <strong>${_escape(role.roleName)}</strong> contributed the largest share of the estimated volunteer value, with
+          <strong>${Formatting.number(role.hours, 1)} volunteer hours</strong> and an estimated value of
+          <strong>${Formatting.currency(role.estimatedValue)}</strong>.
+        </p>
+        <p class="service-impact__stats">${Formatting.number(share, 1)}% of total estimated volunteer value</p>
+        <div class="service-impact__bar" role="img" aria-label="${_escape(role.roleName)} contributed ${Formatting.number(share, 1)} percent of estimated volunteer value">
+          <span style="width: ${Math.min(100, Math.max(0, share))}%"></span>
+        </div>
+      </div>
+    `;
+    return section;
+  }
+
+  function _buildVolunteerValueChart(summary) {
+    const rows = _volunteerValueRanking(summary);
+    if (rows.length === 0) return null;
+
+    const section = document.createElement("section");
+    section.className = "summary-section service-value-chart";
+    section.setAttribute("aria-labelledby", "volunteer-value-chart-heading");
+    const maximum = Math.max(...rows.map(row => row.estimatedValue), 1);
+    section.innerHTML = `
+      <h2 class="summary-section__heading" id="volunteer-value-chart-heading">Volunteer role value by role</h2>
+      <p class="summary-section__intro">Roles are ranked by estimated value. Reported hours are shown for each role.</p>
+      <div class="service-value-chart__rows">
+        ${rows.map(row => {
+          const width = Math.min(100, Math.max(0, row.estimatedValue / maximum * 100));
+          return `
+            <div class="service-value-chart__row">
+              <div class="service-value-chart__label">
+                <span>${_escape(row.roleName)} (${Formatting.number(row.hours, 1)} volunteer hours)</span>
+                <strong>${Formatting.currency(row.estimatedValue)}</strong>
+              </div>
+              <div class="service-value-chart__track" role="img" aria-label="${_escape(row.roleName)}: ${Formatting.currency(row.estimatedValue)} estimated value from ${Formatting.number(row.hours, 1)} volunteer hours">
+                <span style="width: ${width}%"></span>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
     return section;
   }
 
