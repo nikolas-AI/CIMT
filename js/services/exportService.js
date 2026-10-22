@@ -439,6 +439,7 @@ const ExportService = (() => {
       </li>
     `).join("");
     const rateDataNote = `Reference rate data: ${getRateDataSummary(summary.impactMethod)}.`;
+    const rateDataNoteHTML = `<p class="section-note rate-data-note">${_escapeHTML(rateDataNote)}</p>`;
 
     const budgetHTML = summary.reportingPeriodClinicCost !== null ? `
       <section class="report-section cost-comparison">
@@ -740,22 +741,22 @@ const ExportService = (() => {
   .chart-row__label strong { flex-shrink: 0; color: var(--navy); }
   .value-track { height: 7px; overflow: hidden; background: #DDE7DF; border-radius: 999px; }
   .value-track span { display: block; height: 100%; background: var(--teal); border-radius: inherit; }
-  .composition-pie { padding: 18px 20px; background: linear-gradient(135deg, #fff, #F0F7F6); border: 1px solid rgba(8,127,140,.28); border-radius: 10px; box-shadow: 0 6px 16px rgba(22,50,56,.1); break-inside: avoid; page-break-inside: avoid; }
+  .composition-pie { margin-bottom: 36px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--border); break-inside: avoid; page-break-inside: avoid; }
   .composition-pie .summary-section__heading { color: var(--navy); font-size: 14px; }
   .composition-pie .summary-section__intro { margin-bottom: 14px; }
   .composition-pie__content { display: grid; grid-template-columns: minmax(160px, .9fr) minmax(0, 1.1fr); align-items: center; gap: 24px; }
-  .composition-pie__chart { display: block; width: min(100%, 270px); height: auto; margin: 0 auto; overflow: visible; filter: drop-shadow(0 5px 6px rgba(22,50,56,.15)); }
+  .composition-pie__chart { display: block; width: min(100%, 270px); height: auto; margin: 0 auto; overflow: visible; }
   .composition-pie__slice { stroke: #fff; stroke-width: 1.5; stroke-linejoin: round; }
   .composition-pie__center { fill: #fff; stroke: rgba(22,50,56,.08); stroke-width: 1; }
   .composition-pie__total { fill: var(--navy); font-size: 19px; font-weight: 700; }
   .composition-pie__total-label { fill: var(--slate); font-size: 8px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
   .composition-pie__legend { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
-  .composition-pie__item { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto auto; align-items: center; gap: 7px; padding: 6px 8px; border: 1px solid rgba(22,50,56,.07); border-radius: 5px; background: rgba(255,255,255,.85); font-size: 10px; }
-  .composition-pie__swatch { width: 10px; height: 10px; border-radius: 50%; background: var(--pie-color); box-shadow: 0 0 0 3px color-mix(in srgb, var(--pie-color) 18%, transparent); }
+  .composition-pie__item { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto auto; align-items: center; gap: 7px; padding: 6px 8px; border-bottom: 1px solid var(--border); background: transparent; font-size: 10px; }
+  .composition-pie__swatch { width: 10px; height: 10px; border-radius: 50%; background: var(--pie-color); }
   .composition-pie__label { overflow-wrap: anywhere; }
   .composition-pie__value, .composition-pie__share { color: var(--navy); white-space: nowrap; }
   .composition-pie__value { color: var(--slate); }
-  .composition-pie__share { min-width: 36px; padding: 3px 6px; border-radius: 999px; background: var(--impact-bg); text-align: center; font-size: 9px; font-weight: 700; }
+  .composition-pie__share { min-width: 36px; text-align: center; font-size: 9px; font-weight: 700; }
   table { width: 100%; margin: 8px 0 0; border-collapse: collapse; font-size: 10px; }
   thead { display: table-header-group; break-after: avoid; page-break-after: avoid; }
   tbody.table-opening, tbody.table-ending { break-inside: avoid; page-break-inside: avoid; }
@@ -828,16 +829,17 @@ ${!isVolunteerReport ? `<section class="report-section service-breakdown">
     ${tableBodyHTML(svcRows, `<tr class="table-total"><th colspan="4" class="numeric" scope="row">Clinical services total</th><th class="numeric">${_fmt(summary.clinicalServiceValue)}</th><th class="numeric">${summary.clinicalServiceValue > 0 ? "100.0%" : "0.0%"}</th></tr>`)}
   </table></div>
 </section>` : ""}
-  ${clinicalCountsPieHTML}
-  ${isVolunteerReport ? `<section class="report-section">
+${!isVolunteerReport ? rateDataNoteHTML : ""}
+${clinicalCountsPieHTML}
+${isVolunteerReport ? `<section class="report-section">
   <h2>Volunteer Time</h2>
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Role</th><th scope="col">Type</th><th class="numeric" scope="col">Volunteer hours</th><th class="numeric" scope="col">Reference rate / hour</th><th class="numeric" scope="col">Estimated value</th></tr></thead>
     ${tableBodyHTML(volRows, `<tr class="table-total"><th colspan="4" class="numeric" scope="row">Total volunteer time value</th><th class="numeric">${_fmt(summary.volunteerValue)}</th></tr>`)}
   </table></div>
 </section>` : ""}
-  ${volunteerHoursPieHTML}
-  <p class="section-note rate-data-note">${_escapeHTML(rateDataNote)}</p>
+${isVolunteerReport ? rateDataNoteHTML : ""}
+${volunteerHoursPieHTML}
 <section class="report-section funder-section">
   <h2>${_escapeHTML(AppCopy.summary.funderReadyTitle)}</h2>
   <p class="funder-statement">${_escapeHTML(funderReadyStatement)}</p>
