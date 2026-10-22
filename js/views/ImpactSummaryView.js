@@ -41,6 +41,8 @@ const ImpactSummaryView = (() => {
     if (summary.impactMethod === "clinicalServices") {
       const serviceRanking = _buildServiceRanking(summary);
       if (serviceRanking) view.appendChild(serviceRanking);
+      const serviceCountChart = _buildServiceCountPieChart(summary);
+      if (serviceCountChart) view.appendChild(serviceCountChart);
     }
     if (summary.reportingPeriodClinicCost !== null) {
       view.appendChild(_buildBudgetMetrics(summary));
@@ -51,6 +53,8 @@ const ImpactSummaryView = (() => {
         rateTable.appendChild(_buildRateDataNote(summary));
       }
       view.appendChild(rateTable);
+      const volunteerHoursChart = _buildVolunteerHoursPieChart(summary);
+      if (volunteerHoursChart) view.appendChild(volunteerHoursChart);
     }
     if (summary.volunteerBreakdown.length > 0) {
       view.appendChild(_buildVolunteerRateSource());
@@ -576,6 +580,38 @@ const ImpactSummaryView = (() => {
     });
     renderRows("value");
     return section;
+  }
+
+  function _buildVolunteerHoursPieChart(summary) {
+    return _buildQuantityPieChart({
+      id: "volunteer-hours-composition",
+      title: "Volunteer hours by role",
+      description: "Share of total reported volunteer hours by role.",
+      items: summary.volunteerBreakdown.map(row => ({
+        label: row.roleName,
+        value: row.hours,
+        valueLabel: `${Formatting.number(row.hours, 1)} hours`,
+      })),
+    });
+  }
+
+  function _buildServiceCountPieChart(summary) {
+    return _buildQuantityPieChart({
+      id: "clinical-services-composition",
+      title: "Clinical services by count",
+      description: "Share of total reported clinical services by service type.",
+      items: summary.serviceBreakdown.map(row => ({
+        label: row.serviceName,
+        value: row.count,
+        valueLabel: `${Formatting.number(row.count, 0)} services`,
+      })),
+    });
+  }
+
+  function _buildQuantityPieChart(options) {
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = CompositionPieChart.render(options);
+    return wrapper.firstElementChild;
   }
 
   function _buildBudgetMetrics(summary) {

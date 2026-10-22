@@ -187,6 +187,8 @@ Files in this folder include:
 - `ProgressIndicator.js` — the five-step progress bar
 - `NavigationButtons.js` — shared back/next controls
 - `EntryList.js` — dynamic list for adding/removing repeating entries
+- `CompositionPieChart.js` — reusable SVG quantity-share pie charts for the
+  summary and printable report
 
 These components keep the repeated UI patterns consistent.
 
@@ -214,6 +216,10 @@ It supports:
 - Excel export using `xlsx-js-style`
 
 This keeps report generation separate from the calculation and display logic.
+The summary and printable report also show a quantity-share pie chart after the
+corresponding breakdown table: volunteer hours by role or clinical service
+counts by service type. These are quantity distributions, separate from the
+existing estimated-value bar charts.
 
 ---
 

@@ -552,6 +552,31 @@ const ExportService = (() => {
         </section>`
       : "";
 
+    const volunteerHoursPieHTML = isVolunteerReport
+      ? CompositionPieChart.render({
+        id: "volunteer-hours-composition",
+        title: "Volunteer hours by role",
+        description: "Share of total reported volunteer hours by role.",
+        items: summary.volunteerBreakdown.map(row => ({
+          label: row.roleName,
+          value: row.hours,
+          valueLabel: `${row.hours.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} hours`,
+        })),
+      })
+      : "";
+    const clinicalCountsPieHTML = !isVolunteerReport
+      ? CompositionPieChart.render({
+        id: "clinical-services-composition",
+        title: "Clinical services by count",
+        description: "Share of total reported clinical services by service type.",
+        items: summary.serviceBreakdown.map(row => ({
+          label: row.serviceName,
+          value: row.count,
+          valueLabel: `${row.count.toLocaleString("en-US")} services`,
+        })),
+      })
+      : "";
+
     const hasMedicalVolunteerHours = summary.volunteerBreakdown.some(
       row => row.category === "medical professional" && row.hours > 0
     );
@@ -709,6 +734,15 @@ const ExportService = (() => {
   .chart-row__label strong { flex-shrink: 0; color: var(--navy); }
   .value-track { height: 7px; overflow: hidden; background: #DDE7DF; border-radius: 999px; }
   .value-track span { display: block; height: 100%; background: var(--teal); border-radius: inherit; }
+  .composition-pie { padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); }
+  .composition-pie__content { display: grid; grid-template-columns: minmax(120px, .8fr) minmax(0, 1.2fr); align-items: center; gap: 20px; }
+  .composition-pie__chart { display: block; width: min(100%, 220px); height: auto; margin: 0 auto; }
+  .composition-pie__legend { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .composition-pie__item { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto auto; align-items: center; gap: 7px; font-size: 10px; }
+  .composition-pie__swatch { width: 10px; height: 10px; border-radius: 2px; background: var(--pie-color); }
+  .composition-pie__label { overflow-wrap: anywhere; }
+  .composition-pie__value, .composition-pie__share { color: var(--navy); white-space: nowrap; }
+  .composition-pie__value { color: var(--slate); }
   table { width: 100%; margin: 8px 0 0; border-collapse: collapse; font-size: 10px; }
   thead { display: table-header-group; break-after: avoid; page-break-after: avoid; }
   tbody.table-opening, tbody.table-ending { break-inside: avoid; page-break-inside: avoid; }
@@ -731,6 +765,11 @@ const ExportService = (() => {
     .total { font-size: 40px; }
     .table-wrap { overflow-x: auto; }
     table { min-width: 620px; }
+    .composition-pie__content { grid-template-columns: 1fr; gap: 12px; }
+    .composition-pie__chart { width: min(100%, 200px); }
+    .composition-pie__item { grid-template-columns: 10px minmax(0, 1fr) auto; }
+    .composition-pie__value { grid-column: 2; }
+    .composition-pie__share { grid-column: 3; grid-row: 1 / span 2; }
   }
   @media print {
     body { max-width: none; margin: 0; padding: 0; background: #fff; font-size: 10pt; }
@@ -776,14 +815,16 @@ ${!isVolunteerReport ? `<section class="report-section service-breakdown">
     ${tableBodyHTML(svcRows, `<tr class="table-total"><th colspan="4" class="numeric" scope="row">Clinical services total</th><th class="numeric">${_fmt(summary.clinicalServiceValue)}</th><th class="numeric">${summary.clinicalServiceValue > 0 ? "100.0%" : "0.0%"}</th></tr>`)}
   </table></div>
 </section>` : ""}
-${isVolunteerReport ? `<section class="report-section">
+  ${clinicalCountsPieHTML}
+  ${isVolunteerReport ? `<section class="report-section">
   <h2>Volunteer Time</h2>
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Role</th><th scope="col">Type</th><th class="numeric" scope="col">Volunteer hours</th><th class="numeric" scope="col">Reference rate / hour</th><th class="numeric" scope="col">Estimated value</th></tr></thead>
     ${tableBodyHTML(volRows, `<tr class="table-total"><th colspan="4" class="numeric" scope="row">Total volunteer time value</th><th class="numeric">${_fmt(summary.volunteerValue)}</th></tr>`)}
   </table></div>
 </section>` : ""}
-<p class="section-note rate-data-note">${_escapeHTML(rateDataNote)}</p>
+  ${volunteerHoursPieHTML}
+  <p class="section-note rate-data-note">${_escapeHTML(rateDataNote)}</p>
 <section class="report-section funder-section">
   <h2>${_escapeHTML(AppCopy.summary.funderReadyTitle)}</h2>
   <p class="funder-statement">${_escapeHTML(funderReadyStatement)}</p>

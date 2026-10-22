@@ -1497,6 +1497,55 @@ body {
   font-size: var(--text-lg);
 }
 
+.composition-pie {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
+.composition-pie__content {
+  display: grid;
+  grid-template-columns: minmax(10rem, 0.8fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.composition-pie__chart {
+  display: block;
+  width: min(100%, 16rem);
+  height: auto;
+  margin-inline: auto;
+}
+
+.composition-pie__legend {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.composition-pie__item {
+  display: grid;
+  grid-template-columns: 0.75rem minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.composition-pie__swatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 2px;
+  background: var(--pie-color);
+}
+
+.composition-pie__label { overflow-wrap: anywhere; }
+.composition-pie__value,
+.composition-pie__share { color: var(--color-navy); white-space: nowrap; }
+.composition-pie__value { color: var(--color-slate); }
+
 .budget-metrics__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1700,6 +1749,12 @@ body {
   .summary-kpi:nth-last-child(-n + 2) { border-bottom: 0; }
   .summary-kpi { border-bottom: 1px solid var(--color-border); }
   .service-value-chart__label { align-items: flex-start; flex-direction: column; gap: var(--space-1); }
+  .composition-pie { padding: var(--space-4); }
+  .composition-pie__content { grid-template-columns: 1fr; gap: var(--space-4); }
+  .composition-pie__chart { width: min(100%, 13rem); }
+  .composition-pie__item { grid-template-columns: 0.75rem minmax(0, 1fr) auto; }
+  .composition-pie__value { grid-column: 2; }
+  .composition-pie__share { grid-column: 3; grid-row: 1 / span 2; }
   .download-actions { align-items: stretch; flex-direction: column; }
   .download-actions .btn { width: 100%; min-width: 0; }
   .impact-breakdown__heading {
