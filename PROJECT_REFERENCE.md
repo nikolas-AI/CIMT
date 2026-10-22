@@ -219,7 +219,9 @@ This keeps report generation separate from the calculation and display logic.
 The summary and printable report also show a quantity-share pie chart after the
 corresponding breakdown table: volunteer hours by role or clinical service
 counts by service type. These are quantity distributions, separate from the
-existing estimated-value bar charts.
+existing estimated-value bar charts. Charts show up to seven roles or services
+individually and combine the rest as “Other.” When at least two entries are
+below 3% each, those small entries are combined as “Other” as well.
 
 ---
 

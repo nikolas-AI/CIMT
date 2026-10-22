@@ -223,7 +223,7 @@ const AppCopy = (() => {
     valuePerDollarKpi: "Estimated value per $1 of cost",
     valuePerDollarNote: "Calculated from reported cost and estimated activity value",
     topContributorStats: (count, value, share) => `${count} reported services · ${value} estimated value · ${share}% of total`,
-    valueChartHeading: "Estimated value by service",
+    valueChartHeading: "Clinical services by estimated value",
     valueChartIntro: "The bars show the estimated value of each reported service. Numeric labels provide the same information without relying on color.",
     backAction: "Edit reported activity",
     startOverAction: "Create another report",

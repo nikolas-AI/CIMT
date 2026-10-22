@@ -1498,24 +1498,66 @@ body {
 }
 
 .composition-pie {
-  padding: var(--space-5);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-6);
+  border: 1px solid rgba(8, 127, 140, 0.24);
+  border-radius: var(--radius-md);
+  background:
+    radial-gradient(circle at 14% 20%, rgba(8, 127, 140, 0.09), transparent 30%),
+    linear-gradient(135deg, #FFFFFF 0%, #F4F8F6 100%);
+  box-shadow: 0 12px 28px rgba(22, 50, 56, 0.09);
+}
+
+.composition-pie .summary-section__heading {
+  color: var(--color-navy);
+  font-size: var(--text-lg);
+}
+
+.composition-pie .summary-section__intro {
+  margin-bottom: var(--space-5);
 }
 
 .composition-pie__content {
   display: grid;
-  grid-template-columns: minmax(10rem, 0.8fr) minmax(0, 1.2fr);
+  grid-template-columns: minmax(14rem, 0.9fr) minmax(0, 1.1fr);
   align-items: center;
-  gap: var(--space-6);
+  gap: var(--space-8);
 }
 
 .composition-pie__chart {
   display: block;
-  width: min(100%, 16rem);
+  width: min(100%, 20rem);
   height: auto;
   margin-inline: auto;
+  overflow: visible;
+  filter: drop-shadow(0 7px 8px rgba(22, 50, 56, 0.15));
+}
+
+.composition-pie__slice {
+  stroke: #FFFFFF;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.composition-pie__center {
+  fill: #FFFFFF;
+  stroke: rgba(22, 50, 56, 0.08);
+  stroke-width: 1;
+}
+
+.composition-pie__total {
+  fill: var(--color-navy);
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.composition-pie__total-label {
+  fill: var(--color-slate);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .composition-pie__legend {
@@ -1531,20 +1573,33 @@ body {
   grid-template-columns: 0.75rem minmax(0, 1fr) auto auto;
   align-items: center;
   gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid rgba(22, 50, 56, 0.07);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.82);
   font-size: var(--text-sm);
 }
 
 .composition-pie__swatch {
   width: 0.75rem;
   height: 0.75rem;
-  border-radius: 2px;
+  border-radius: 50%;
   background: var(--pie-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pie-color) 18%, transparent);
 }
 
 .composition-pie__label { overflow-wrap: anywhere; }
 .composition-pie__value,
 .composition-pie__share { color: var(--color-navy); white-space: nowrap; }
 .composition-pie__value { color: var(--color-slate); }
+.composition-pie__share {
+  min-width: 3.6rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  background: var(--color-impact-bg);
+  text-align: center;
+  font-size: var(--text-xs);
+}
 
 .budget-metrics__grid {
   display: grid;
@@ -1751,7 +1806,7 @@ body {
   .service-value-chart__label { align-items: flex-start; flex-direction: column; gap: var(--space-1); }
   .composition-pie { padding: var(--space-4); }
   .composition-pie__content { grid-template-columns: 1fr; gap: var(--space-4); }
-  .composition-pie__chart { width: min(100%, 13rem); }
+  .composition-pie__chart { width: min(100%, 16rem); }
   .composition-pie__item { grid-template-columns: 0.75rem minmax(0, 1fr) auto; }
   .composition-pie__value { grid-column: 2; }
   .composition-pie__share { grid-column: 3; grid-row: 1 / span 2; }

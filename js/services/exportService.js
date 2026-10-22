@@ -556,7 +556,10 @@ const ExportService = (() => {
       ? CompositionPieChart.render({
         id: "volunteer-hours-composition",
         title: "Volunteer hours by role",
-        description: "Share of total reported volunteer hours by role.",
+        description: "Reported volunteer hours split by role. Small shares are combined into Other.",
+        otherLabel: "Other roles",
+        unitLabel: "hours",
+        formatValue: value => value.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
         items: summary.volunteerBreakdown.map(row => ({
           label: row.roleName,
           value: row.hours,
@@ -568,7 +571,10 @@ const ExportService = (() => {
       ? CompositionPieChart.render({
         id: "clinical-services-composition",
         title: "Clinical services by count",
-        description: "Share of total reported clinical services by service type.",
+        description: "Reported clinical service counts split by type. Small shares are combined into Other.",
+        otherLabel: "Other services",
+        unitLabel: "services",
+        formatValue: value => value.toLocaleString("en-US"),
         items: summary.serviceBreakdown.map(row => ({
           label: row.serviceName,
           value: row.count,
@@ -734,15 +740,22 @@ const ExportService = (() => {
   .chart-row__label strong { flex-shrink: 0; color: var(--navy); }
   .value-track { height: 7px; overflow: hidden; background: #DDE7DF; border-radius: 999px; }
   .value-track span { display: block; height: 100%; background: var(--teal); border-radius: inherit; }
-  .composition-pie { padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); }
-  .composition-pie__content { display: grid; grid-template-columns: minmax(120px, .8fr) minmax(0, 1.2fr); align-items: center; gap: 20px; }
-  .composition-pie__chart { display: block; width: min(100%, 220px); height: auto; margin: 0 auto; }
+  .composition-pie { padding: 18px 20px; background: linear-gradient(135deg, #fff, #F0F7F6); border: 1px solid rgba(8,127,140,.28); border-radius: 10px; box-shadow: 0 6px 16px rgba(22,50,56,.1); break-inside: avoid; page-break-inside: avoid; }
+  .composition-pie .summary-section__heading { color: var(--navy); font-size: 14px; }
+  .composition-pie .summary-section__intro { margin-bottom: 14px; }
+  .composition-pie__content { display: grid; grid-template-columns: minmax(160px, .9fr) minmax(0, 1.1fr); align-items: center; gap: 24px; }
+  .composition-pie__chart { display: block; width: min(100%, 270px); height: auto; margin: 0 auto; overflow: visible; filter: drop-shadow(0 5px 6px rgba(22,50,56,.15)); }
+  .composition-pie__slice { stroke: #fff; stroke-width: 1.5; stroke-linejoin: round; }
+  .composition-pie__center { fill: #fff; stroke: rgba(22,50,56,.08); stroke-width: 1; }
+  .composition-pie__total { fill: var(--navy); font-size: 19px; font-weight: 700; }
+  .composition-pie__total-label { fill: var(--slate); font-size: 8px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
   .composition-pie__legend { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
-  .composition-pie__item { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto auto; align-items: center; gap: 7px; font-size: 10px; }
-  .composition-pie__swatch { width: 10px; height: 10px; border-radius: 2px; background: var(--pie-color); }
+  .composition-pie__item { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto auto; align-items: center; gap: 7px; padding: 6px 8px; border: 1px solid rgba(22,50,56,.07); border-radius: 5px; background: rgba(255,255,255,.85); font-size: 10px; }
+  .composition-pie__swatch { width: 10px; height: 10px; border-radius: 50%; background: var(--pie-color); box-shadow: 0 0 0 3px color-mix(in srgb, var(--pie-color) 18%, transparent); }
   .composition-pie__label { overflow-wrap: anywhere; }
   .composition-pie__value, .composition-pie__share { color: var(--navy); white-space: nowrap; }
   .composition-pie__value { color: var(--slate); }
+  .composition-pie__share { min-width: 36px; padding: 3px 6px; border-radius: 999px; background: var(--impact-bg); text-align: center; font-size: 9px; font-weight: 700; }
   table { width: 100%; margin: 8px 0 0; border-collapse: collapse; font-size: 10px; }
   thead { display: table-header-group; break-after: avoid; page-break-after: avoid; }
   tbody.table-opening, tbody.table-ending { break-inside: avoid; page-break-inside: avoid; }
@@ -766,7 +779,7 @@ const ExportService = (() => {
     .table-wrap { overflow-x: auto; }
     table { min-width: 620px; }
     .composition-pie__content { grid-template-columns: 1fr; gap: 12px; }
-    .composition-pie__chart { width: min(100%, 200px); }
+    .composition-pie__chart { width: min(100%, 220px); }
     .composition-pie__item { grid-template-columns: 10px minmax(0, 1fr) auto; }
     .composition-pie__value { grid-column: 2; }
     .composition-pie__share { grid-column: 3; grid-row: 1 / span 2; }
