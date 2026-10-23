@@ -606,8 +606,9 @@ const ImpactSummaryView = (() => {
       otherLabel: "Other services",
       unitLabel: "services",
       formatValue: value => Formatting.number(value, 0),
+      hideLegendMetrics: true,
       items: summary.serviceBreakdown.map(row => ({
-        label: row.serviceName,
+        label: row.serviceDescription,
         value: row.count,
         valueLabel: `${Formatting.number(row.count, 0)} services`,
       })),

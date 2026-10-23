@@ -576,8 +576,9 @@ const ExportService = (() => {
         otherLabel: "Other services",
         unitLabel: "services",
         formatValue: value => value.toLocaleString("en-US"),
+        hideLegendMetrics: true,
         items: summary.serviceBreakdown.map(row => ({
-          label: row.serviceName,
+          label: row.serviceDescription,
           value: row.count,
           valueLabel: `${row.count.toLocaleString("en-US")} services`,
         })),
@@ -752,6 +753,7 @@ const ExportService = (() => {
   .composition-pie__total-label { fill: var(--slate); font-size: 8px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
   .composition-pie__legend { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
   .composition-pie__item { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto auto; align-items: center; gap: 7px; padding: 6px 8px; border-bottom: 1px solid var(--border); background: transparent; font-size: 10px; }
+  .composition-pie__item--label-only { grid-template-columns: 10px minmax(0, 1fr); font-size: 8px; }
   .composition-pie__swatch { width: 10px; height: 10px; border-radius: 50%; background: var(--pie-color); }
   .composition-pie__label { overflow-wrap: anywhere; }
   .composition-pie__value, .composition-pie__share { color: var(--navy); white-space: nowrap; }

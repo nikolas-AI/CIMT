@@ -159,6 +159,7 @@ const Calculator = (() => {
         const count = parseInt(entry.count, 10) || 0;
         return {
           serviceId:      svc.id,
+          serviceDescription: svc.description,
           serviceName:    svc.displayName,
           code:           svc.code,
           codeSystem:     svc.codeSystem,

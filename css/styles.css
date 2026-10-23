@@ -1021,6 +1021,28 @@ body {
 
 .nav-buttons--end { justify-content: flex-end; }
 
+.welcome-actions {
+  justify-content: space-between;
+}
+
+.welcome-data-warning {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: #654B19;
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+
+.welcome-data-warning p { margin: 0; }
+.welcome-data-warning strong { color: #49340E; }
+
+.welcome-data-warning__icon {
+  flex: 0 0 1.125rem;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
 /* ---------------------------------------------------------
   IMPACT SUMMARY - VIEW 4
   The summary is intentionally organized from largest result to supporting
@@ -1621,6 +1643,11 @@ body {
   font-size: var(--text-sm);
 }
 
+.composition-pie__item--label-only {
+  grid-template-columns: 0.75rem minmax(0, 1fr);
+  font-size: var(--text-xs);
+}
+
 .composition-pie__swatch {
   width: 0.75rem;
   height: 0.75rem;
@@ -1826,6 +1853,8 @@ body {
     border-top: 1px solid #DAD8D0;
   }
   .nav-buttons--end .btn { width: 100%; justify-content: center; }
+  .welcome-actions { align-items: stretch; flex-direction: column; }
+  .welcome-data-warning { align-self: flex-start; }
 
   .view-heading { font-size: 2.25rem; }
   .welcome-hero .view-heading { font-size: 2.25rem; }

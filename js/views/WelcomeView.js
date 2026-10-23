@@ -58,6 +58,16 @@ const WelcomeView = (() => {
       nextLabel: AppCopy.welcome.begin,
       onNext,
     });
+    nav.classList.add("welcome-actions");
+    nav.insertAdjacentHTML("afterbegin", `
+      <div class="welcome-data-warning" role="note">
+        <svg class="welcome-data-warning__icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3 2.8 20h18.4L12 3Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.8"/>
+          <path d="M12 9v5m0 3h.01" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/>
+        </svg>
+        <p><strong>Your entered data is not saved.</strong> Refreshing or closing this page will erase it.</p>
+      </div>
+    `);
     view.appendChild(nav);
 
     container.appendChild(view);

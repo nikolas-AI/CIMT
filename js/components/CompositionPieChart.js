@@ -18,7 +18,7 @@ const CompositionPieChart = (() => {
     "#52616B",
   ];
 
-  function render({ id, title, description, items, otherLabel, unitLabel, formatValue }) {
+  function render({ id, title, description, items, otherLabel, unitLabel, formatValue, hideLegendMetrics = false }) {
     const chartItems = _groupItems(items, otherLabel, unitLabel, formatValue);
     const total = chartItems.reduce((sum, item) => sum + item.value, 0);
     if (chartItems.length === 0 || total <= 0) return "";
@@ -34,7 +34,7 @@ const CompositionPieChart = (() => {
       const tooltip = `${item.label}: ${item.valueLabel} (${(item.value / total * 100).toFixed(1)}%)`;
 
       const shape = chartItems.length === 1
-        ? `<circle class="composition-pie__shape" cx="100" cy="100" r="88" fill="${COLORS[index % COLORS.length]}" />`
+        ? `<circle class="composition-pie__shape" cx="100" cy="100" r="94" fill="${COLORS[index % COLORS.length]}" />`
         : `<path class="composition-pie__shape" d="${_slicePath(startAngle, endAngle)}" fill="${COLORS[index % COLORS.length]}" />`;
       const path = `
         <g class="composition-pie__slice" tabindex="0" role="img"
@@ -62,11 +62,13 @@ const CompositionPieChart = (() => {
           </svg>
           <ul class="composition-pie__legend">
             ${slices.map(slice => `
-              <li class="composition-pie__item">
+              <li class="composition-pie__item${hideLegendMetrics ? " composition-pie__item--label-only" : ""}">
                 <span class="composition-pie__swatch" style="--pie-color: ${COLORS[slice.index % COLORS.length]}" aria-hidden="true"></span>
                 <span class="composition-pie__label">${_escape(slice.item.label)}</span>
-                <span class="composition-pie__value">${_escape(slice.item.valueLabel)}</span>
-                <strong class="composition-pie__share">${slice.percentage.toFixed(1)}%</strong>
+                ${hideLegendMetrics ? "" : `
+                  <span class="composition-pie__value">${_escape(slice.item.valueLabel)}</span>
+                  <strong class="composition-pie__share">${slice.percentage.toFixed(1)}%</strong>
+                `}
               </li>
             `).join("")}
           </ul>
@@ -151,14 +153,14 @@ const CompositionPieChart = (() => {
     const start = _point(startAngle);
     const end = _point(endAngle);
     const largeArc = endAngle - startAngle > 180 ? 1 : 0;
-    return `M 100 100 L ${start.x} ${start.y} A 88 88 0 ${largeArc} 1 ${end.x} ${end.y} Z`;
+    return `M 100 100 L ${start.x} ${start.y} A 94 94 0 ${largeArc} 1 ${end.x} ${end.y} Z`;
   }
 
   function _point(angle) {
     const radians = angle * Math.PI / 180;
     return {
-      x: (100 + 88 * Math.cos(radians)).toFixed(3),
-      y: (100 + 88 * Math.sin(radians)).toFixed(3),
+      x: (100 + 94 * Math.cos(radians)).toFixed(3),
+      y: (100 + 94 * Math.sin(radians)).toFixed(3),
     };
   }
 
