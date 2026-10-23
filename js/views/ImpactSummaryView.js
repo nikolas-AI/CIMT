@@ -617,7 +617,9 @@ const ImpactSummaryView = (() => {
   function _buildQuantityPieChart(options) {
     const wrapper = document.createElement("div");
     wrapper.innerHTML = CompositionPieChart.render(options);
-    return wrapper.firstElementChild;
+    const section = wrapper.firstElementChild;
+    if (section) CompositionPieChart.bind(section);
+    return section;
   }
 
   function _buildBudgetMetrics(summary) {

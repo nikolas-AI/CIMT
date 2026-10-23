@@ -28,10 +28,20 @@ const CompositionPieChart = (() => {
       const startAngle = angle;
       const endAngle = startAngle + item.value / total * 360;
       angle = endAngle;
+      const midpoint = (startAngle + endAngle) / 2 * Math.PI / 180;
+      const offsetX = (Math.cos(midpoint) * 5).toFixed(2);
+      const offsetY = (Math.sin(midpoint) * 5).toFixed(2);
+      const tooltip = `${item.label}: ${item.valueLabel} (${(item.value / total * 100).toFixed(1)}%)`;
 
-      const path = chartItems.length === 1
-        ? `<circle class="composition-pie__slice" cx="100" cy="100" r="88" fill="${COLORS[index % COLORS.length]}" />`
-        : `<path class="composition-pie__slice" d="${_slicePath(startAngle, endAngle)}" fill="${COLORS[index % COLORS.length]}" />`;
+      const shape = chartItems.length === 1
+        ? `<circle class="composition-pie__shape" cx="100" cy="100" r="88" fill="${COLORS[index % COLORS.length]}" />`
+        : `<path class="composition-pie__shape" d="${_slicePath(startAngle, endAngle)}" fill="${COLORS[index % COLORS.length]}" />`;
+      const path = `
+        <g class="composition-pie__slice" tabindex="0" role="img"
+          aria-label="${_escape(tooltip)}" style="--slice-x: ${offsetX}px; --slice-y: ${offsetY}px">
+          ${shape}
+        </g>
+      `;
       return { item, index, percentage: item.value / total * 100, path };
     });
     const safeId = _escape(id);
@@ -42,9 +52,8 @@ const CompositionPieChart = (() => {
         <h2 class="summary-section__heading" id="${safeId}-heading">${_escape(title)}</h2>
         <p class="summary-section__intro">${_escape(description)}</p>
         <div class="composition-pie__content">
-          <svg class="composition-pie__chart" viewBox="0 0 200 200" role="img"
-            aria-labelledby="${safeId}-svg-title ${safeId}-svg-desc">
-            <title id="${safeId}-svg-title">${_escape(title)}</title>
+          <svg class="composition-pie__chart" viewBox="0 0 200 200" role="group"
+            aria-label="${_escape(title)}" aria-describedby="${safeId}-svg-desc">
             <desc id="${safeId}-svg-desc">${_escape(description)} Total: ${_escape(totalText)} ${_escape(unitLabel)}.</desc>
             ${slices.map(slice => slice.path).join("")}
             <circle class="composition-pie__center" cx="100" cy="100" r="51" />
@@ -64,6 +73,48 @@ const CompositionPieChart = (() => {
         </div>
       </section>
     `;
+  }
+
+  function bind(section) {
+    const content = section.querySelector(".composition-pie__content");
+    const slices = section.querySelectorAll(".composition-pie__slice");
+    if (!content || slices.length === 0) return;
+
+    const tooltip = document.createElement("div");
+    tooltip.className = "composition-pie__tooltip";
+    tooltip.setAttribute("role", "tooltip");
+    tooltip.hidden = true;
+    content.append(tooltip);
+
+    function showTooltip(slice, clientX, clientY) {
+      tooltip.textContent = slice.getAttribute("aria-label");
+      tooltip.hidden = false;
+
+      const contentRect = content.getBoundingClientRect();
+      const left = clientX - contentRect.left + 12;
+      const top = clientY - contentRect.top + 12;
+      tooltip.style.left = `${Math.min(left, Math.max(0, content.clientWidth - tooltip.offsetWidth - 8))}px`;
+      tooltip.style.top = `${Math.min(top, Math.max(0, content.clientHeight - tooltip.offsetHeight - 8))}px`;
+    }
+
+    slices.forEach(slice => {
+      slice.addEventListener("pointerenter", event => {
+        showTooltip(slice, event.clientX, event.clientY);
+      });
+      slice.addEventListener("pointermove", event => {
+        showTooltip(slice, event.clientX, event.clientY);
+      });
+      slice.addEventListener("pointerleave", () => {
+        tooltip.hidden = true;
+      });
+      slice.addEventListener("focus", () => {
+        const bounds = slice.getBoundingClientRect();
+        showTooltip(slice, bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
+      });
+      slice.addEventListener("blur", () => {
+        tooltip.hidden = true;
+      });
+    });
   }
 
   function _groupItems(items, otherLabel, unitLabel, formatValue) {
@@ -121,5 +172,5 @@ const CompositionPieChart = (() => {
     })[character]);
   }
 
-  return { render };
+  return { render, bind };
 })();
