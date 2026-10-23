@@ -2,56 +2,79 @@ Care in Action — project file map
 ================================
 
 For quick start instructions, see README.md.
-For a beginner-friendly overview of the project architecture and flow, see
-PROJECT_REFERENCE.md.
+For architecture and calculation details, see PROJECT_REFERENCE.md.
+For end-user instructions, see USER_GUIDE.md.
 
-Repository files
-----------------
+Repository root
+---------------
+.gitignore
+  Repository ignore rules for local environment files, editor artifacts, and
+  non-source files that should not be committed.
+
+.vscode/
+  Workspace settings and editor configuration for local development.
+
 README.md
-  Main project overview, purpose, usage guidance, data-source notes, and local run
-  instructions.
+  Project overview, purpose, local run instructions, source notes, licensing
+  caveats, and usage guidance.
 
 PROJECT_REFERENCE.md
-  Beginner-friendly technical reference covering architecture, state flow,
-  validation, calculation logic, and export behavior.
+  Technical reference covering architecture, state flow, validation rules,
+  calculation logic, and export behavior.
+
+USER_GUIDE.md
+  Step-by-step instructions for completing an impact report and interpreting
+  the estimate.
+
+Care_in_Action_User_Guide.pdf
+  Exported PDF version of the user guide for distribution or offline use.
 
 index.html
-  Application shell, shared header/footer, stylesheet link, and ordered script
-  loading for the browser app.
+  Browser application shell, shared header/footer, CSS link, and ordered script
+  loading for the app.
+
+plans4nxt.txt
+  Working notes and future enhancement ideas for continued project iteration.
 
 assets/
   cie-logo.png — primary app branding/logo.
   TXACC-logo.png — Texas Association of Charitable Clinics branding.
-  thrc-logo.jpg — Translational Health Research Center branding.
+  thrc-logo.png — Translational Health Research Center branding.
 
 css/
   styles.css — design tokens, layout, accessibility styling, responsive rules,
   and print-ready presentation.
 
 js/
-  app.js — in-memory state, wizard navigation, validation gates, and startup.
-  calculator.js — pure impact calculation engine and summary shaping.
-  content.js — UI copy, validation messages, labels, and report text.
-  data.js — benchmark rates, service catalogs, source metadata, and references.
-  utils.js — formatting helpers, validation rules, and small DOM utilities.
+  app.js — in-memory state, wizard navigation, validation logic, and startup.
+  calculator.js — pure impact calculation engine and result shaping.
+  content.js — UI labels, validation messages, report copy, and source text.
+  data.js — embedded benchmark rates, service catalogs, and metadata.
+  utils.js — formatting helpers, validation rules, DOM utilities, and shared
+  support functions.
 
   components/
-    EntryList.js — reusable add/remove input rows for activity entries.
-    NavigationButtons.js — shared Back/Next actions used across the flow.
-    ProgressIndicator.js — the five-step progress indicator UI.
+    CompositionPieChart.js — reusable chart component for quantity-share views.
+    EntryList.js — row-based form builder for repeated activity entries.
+    NavigationButtons.js — shared Back/Next actions across the workflow.
+    ProgressIndicator.js — five-step progress indicator UI.
 
   services/
-    exportService.js — print/PDF and XLSX export logic.
+    exportService.js — PDF and Excel export logic.
 
   views/
-    WelcomeView.js — intro screen and privacy/context messaging.
-    ClinicInformationView.js — clinic details, reporting period, and optional costs.
-    ImpactMethodView.js — selection between volunteer and service-based methods.
-    ImpactActivityView.js — entry form for aggregate totals.
-    ImpactSummaryView.js — final estimate, methodology, references, and exports.
+    WelcomeView.js — intro and onboarding screen.
+    ClinicInformationView.js — clinic metadata, dates, and cost input form.
+    ImpactMethodView.js — method selection between volunteer and service-based
+      reporting.
+    ImpactActivityView.js — aggregate totals entry form and validation rules.
+    ImpactSummaryView.js — estimate display, references, optional cost comparison,
+      suggested impact statement, and export actions.
 
-plans4nxt.txt
-  Working notes and planning material for future improvements or feature work.
-
-No build configuration or package manifest is present. See README.md for running
-the app locally in a browser.
+Project notes
+-------------
+- No build configuration or package manifest is present.
+- The app runs directly in the browser; either open index.html in a browser or
+  run "python3 -m http.server 8000" from the project root.
+- The project uses embedded data and browser-based export features rather than a
+  server-side application or build pipeline.
