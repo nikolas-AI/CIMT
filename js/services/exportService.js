@@ -743,7 +743,6 @@ const ExportService = (() => {
   .value-track { height: 7px; overflow: hidden; background: #DDE7DF; border-radius: 999px; }
   .value-track span { display: block; height: 100%; background: var(--teal); border-radius: inherit; }
   .composition-pie { margin-bottom: 36px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--border); break-inside: avoid; page-break-inside: avoid; }
-  .composition-pie .summary-section__heading { color: var(--navy); font-size: 14px; }
   .composition-pie .summary-section__intro { margin-bottom: 14px; }
   .composition-pie__content { display: grid; grid-template-columns: minmax(160px, .9fr) minmax(0, 1.1fr); align-items: center; gap: 24px; }
   .composition-pie__chart { display: block; width: min(100%, 270px); height: auto; margin: 0 auto; overflow: visible; }

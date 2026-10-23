@@ -1528,11 +1528,6 @@ body {
   background: var(--color-surface);
 }
 
-.composition-pie .summary-section__heading {
-  color: var(--color-navy);
-  font-size: var(--text-lg);
-}
-
 .composition-pie .summary-section__intro {
   margin-bottom: var(--space-5);
 }

@@ -65,7 +65,7 @@ const WelcomeView = (() => {
           <path d="M12 3 2.8 20h18.4L12 3Z" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.8"/>
           <path d="M12 9v5m0 3h.01" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"/>
         </svg>
-        <p><strong>Your entered data is not saved.</strong> Refreshing or closing this page will erase it.</p>
+        <p><strong>This website doesn’t save your data.</strong> If you refresh or close your browser, your information will be lost. Download or copy your final report before you leave or refresh the page.</p>
       </div>
     `);
     view.appendChild(nav);
