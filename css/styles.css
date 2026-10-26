@@ -1838,8 +1838,8 @@ body {
     justify-self: center;
   }
   .footer-partner-logo--txacc {
-    width: 76px;
-    height: 48px;
+    width: calc(110px * 0.6); /* 66px */
+    height: calc(64px * 0.6); /* about 38px */
     justify-self: center;
   }
   .footer-meta {
