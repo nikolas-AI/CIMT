@@ -1828,7 +1828,7 @@ body {
     padding: var(--space-6) var(--space-4);
   }
   .footer-branding {
-    grid-template-columns: 48px minmax(0, max-content) 76px;
+    grid-template-columns: calc(120px * 0.6) minmax(0, max-content) calc(110px * 0.6);
     gap: var(--space-3);
     justify-content: center;
   }
