@@ -1833,7 +1833,7 @@ body {
     justify-content: center;
   }
   .footer-partner-logo--thrc {
-    width: 48px;
+    width: calc(120px * 0.6); /* 72px */
     height: auto;
     justify-self: center;
   }
