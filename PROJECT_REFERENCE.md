@@ -24,7 +24,7 @@ The tool guides the user through a five-step flow:
 1. Welcome
 2. Clinic information
 3. Method selection
-4. Activity entry
+4. Activity entry, entered manually or imported from a CSV/TXT file
 5. Impact summary
 
 The user picks one calculation method for the report:
@@ -222,6 +222,14 @@ counts by service type. These are quantity distributions, separate from the
 existing estimated-value bar charts. Charts show up to seven roles or services
 individually and combine the rest as “Other.” When at least two entries are
 below 3% each, those small entries are combined as “Other” as well.
+
+### `js/services/batchImportService.js`
+
+This service supports the optional file-import path on the activity screen. It
+generates templates and catalog references from the live catalogs, validates
+CSV/TXT rows, and combines duplicate IDs. Imported data stays in page memory
+and is adapted into the same volunteer/service state used by manual entry
+before the existing calculator and summary are run.
 
 ---
 

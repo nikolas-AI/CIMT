@@ -72,6 +72,39 @@ browser window; allow pop-ups and use the browser's print dialog to save as PDF.
 
 Make sure `TESTING_DEFAULTS_ENABLED` is false before you use the tool. 
 
+## Batch activity import
+
+On the activity-entry screen, choose “Upload a CSV or TXT file” instead of
+entering rows manually. The import uses the clinic details and reporting period
+already entered in the same report; it is not a separate page and does not
+transfer data between pages. For local hosting, run
+`python3 -m http.server 8000` from the repository root and visit
+<http://localhost:8000>.
+
+Choose either volunteer hours or clinical services, then download the matching
+CSV template and live catalog ID/name reference. Templates contain current
+catalog IDs and zero-valued quantities; replace or remove unused rows before
+import. CSV headers are case-insensitive, surrounding whitespace is trimmed,
+and TXT files must be tab-separated. Exactly the method’s two expected columns
+are accepted. Quoted CSV fields, escaped quotes, UTF-8 BOM, blank lines, and
+CRLF/LF line endings are supported. Uploads are limited to 5 MB and 10,000
+nonblank data rows.
+
+Every source row is validated before calculation. Duplicate IDs are combined
+by summing their quantities and the preview shows the number of combined rows.
+Any invalid row blocks report generation; replace the file to correct it.
+Import data is held in page memory only, is not uploaded or persisted, and is
+cleared on reset or page reload. Upload aggregate activity only—not patient
+names or other patient-level information. PDF export uses the browser print
+dialog and Excel export loads the same pinned XLSX library as the manual tool;
+the page’s fonts and XLSX library still require their existing CDN access.
+
+Parser and calculator-adapter tests can be run with:
+
+```sh
+node --test tests/batch-import.test.js
+```
+
 ## Using the estimator
 
 - Choose the method that matches the activity you want to report.

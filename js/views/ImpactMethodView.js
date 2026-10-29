@@ -67,6 +67,9 @@ const ImpactMethodView = (() => {
       state.volunteers = [];
     }
     state.impactMethod = method;
+    state.activityEntryMode = "manual";
+    state.batchImportReview = null;
+    state.batchImportConfirmed = false;
     state.impact = null;
     return true;
   }

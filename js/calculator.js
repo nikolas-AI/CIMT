@@ -156,7 +156,8 @@ const Calculator = (() => {
       .map(entry => {
         const svc   = CLINICAL_SERVICES.find(s => s.id === entry.serviceId);
         if (!svc) return null;
-        const count = parseInt(entry.count, 10) || 0;
+        const parsedCount = Number(entry.count);
+        const count = Number.isFinite(parsedCount) ? parsedCount : 0;
         return {
           serviceId:      svc.id,
           serviceDescription: svc.description,

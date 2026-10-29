@@ -69,6 +69,11 @@
     /** @type {Array<{ id: string, serviceId: string, count: number }>} */
     services: TESTING_DEFAULTS_ENABLED ? TESTING_DEFAULTS.services.map(entry => ({ ...entry })) : [],
 
+    /** @type {"manual"|"batch"} */
+    activityEntryMode: "manual",
+    batchImportReview: null,
+    batchImportConfirmed: false,
+
     /** @type {ImpactSummary|null} */
     impact: null,
 
@@ -105,6 +110,11 @@
       return;
     }
 
+    if (step >= 4) {
+      _applyBatchImport();
+      state.impact = Calculator.computeImpact(state);
+    }
+
     goTo(step);
   }
 
@@ -120,6 +130,9 @@
     state.impactMethod = null;
     state.volunteers = [];
     state.services = [];
+    state.activityEntryMode = "manual";
+    state.batchImportReview = null;
+    state.batchImportConfirmed = false;
     state.impact = null;
     goTo(0);
   }
@@ -184,6 +197,12 @@
   }
 
   function _activityDetailsComplete() {
+    if (state.activityEntryMode === "batch") {
+      return Boolean(state.batchImportReview &&
+        state.batchImportReview.valid &&
+        state.batchImportConfirmed);
+    }
+
     const volunteersValid = state.volunteers.every(entry =>
       entry.roleId && Number.isFinite(Number(entry.hours)) && Number(entry.hours) >= 0 &&
       Number.isInteger(Number(entry.hours) * 2)
@@ -204,6 +223,25 @@
     return _activityDetailsComplete();
   }
 
+  function _applyBatchImport() {
+    if (state.activityEntryMode !== "batch" || !state.batchImportReview) return;
+    if (state.impactMethod === "volunteerHours") {
+      state.volunteers = state.batchImportReview.entries.map((entry, index) => ({
+        id: `batch-volunteer-${index + 1}`,
+        roleId: entry.id,
+        hours: entry.quantity,
+      }));
+      state.services = [];
+    } else {
+      state.services = state.batchImportReview.entries.map((entry, index) => ({
+        id: `batch-service-${index + 1}`,
+        serviceId: entry.id,
+        count: entry.quantity,
+      }));
+      state.volunteers = [];
+    }
+  }
+
   // -----------------------------------------------------------------
   // IMPACT COMPUTATION
   // Called when the user clicks "See Impact" on View 4.
@@ -216,6 +254,7 @@
       ProgressIndicator.showWarning(AppCopy.validation.impactActivityRequired);
       return;
     }
+    _applyBatchImport();
     state.impact = Calculator.computeImpact(state);
     advance();
   }
