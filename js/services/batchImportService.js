@@ -168,6 +168,53 @@ const BatchImportService = (() => {
     return _result(fileName, method, dataRecords.length, entries, errors, totalQuantity);
   }
 
+  function parseXlsx(arrayBuffer, fileName, method) {
+    if (typeof XLSX === "undefined") {
+      return _result(fileName, method, 0, [], [
+        "Excel import is unavailable because the spreadsheet library did not load. Check your internet connection, then reload the page.",
+      ]);
+    }
+
+    try {
+      const workbook = XLSX.read(arrayBuffer, { type: "array", cellDates: false });
+      const firstSheetName = workbook.SheetNames && workbook.SheetNames[0];
+      if (!firstSheetName || !workbook.Sheets[firstSheetName]) {
+        return _result(fileName, method, 0, [], ["This Excel workbook does not contain a worksheet to import."]);
+      }
+
+      const sheet = workbook.Sheets[firstSheetName];
+      const formulaCell = Object.keys(sheet).find(address =>
+        !address.startsWith("!") && sheet[address] && sheet[address].f
+      );
+      if (formulaCell) {
+        return _result(fileName, method, 0, [], [
+          `Worksheet "${firstSheetName}" contains a formula in cell ${formulaCell}. Replace formulas with their saved values before uploading.`,
+        ]);
+      }
+
+      const rows = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        raw: true,
+        defval: "",
+        blankrows: true,
+      });
+      if (!rows.length) {
+        return _result(fileName, method, 0, [], ["The first worksheet is empty. Add a header and at least one activity row."]);
+      }
+
+      const csv = rows
+        .map(row => Array.from(row, value => _csvCell(value instanceof Date ? value.toISOString() : value)).join(","))
+        .join("\r\n");
+      const result = parse(csv, "uploaded-workbook.csv", method);
+      result.fileName = String(fileName || "");
+      return result;
+    } catch (error) {
+      return _result(fileName, method, 0, [], [
+        `This Excel workbook could not be read. Make sure it is a valid .xlsx file: ${error.message || "unknown workbook error"}`,
+      ]);
+    }
+  }
+
   function toCalculatorState(clinic, method, entries) {
     if (!METHODS[method]) throw new Error("Choose a valid calculation method.");
     const state = {
@@ -325,6 +372,7 @@ const BatchImportService = (() => {
     createTemplate,
     createReferenceCSV,
     parse,
+    parseXlsx,
     toCalculatorState,
   };
 })();

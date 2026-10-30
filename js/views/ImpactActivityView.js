@@ -31,7 +31,7 @@ const ImpactActivityView = (() => {
         <label class="activity-entry-mode__option">
           <input type="radio" name="activity-entry-mode" value="batch" ${state.activityEntryMode === "batch" ? "checked" : ""}>
           <span class="activity-entry-mode__copy">
-            <strong>Upload a CSV or TXT file</strong>
+            <strong>Upload a CSV, Excel, or TXT file</strong>
             <span>Import and review multiple activity totals at once.</span>
           </span>
         </label>
@@ -111,33 +111,62 @@ const ImpactActivityView = (() => {
     downloads.append(templateLink, referenceLink);
     const downloadHeading = document.createElement("h3");
     downloadHeading.className = "batch-import-subheading";
-    downloadHeading.textContent = "Start with the right file";
+    downloadHeading.textContent = "Get your files";
     panel.append(downloadHeading);
     panel.append(downloads);
 
     const limits = BatchImportService.getLimits();
     const formatDetails = document.createElement("div");
     formatDetails.className = "batch-import-format";
-    const formatHeading = document.createElement("strong");
-    formatHeading.textContent = "File requirements";
-    const formatCopy = document.createElement("p");
-    formatCopy.textContent = `Use the ${isVolunteerMethod ? "role_id, hours" : "service_id, count"} headers. CSV headers are case-insensitive; TXT files use tab separators.`;
+    const formatHeading = document.createElement("h3");
+    formatHeading.textContent = "Before you upload";
     const requirements = document.createElement("ul");
     [
-      `CSV or tab-separated TXT · up to ${limits.maxFileBytes / (1024 * 1024)} MB`,
-      `${limits.maxDataRows.toLocaleString("en-US")} nonblank rows maximum`,
-      "Repeated IDs are combined by adding their quantities",
+      `Upload a CSV, tab-separated TXT, or .xlsx workbook (up to ${limits.maxFileBytes / (1024 * 1024)} MB).`,
+      `Your file can contain up to ${limits.maxDataRows.toLocaleString("en-US")} activity rows.`,
+      `Keep these two column headers: ${isVolunteerMethod ? "role_id and hours" : "service_id and count"}.`,
+      "For Excel, the first worksheet is used; replace formulas with saved values.",
     ].forEach(text => {
       const item = document.createElement("li");
       item.textContent = text;
       requirements.append(item);
     });
-    formatDetails.append(formatHeading, formatCopy, requirements);
+    formatDetails.append(formatHeading, requirements);
     panel.append(formatDetails);
+
+    const guide = document.createElement("div");
+    guide.className = "batch-import-guide";
+    guide.append(
+      _createGuideDisclosure("How do I use the template?", [
+        `Use the ${isVolunteerMethod ? "volunteer-hours" : "clinical-services"} template for the method selected above.`,
+        `Keep the headers ${isVolunteerMethod ? "role_id and hours" : "service_id and count"} unchanged. Header capitalization and extra surrounding spaces are okay.`,
+        `Use the catalog ID from the reference file in the first column. Do not enter a role or service name, or a CPT/HCPCS code, in place of that ID.`,
+        isVolunteerMethod
+          ? "Enter hours in half-hour steps, such as 8 or 8.5."
+          : "Enter service counts as whole numbers, such as 8.",
+        "Remove rows you do not need, or leave their quantity at 0. Make sure at least one row has a quantity greater than 0.",
+      ]),
+      _createGuideDisclosure("What files and data can I upload?", [
+        "Upload a .csv file, a .txt file with columns separated by tabs, or an .xlsx Excel workbook.",
+        "For an Excel workbook, only the first worksheet is read. Other worksheets are ignored.",
+        "Replace formulas in the first worksheet with their saved values before uploading. The tool does not recalculate formulas.",
+        "PDFs, Word documents, and older .xls workbooks are not accepted.",
+        "Upload totals for one clinic, one reporting period, and the selected method only.",
+        "Do not include patient names, medical records, or other patient-level information.",
+      ]),
+      _createGuideDisclosure("What happens after I upload?", [
+        "The tool checks every row and matches catalog IDs exactly. It does not guess which role or service a name means.",
+        "Repeated IDs are combined by adding their quantities. The preview shows the combined totals.",
+        "If a row has an error, the tool will explain what to fix. You must correct the file and upload it again; partial reports are not generated.",
+        "Review the preview and confirm the totals before continuing. You can choose a new file to replace this import.",
+        "The report is an estimate based on benchmark rates, not revenue, reimbursement, confirmed savings, or patient outcomes.",
+      ])
+    );
+    panel.append(guide);
 
     const uploadHeading = document.createElement("h3");
     uploadHeading.className = "batch-import-subheading";
-    uploadHeading.textContent = "Upload your activity file";
+    uploadHeading.textContent = "Upload your file";
     panel.append(uploadHeading);
     const label = document.createElement("label");
     label.className = "batch-import-upload";
@@ -151,13 +180,13 @@ const ImpactActivityView = (() => {
     const uploadTitle = document.createElement("strong");
     uploadTitle.textContent = "Choose a file to upload";
     const uploadDescription = document.createElement("span");
-    uploadDescription.textContent = "CSV or tab-separated TXT";
+    uploadDescription.textContent = "CSV, tab-separated TXT, or XLSX";
     uploadCopy.append(uploadTitle, uploadDescription);
     const fileInput = document.createElement("input");
     fileInput.type = "file";
     fileInput.id = "batch-activity-file";
     fileInput.className = "batch-import-file";
-    fileInput.accept = ".csv,.txt,text/csv,text/plain";
+    fileInput.accept = ".csv,.txt,.xlsx,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
     fileInput.setAttribute("aria-describedby", "batch-activity-file-help");
     fileInput.addEventListener("change", () => _handleImportFile(fileInput, state));
     label.append(uploadIcon, uploadCopy, fileInput);
@@ -175,6 +204,21 @@ const ImpactActivityView = (() => {
     panel.append(preview);
     _renderImportPreview(preview, state);
     return panel;
+  }
+
+  function _createGuideDisclosure(title, instructions) {
+    const details = document.createElement("details");
+    details.className = "batch-import-guide__item";
+    const summary = document.createElement("summary");
+    summary.textContent = title;
+    const list = document.createElement("ul");
+    instructions.forEach(instruction => {
+      const item = document.createElement("li");
+      item.textContent = instruction;
+      list.append(item);
+    });
+    details.append(summary, list);
+    return details;
   }
 
   async function _handleImportFile(input, state) {
@@ -215,10 +259,20 @@ const ImpactActivityView = (() => {
     }
 
     try {
-      const contents = await file.text();
       if (version !== _uploadVersion || method !== state.impactMethod ||
           state.activityEntryMode !== "batch") return;
-      state.batchImportReview = BatchImportService.parse(contents, file.name, method);
+      const extension = file.name.toLowerCase().split(".").pop();
+      if (extension === "xlsx") {
+        const contents = await file.arrayBuffer();
+        if (version !== _uploadVersion || method !== state.impactMethod ||
+            state.activityEntryMode !== "batch") return;
+        state.batchImportReview = BatchImportService.parseXlsx(contents, file.name, method);
+      } else {
+        const contents = await file.text();
+        if (version !== _uploadVersion || method !== state.impactMethod ||
+            state.activityEntryMode !== "batch") return;
+        state.batchImportReview = BatchImportService.parse(contents, file.name, method);
+      }
     } catch (error) {
       if (version !== _uploadVersion || method !== state.impactMethod ||
           state.activityEntryMode !== "batch") return;

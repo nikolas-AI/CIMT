@@ -82,13 +82,17 @@ transfer data between pages. For local hosting, run
 <http://localhost:8000>.
 
 Choose either volunteer hours or clinical services, then download the matching
-CSV template and live catalog ID/name reference. Templates contain current
-catalog IDs and zero-valued quantities; replace or remove unused rows before
-import. CSV headers are case-insensitive, surrounding whitespace is trimmed,
-and TXT files must be tab-separated. Exactly the method’s two expected columns
-are accepted. Quoted CSV fields, escaped quotes, UTF-8 BOM, blank lines, and
-CRLF/LF line endings are supported. Uploads are limited to 5 MB and 10,000
-nonblank data rows.
+CSV template and live catalog ID/name reference. Use the catalog ID in the
+template—not the display name or CPT/HCPCS code. Keep the two method-specific
+column headers; header capitalization and surrounding whitespace do not matter.
+Remove unused rows or leave their quantities at zero, and include at least one
+positive total. Volunteer hours must use half-hour increments; service counts
+must be whole numbers. TXT uploads must use tabs between columns. `.xlsx`
+workbooks are supported; only the first worksheet is read, and formulas must
+be replaced with saved values. Older `.xls` workbooks and PDFs are not
+supported. Uploads are limited to 5 MB and 10,000 nonblank activity rows. The
+import panel has expandable instructions for filling the template, accepted
+files, and what happens during review.
 
 Every source row is validated before calculation. Duplicate IDs are combined
 by summing their quantities and the preview shows the number of combined rows.

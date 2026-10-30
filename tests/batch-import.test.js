@@ -82,6 +82,61 @@ test("parses tab-separated service TXT and adapts imported entries to calculator
   );
 });
 
+test("parses the first worksheet of an XLSX workbook through the same validations", () => {
+  const firstSheet = { A1: { v: "role_id" }, B1: { v: "hours" } };
+  const secondSheet = { A1: { v: "not-used" } };
+  const workbook = {
+    SheetNames: ["Activity", "Other"],
+    Sheets: { Activity: firstSheet, Other: secondSheet },
+  };
+  let readOptions;
+  context.XLSX = {
+    read: (contents, options) => {
+      assert.equal(contents.byteLength, 4);
+      readOptions = options;
+      return workbook;
+    },
+    utils: {
+      sheet_to_json: (sheet, options) => {
+        assert.equal(sheet, firstSheet);
+        assert.equal(options.header, 1);
+        assert.equal(options.raw, true);
+        return [
+          ["ROLE_ID", "hours"],
+          ["general-volunteer", 2.5],
+          ["general-volunteer", 1],
+        ];
+      },
+    },
+  };
+
+  const result = service.parseXlsx(new ArrayBuffer(4), "clinic.xlsx", "volunteerHours");
+  assert.equal(readOptions.type, "array");
+  assert.equal(result.fileName, "clinic.xlsx");
+  assert.equal(result.valid, true);
+  assert.equal(result.sourceRowCount, 2);
+  assert.equal(result.entries[0].quantity, 3.5);
+  assert.equal(result.duplicateRowsCombined, 1);
+});
+
+test("rejects formulas and reports unavailable spreadsheet support clearly", () => {
+  context.XLSX = {
+    read: () => ({
+      SheetNames: ["Activity"],
+      Sheets: { Activity: { A1: { v: "role_id" }, B1: { v: "hours" }, B2: { f: "1+2", v: 3 } } },
+    }),
+    utils: { sheet_to_json: () => assert.fail("Formula workbook must not be converted") },
+  };
+  const formulaResult = service.parseXlsx(new ArrayBuffer(1), "formula.xlsx", "volunteerHours");
+  assert.equal(formulaResult.valid, false);
+  assert.match(formulaResult.errors[0], /cell B2.*Replace formulas/i);
+
+  context.XLSX = undefined;
+  const unavailable = service.parseXlsx(new ArrayBuffer(1), "clinic.xlsx", "clinicalServices");
+  assert.equal(unavailable.valid, false);
+  assert.match(unavailable.errors[0], /spreadsheet library did not load/i);
+});
+
 test("generates templates from the active live catalogs", () => {
   for (const [method, header, sampleId] of [
     ["volunteerHours", "role_id", "general-volunteer"],

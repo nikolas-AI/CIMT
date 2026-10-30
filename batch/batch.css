@@ -74,15 +74,13 @@
 .batch-import-panel {
   --batch-ink: #17383B;
   --batch-muted: #5D6C6C;
-  --batch-line: #DCE5E1;
+  --batch-line: var(--color-border);
   margin: var(--space-6) 0 var(--space-8);
   padding: clamp(1.25rem, 3.5vw, 2.5rem);
-  border: 1px solid var(--batch-line);
-  border-radius: 18px;
-  background:
-    radial-gradient(ellipse at 100% 0%, rgba(220, 236, 228, 0.62), transparent 38%),
-    linear-gradient(145deg, #FFFFFF 0%, #FBFCF9 60%, #F7FAF6 100%);
-  box-shadow: 0 16px 42px rgba(27, 55, 51, 0.09), 0 2px 6px rgba(27, 55, 51, 0.04);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
 }
 
 .batch-import-panel__header {
@@ -99,12 +97,11 @@
 }
 
 .batch-import-panel h2 {
-  margin-bottom: var(--space-2);
-  color: var(--batch-ink);
+  margin-bottom: var(--space-3);
+  color: var(--color-navy);
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 3.5vw, 2.3rem);
-  font-weight: 400;
-  line-height: 1.15;
+  font-size: 1.5rem;
+  line-height: 1.25;
 }
 
 .batch-import-panel__intro {
@@ -202,21 +199,71 @@
   line-height: 1.55;
 }
 
-.batch-import-format > strong {
+.batch-import-format h3 {
   display: block;
   margin-bottom: var(--space-1);
   color: var(--batch-ink);
   font-size: var(--text-sm);
 }
 
-.batch-import-format p { margin-bottom: var(--space-2); }
-
 .batch-import-format ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-5);
+  display: grid;
+  gap: var(--space-1);
   margin: 0;
   padding-left: 1.1rem;
+}
+
+.batch-import-guide {
+  margin: var(--space-4) 0 var(--space-6);
+  border-top: 1px solid var(--batch-line);
+  border-bottom: 1px solid var(--batch-line);
+}
+
+.batch-import-guide__item {
+  border-bottom: 1px solid #E8ECE8;
+}
+
+.batch-import-guide__item:last-child { border-bottom: 0; }
+
+.batch-import-guide__item summary {
+  position: relative;
+  padding: var(--space-3) 2rem var(--space-3) 0;
+  color: var(--batch-ink);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.batch-import-guide__item summary::-webkit-details-marker { display: none; }
+
+.batch-import-guide__item summary::after {
+  position: absolute;
+  top: 50%;
+  right: 0.25rem;
+  color: var(--color-accent);
+  content: "+";
+  font-size: 1.2rem;
+  font-weight: 400;
+  transform: translateY(-50%);
+}
+
+.batch-import-guide__item[open] summary::after { content: "−"; }
+
+.batch-import-guide__item summary:focus-visible {
+  border-radius: 4px;
+  outline: 3px solid rgba(22, 109, 106, 0.35);
+  outline-offset: 2px;
+}
+
+.batch-import-guide__item ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0 2rem var(--space-4) 1.25rem;
+  color: var(--batch-muted);
+  font-size: var(--text-xs);
+  line-height: 1.6;
 }
 
 .batch-import-upload {
