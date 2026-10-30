@@ -49,9 +49,14 @@ Select one method for this report:
 
 A report uses one method at a time; it does not combine volunteer hours and clinical service counts. If you change methods after entering activity, the estimator warns that entries for the other method will be cleared.
 
-### 4. Enter activity totals
+### 4. Enter or import activity totals
 
-Use the search field to find each role or service, then enter its total for the reporting period. Use **Add another** to add a row and the row’s remove button to remove that row.
+Choose how to enter activity:
+
+- **Enter totals manually** — use the search field to find each role or service, then enter its total for the reporting period. Use **Add another** to add a row and the row’s remove button to remove a row.
+- **Upload a CSV, Excel, or TXT file** — use this when your activity totals are already in a spreadsheet or text file. The clinic details and reporting period you entered earlier are used in the report.
+
+#### Enter totals manually
 
 - For **volunteer hours**, enter total hours by role. Hours can be entered in half-hour increments, such as `12` or `12.5`.
 - For **clinical services**, enter the total number of each service provided. Counts must be whole numbers, such as `25`.
@@ -59,7 +64,27 @@ Use the search field to find each role or service, then enter its total for the 
 - Enter each role or service only once. Combine its activity into one total.
 - At least one activity entry must have a value greater than zero to create a summary.
 
-Select **See impact summary** when the entries are complete. If the estimator identifies an incomplete or invalid row, correct it before continuing.
+#### Import totals from a file
+
+1. Select the matching calculation method first: volunteer hours or clinical services.
+2. Select **Download CSV template** and **Download catalog ID reference**. The template shows the required columns and IDs; the reference pairs catalog IDs with role or service names.
+3. Fill in the template using the catalog ID from the reference. Do not substitute a role or service name, or a CPT/HCPCS code, for the ID. Keep the two column headers unchanged:
+   - Volunteer hours: `role_id` and `hours`
+   - Clinical services: `service_id` and `count`
+4. Remove rows you do not need, or leave their quantity as `0`. Include at least one positive total. Volunteer hours must use half-hour increments; service counts must be whole numbers.
+5. Upload the completed file. The tool checks the IDs and quantities, combines repeated IDs by adding their totals, and shows a preview. Review the preview and confirm the totals before continuing.
+
+Accepted file types are:
+
+- **CSV** (`.csv`)
+- **TXT** (`.txt`) with columns separated by tabs
+- **Excel workbook** (`.xlsx`), using only the first worksheet
+
+For Excel uploads, the first worksheet must contain the required headers and activity rows. The importer does not calculate spreadsheet formulas; formula cells in that worksheet are rejected. Replace formulas with their displayed values before uploading (in Excel, copy the cells and use **Paste Special → Values**). Older `.xls` workbooks, PDFs, and documents are not supported.
+
+Uploads may be up to **5 MB** and contain up to **10,000 nonblank activity rows**. If a row is invalid or an ID is not in the selected method’s catalog, the tool displays an error and will not generate a partial report. Correct the file and upload it again. Uploading another file replaces the previous import; it does not add to it.
+
+Select **See impact summary** once manual entries are complete, or once an imported file has no errors and you have confirmed its preview.
 
 ### 5. Review the impact summary
 
@@ -103,6 +128,9 @@ The estimator is designed to use aggregate totals and does not require patient-l
 - **A field shows an error:** Check the field’s message. Confirm required clinic details and dates are complete, and that the ZIP code, state abbreviation, and numbers are valid.
 - **The reporting period is rejected:** Make sure both dates are valid and the start date is not after the end date.
 - **An activity row is rejected:** Select a role or service and enter a non-negative number. Use half-hour increments for volunteer hours and whole numbers for service counts.
+- **An imported file has a header or ID error:** Use the template for the selected method, keep its two headers, and copy IDs from the matching catalog reference. Names and service codes are not accepted in place of catalog IDs.
+- **An Excel file is rejected:** Confirm it is an `.xlsx` workbook, check the first worksheet for the required headers, and replace any formulas with their saved values. Only the first worksheet is read.
+- **An upload exceeds the limit:** Keep the file at or below 5 MB and reduce it to 10,000 or fewer nonblank activity rows.
 - **You cannot see a summary:** Confirm that at least one activity total is greater than zero.
 - **The PDF window does not appear:** Allow pop-ups for the site, then select the PDF button again.
 - **The Excel download does not work:** The workbook library may not have loaded. Check your internet connection and try again.
