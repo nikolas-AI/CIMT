@@ -129,7 +129,7 @@ const ExportService = (() => {
       rows.push(["Clinical Services"]);
       clinicalHeaderRow = rows.length;
       rows.push(["Service", "Service Code", "Number Reported", "Reference Rate", "Estimated Value"]);
-      rows.push(...summary.serviceBreakdown.map(row => [
+      rows.push(...summary.serviceBreakdown.filter(row => row.count > 0).map(row => [
           row.serviceName, row.code, row.count, row.benchmarkRate, row.estimatedValue,
         ]));
       clinicalTotalRow = rows.length;
@@ -399,7 +399,7 @@ const ExportService = (() => {
       </div>
     `;
 
-    const svcRows = summary.serviceBreakdown.map(row => `
+    const svcRows = summary.serviceBreakdown.filter(row => row.count > 0).map(row => `
       <tr>
         <td>${_escapeHTML(row.serviceName)}</td>
         <td class="service-code">${_escapeHTML(row.code)}</td>
