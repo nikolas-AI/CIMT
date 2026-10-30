@@ -8,20 +8,23 @@
 
 const CompositionPieChart = (() => {
   const COLORS = [
-    "#087F8C",
-    "#B23A48",
-    "#E07A2D",
-    "#3A7D44",
-    "#5A55A3",
-    "#C18A00",
-    "#A33C82",
-    "#52616B",
+    "#428994", "#427E94", "#427394", "#426894", "#425E94",
+    "#4A99A5", "#4A8DA5", "#4A81A5", "#4A75A5", "#4A69A5",
+    "#56A7B3", "#569AB3", "#568EB3", "#5681B3", "#5675B3",
+    "#68B0BB", "#68A5BB", "#689ABB", "#688FBB", "#6883BB",
+    "#79B9C3", "#79AFC3", "#79A5C3", "#799CC3", "#7992C3",
+    "#8BC2CB", "#8BBACB", "#8BB1CB", "#8BA9CB", "#8BA0CB",
+    "#9CCBD3", "#9CC4D3", "#9CBDD3", "#9CB6D3", "#9CAFD3",
+    "#AED5DB", "#AECFDB", "#AEC9DB", "#AEC3DB", "#AEBDDB",
+    "#C0DEE3", "#C0D9E3", "#C0D5E3", "#C0D0E3", "#C0CBE3",
+    "#D1E7EA", "#D1E4EA", "#D1E0EA", "#D1DDEA", "#D1DAEA",
   ];
 
-  function render({ id, title, description, items, otherLabel, unitLabel, formatValue, hideLegendMetrics = false }) {
+  function render({ id, title, description, items, otherLabel, unitLabel, formatValue, hideLegendValues = false }) {
     const chartItems = _groupItems(items, otherLabel, unitLabel, formatValue);
     const total = chartItems.reduce((sum, item) => sum + item.value, 0);
     if (chartItems.length === 0 || total <= 0) return "";
+    const colorByItem = new Map(chartItems.map((item, index) => [item, _color(index)]));
 
     let angle = -90;
     const slices = chartItems.map((item, index) => {
@@ -32,17 +35,18 @@ const CompositionPieChart = (() => {
       const offsetX = (Math.cos(midpoint) * 5).toFixed(2);
       const offsetY = (Math.sin(midpoint) * 5).toFixed(2);
       const tooltip = `${item.label}: ${item.valueLabel} (${(item.value / total * 100).toFixed(1)}%)`;
+      const color = colorByItem.get(item);
 
       const shape = chartItems.length === 1
-        ? `<circle class="composition-pie__shape" cx="100" cy="100" r="94" fill="${COLORS[index % COLORS.length]}" />`
-        : `<path class="composition-pie__shape" d="${_slicePath(startAngle, endAngle)}" fill="${COLORS[index % COLORS.length]}" />`;
+        ? `<circle class="composition-pie__shape" cx="100" cy="100" r="94" fill="${color}" />`
+        : `<path class="composition-pie__shape" d="${_slicePath(startAngle, endAngle)}" fill="${color}" />`;
       const path = `
         <g class="composition-pie__slice" tabindex="0" role="img"
           aria-label="${_escape(tooltip)}" style="--slice-x: ${offsetX}px; --slice-y: ${offsetY}px">
           ${shape}
         </g>
       `;
-      return { item, index, percentage: item.value / total * 100, path };
+      return { item, index, color, percentage: item.value / total * 100, path };
     });
     const safeId = _escape(id);
     const totalText = formatValue(total);
@@ -56,19 +60,19 @@ const CompositionPieChart = (() => {
             aria-label="${_escape(title)}" aria-describedby="${safeId}-svg-desc">
             <desc id="${safeId}-svg-desc">${_escape(description)} Total: ${_escape(totalText)} ${_escape(unitLabel)}.</desc>
             ${slices.map(slice => slice.path).join("")}
-            <circle class="composition-pie__center" cx="100" cy="100" r="51" />
-            <text class="composition-pie__total" x="100" y="98" text-anchor="middle">${_escape(totalText)}</text>
-            <text class="composition-pie__total-label" x="100" y="117" text-anchor="middle">total ${_escape(unitLabel)}</text>
+            <circle class="composition-pie__center" cx="100" cy="100" r="36" />
+            <text class="composition-pie__total" x="100" y="97" text-anchor="middle">${_escape(totalText)}</text>
+            <text class="composition-pie__total-label" x="100" y="108" text-anchor="middle">total ${_escape(unitLabel)}</text>
           </svg>
           <ul class="composition-pie__legend">
             ${slices.map(slice => `
-              <li class="composition-pie__item${hideLegendMetrics ? " composition-pie__item--label-only" : ""}">
-                <span class="composition-pie__swatch" style="--pie-color: ${COLORS[slice.index % COLORS.length]}" aria-hidden="true"></span>
+              <li class="composition-pie__item${hideLegendValues ? " composition-pie__item--percentage-only" : ""}">
+                <span class="composition-pie__swatch" style="--pie-color: ${slice.color}" aria-hidden="true"></span>
                 <span class="composition-pie__label">${_escape(slice.item.label)}</span>
-                ${hideLegendMetrics ? "" : `
+                ${hideLegendValues ? "" : `
                   <span class="composition-pie__value">${_escape(slice.item.valueLabel)}</span>
-                  <strong class="composition-pie__share">${slice.percentage.toFixed(1)}%</strong>
                 `}
+                <strong class="composition-pie__share">${slice.percentage.toFixed(1)}%</strong>
               </li>
             `).join("")}
           </ul>
@@ -125,28 +129,36 @@ const CompositionPieChart = (() => {
       .slice()
       .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label));
     const total = rankedItems.reduce((sum, item) => sum + item.value, 0);
-    const smallItems = rankedItems.filter(item => item.value / total * 100 < 3);
-    const groupSmallItems = smallItems.length >= 2;
-    const namedItems = groupSmallItems
-      ? rankedItems.filter(item => item.value / total * 100 >= 3)
-      : rankedItems;
-    const visibleItems = namedItems.slice(0, 7);
-    const groupedItems = [
-      ...(groupSmallItems ? smallItems : []),
-      ...namedItems.slice(7),
-    ];
+    const groupedItems = [];
+    let groupedValue = 0;
+    let firstGroupedIndex = rankedItems.length;
 
-    if (groupedItems.length === 0) return visibleItems;
+    while (firstGroupedIndex > 1 && groupedValue < total * 0.1) {
+      const item = rankedItems[--firstGroupedIndex];
+      groupedItems.unshift(item);
+      groupedValue += item.value;
+    }
 
-    const otherValue = groupedItems.reduce((sum, item) => sum + item.value, 0);
+    if (groupedItems.length === 0) return rankedItems;
+
+    const otherValue = groupedValue;
     return [
-      ...visibleItems,
+      ...rankedItems.slice(0, firstGroupedIndex),
       {
         label: otherLabel,
         value: otherValue,
         valueLabel: `${formatValue(otherValue)} ${unitLabel}`,
       },
     ];
+  }
+
+  function _color(index) {
+    if (index < COLORS.length) return COLORS[index];
+    const extraIndex = index - COLORS.length;
+    const hue = 188 + (extraIndex % 33);
+    const saturation = [32, 38, 44][Math.floor(extraIndex / 33) % 3];
+    const lightness = [42, 50, 58, 66, 74][Math.floor(extraIndex / 99) % 5];
+    return `hsl(${hue.toFixed(1)}, ${saturation}%, ${lightness}%)`;
   }
 
   function _slicePath(startAngle, endAngle) {

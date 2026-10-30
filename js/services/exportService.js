@@ -576,7 +576,7 @@ const ExportService = (() => {
         otherLabel: "Other services",
         unitLabel: "services",
         formatValue: value => value.toLocaleString("en-US"),
-        hideLegendMetrics: true,
+        hideLegendValues: true,
         items: summary.serviceBreakdown.map(row => ({
           label: row.serviceDescription,
           value: row.count,
@@ -744,20 +744,20 @@ const ExportService = (() => {
   .value-track span { display: block; height: 100%; background: var(--teal); border-radius: inherit; }
   .composition-pie { margin-bottom: 36px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--border); break-inside: avoid; page-break-inside: avoid; }
   .composition-pie .summary-section__intro { margin-bottom: 14px; }
-  .composition-pie__content { display: grid; grid-template-columns: minmax(160px, .9fr) minmax(0, 1.1fr); align-items: center; gap: 24px; }
-  .composition-pie__chart { display: block; width: min(100%, 270px); height: auto; margin: 0 auto; overflow: visible; }
-  .composition-pie__slice { stroke: #fff; stroke-width: 1.5; stroke-linejoin: round; }
+  .composition-pie__content { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; }
+  .composition-pie__chart { display: block; width: min(100%, 440px); height: auto; margin: 0 auto; overflow: visible; }
+  .composition-pie__shape { stroke: #fff; stroke-width: .6px; stroke-linejoin: round; }
   .composition-pie__center { fill: #fff; stroke: rgba(22,50,56,.08); stroke-width: 1; }
-  .composition-pie__total { fill: var(--navy); font-size: 19px; font-weight: 700; }
-  .composition-pie__total-label { fill: var(--slate); font-size: 8px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
-  .composition-pie__legend { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
-  .composition-pie__item { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto auto; align-items: center; gap: 7px; padding: 6px 8px; border-bottom: 1px solid var(--border); background: transparent; font-size: 10px; }
-  .composition-pie__item--label-only { grid-template-columns: 10px minmax(0, 1fr); font-size: 8px; }
-  .composition-pie__swatch { width: 10px; height: 10px; border-radius: 50%; background: var(--pie-color); }
-  .composition-pie__label { overflow-wrap: anywhere; }
+  .composition-pie__total { fill: var(--navy); font-size: 12px; font-weight: 700; }
+  .composition-pie__total-label { fill: var(--slate); font-size: 6px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+  .composition-pie__legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 4px 6px; min-width: 0; margin: 0; padding: 0; list-style: none; }
+  .composition-pie__item { display: grid; grid-template-columns: 7px minmax(0, 1fr) auto auto; align-items: center; gap: 3px; min-width: 0; padding: 2px 0; background: transparent; font-size: 7px; }
+  .composition-pie__item--percentage-only { grid-template-columns: 8px minmax(0, 1fr) auto; }
+  .composition-pie__swatch { width: 7px; height: 7px; border-radius: 50%; background: var(--pie-color); }
+  .composition-pie__label { min-width: 0; overflow-wrap: anywhere; }
   .composition-pie__value, .composition-pie__share { color: var(--navy); white-space: nowrap; }
   .composition-pie__value { color: var(--slate); }
-  .composition-pie__share { min-width: 36px; text-align: center; font-size: 9px; font-weight: 700; }
+  .composition-pie__share { min-width: 24px; text-align: center; font-size: 6px; font-weight: 700; }
   table { width: 100%; margin: 8px 0 0; border-collapse: collapse; font-size: 10px; }
   thead { display: table-header-group; break-after: avoid; page-break-after: avoid; }
   tbody.table-opening, tbody.table-ending { break-inside: avoid; page-break-inside: avoid; }
@@ -780,11 +780,7 @@ const ExportService = (() => {
     .total { font-size: 40px; }
     .table-wrap { overflow-x: auto; }
     table { min-width: 620px; }
-    .composition-pie__content { grid-template-columns: 1fr; gap: 12px; }
-    .composition-pie__chart { width: min(100%, 220px); }
-    .composition-pie__item { grid-template-columns: 10px minmax(0, 1fr) auto; }
-    .composition-pie__value { grid-column: 2; }
-    .composition-pie__share { grid-column: 3; grid-row: 1 / span 2; }
+    .composition-pie__chart { width: min(100%, 360px); }
   }
   @media print {
     body { max-width: none; margin: 0; padding: 0; background: #fff; font-size: 10pt; }
