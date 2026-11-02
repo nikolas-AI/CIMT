@@ -545,7 +545,7 @@ const ExportService = (() => {
             ${topServices.map(row => {
               const width = Math.min(100, Math.max(0, row.estimatedValue / maximumServiceValue * 100));
               return `<div class="chart-row">
-                <div class="chart-row__label"><span>${_escapeHTML(row.serviceName)}</span><strong>${_fmt(row.estimatedValue)}</strong></div>
+                <div class="chart-row__label"><span>${_escapeHTML(row.serviceName)} (${row.count.toLocaleString("en-US")} counts)</span><strong>${_fmt(row.estimatedValue)}</strong></div>
                 <div class="value-track" aria-hidden="true"><span style="width:${width}%"></span></div>
               </div>`;
             }).join("")}

@@ -479,7 +479,7 @@ const ImpactSummaryView = (() => {
           return `
             <div class="service-value-chart__row">
               <div class="service-value-chart__label">
-                <span>${_escape(row.serviceName)}</span>
+                <span>${_escape(row.serviceName)} (${Formatting.number(row.count, 0)} counts)</span>
                 <strong>${Formatting.currency(row.estimatedValue)}</strong>
               </div>
               <div class="service-value-chart__track" aria-hidden="true">
