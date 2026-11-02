@@ -1532,6 +1532,25 @@ body {
   margin-bottom: var(--space-5);
 }
 
+.composition-pie .summary-section__heading {
+  color: var(--color-impact);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  border-bottom: 2px solid var(--color-impact);
+}
+
+.composition-pie__heading-total {
+  margin-top: var(--space-1);
+  color: var(--color-navy);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
 .composition-pie__content {
   position: relative;
   display: grid;
@@ -1598,12 +1617,6 @@ body {
   stroke-linejoin: round;
 }
 
-.composition-pie__center {
-  fill: #FFFFFF;
-  stroke: rgba(22, 50, 56, 0.08);
-  stroke-width: 1;
-}
-
 .composition-pie__total {
   fill: var(--color-navy);
   font-size: 12px;
@@ -1618,9 +1631,19 @@ body {
   text-transform: uppercase;
 }
 
+.composition-pie__heading-total {
+  display: block;
+  color: var(--color-navy);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
 .composition-pie__legend {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-1) var(--space-2);
   min-width: 0;
   margin: 0;

@@ -590,6 +590,7 @@ const ImpactSummaryView = (() => {
       otherLabel: "Other roles",
       unitLabel: "hours",
       formatValue: value => Formatting.number(value, 1),
+      totalInHeading: true,
       items: summary.volunteerBreakdown.map(row => ({
         label: row.roleName,
         value: row.hours,
@@ -606,7 +607,7 @@ const ImpactSummaryView = (() => {
       otherLabel: "Other services",
       unitLabel: "services",
       formatValue: value => Formatting.number(value, 0),
-      hideLegendValues: true,
+      totalInHeading: true,
       items: summary.serviceBreakdown.map(row => ({
         label: row.serviceDescription,
         value: row.count,

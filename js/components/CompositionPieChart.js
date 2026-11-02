@@ -8,19 +8,11 @@
 
 const CompositionPieChart = (() => {
   const COLORS = [
-    "#428994", "#427E94", "#427394", "#426894", "#425E94",
-    "#4A99A5", "#4A8DA5", "#4A81A5", "#4A75A5", "#4A69A5",
-    "#56A7B3", "#569AB3", "#568EB3", "#5681B3", "#5675B3",
-    "#68B0BB", "#68A5BB", "#689ABB", "#688FBB", "#6883BB",
-    "#79B9C3", "#79AFC3", "#79A5C3", "#799CC3", "#7992C3",
-    "#8BC2CB", "#8BBACB", "#8BB1CB", "#8BA9CB", "#8BA0CB",
-    "#9CCBD3", "#9CC4D3", "#9CBDD3", "#9CB6D3", "#9CAFD3",
-    "#AED5DB", "#AECFDB", "#AEC9DB", "#AEC3DB", "#AEBDDB",
-    "#C0DEE3", "#C0D9E3", "#C0D5E3", "#C0D0E3", "#C0CBE3",
-    "#D1E7EA", "#D1E4EA", "#D1E0EA", "#D1DDEA", "#D1DAEA",
+    "#E69F00", "#56B4E9", "#009E73", "#B08A00",
+    "#0072B2", "#D55E00", "#CC79A7", "#4D4D4D",
   ];
 
-  function render({ id, title, description, items, otherLabel, unitLabel, formatValue, hideLegendValues = false }) {
+  function render({ id, title, description, items, otherLabel, unitLabel, formatValue, hideLegendValues = false, totalInHeading = false }) {
     const chartItems = _groupItems(items, otherLabel, unitLabel, formatValue);
     const total = chartItems.reduce((sum, item) => sum + item.value, 0);
     if (chartItems.length === 0 || total <= 0) return "";
@@ -53,16 +45,17 @@ const CompositionPieChart = (() => {
 
     return `
       <section class="summary-section composition-pie" aria-labelledby="${safeId}-heading">
-        <h2 class="summary-section__heading" id="${safeId}-heading">${_escape(title)}</h2>
+        <h2 class="summary-section__heading" id="${safeId}-heading">${_escape(title)}${totalInHeading ? `<span class="composition-pie__heading-total">${_escape(totalText)} ${_escape(unitLabel)}</span>` : ""}</h2>
         <p class="summary-section__intro">${_escape(description)}</p>
         <div class="composition-pie__content">
           <svg class="composition-pie__chart" viewBox="0 0 200 200" role="group"
             aria-label="${_escape(title)}" aria-describedby="${safeId}-svg-desc">
             <desc id="${safeId}-svg-desc">${_escape(description)} Total: ${_escape(totalText)} ${_escape(unitLabel)}.</desc>
             ${slices.map(slice => slice.path).join("")}
-            <circle class="composition-pie__center" cx="100" cy="100" r="36" />
-            <text class="composition-pie__total" x="100" y="97" text-anchor="middle">${_escape(totalText)}</text>
-            <text class="composition-pie__total-label" x="100" y="108" text-anchor="middle">total ${_escape(unitLabel)}</text>
+            ${totalInHeading ? "" : `
+              <text class="composition-pie__total" x="100" y="97" text-anchor="middle">${_escape(totalText)}</text>
+              <text class="composition-pie__total-label" x="100" y="108" text-anchor="middle">total ${_escape(unitLabel)}</text>
+            `}
           </svg>
           <ul class="composition-pie__legend">
             ${slices.map(slice => `
@@ -155,9 +148,9 @@ const CompositionPieChart = (() => {
   function _color(index) {
     if (index < COLORS.length) return COLORS[index];
     const extraIndex = index - COLORS.length;
-    const hue = 188 + (extraIndex % 33);
-    const saturation = [32, 38, 44][Math.floor(extraIndex / 33) % 3];
-    const lightness = [42, 50, 58, 66, 74][Math.floor(extraIndex / 99) % 5];
+    const hue = (extraIndex * 137.508 + 24) % 360;
+    const saturation = [62, 72, 82][Math.floor(extraIndex / 12) % 3];
+    const lightness = [40, 50, 60, 45][Math.floor(extraIndex / 36) % 4];
     return `hsl(${hue.toFixed(1)}, ${saturation}%, ${lightness}%)`;
   }
 

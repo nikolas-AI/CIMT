@@ -61,12 +61,53 @@ test("does not rename the only component as Other", () => {
   assert.deepEqual(labels, ["A"]);
 });
 
-test("renders a smaller center circle with reduced total and unit label", () => {
+test("renders a full pie with its total and unit label", () => {
   const { html } = renderLabels([["A", 100]]);
 
-  assert.match(html, /composition-pie__center" cx="100" cy="100" r="36"/);
+  assert.doesNotMatch(html, /composition-pie__center/);
   assert.match(html, /composition-pie__total" x="100" y="97"/);
   assert.match(html, /composition-pie__total-label" x="100" y="108"/);
+});
+
+test("puts the service total in the heading instead of the pie center", () => {
+  const { html } = renderLabels([["A", 125], ["B", 75]], {
+    title: "Clinical services by count",
+    unitLabel: "services",
+    formatValue: value => value.toLocaleString("en-US"),
+    totalInHeading: true,
+  });
+
+  assert.match(html, /composition-pie__heading-total">200 services/);
+  assert.doesNotMatch(html, /<text class="composition-pie__total"/);
+  assert.doesNotMatch(html, /<text class="composition-pie__total-label"/);
+});
+
+test("puts the volunteer hours total in the heading instead of the pie center", () => {
+  const { html } = renderLabels([["A", 12.5], ["B", 7.5]], {
+    title: "Volunteer hours by role",
+    unitLabel: "hours",
+    formatValue: value => value.toFixed(1),
+    totalInHeading: true,
+  });
+
+  assert.match(html, /composition-pie__heading-total">20\.0 hours/);
+  assert.doesNotMatch(html, /<text class="composition-pie__total"/);
+  assert.doesNotMatch(html, /<text class="composition-pie__total-label"/);
+});
+
+test("shows service counts alongside percentages in the legend", () => {
+  const { html } = renderLabels([["A", 75], ["B", 25]], {
+    unitLabel: "services",
+    items: [
+      { label: "A", value: 75, valueLabel: "75 services" },
+      { label: "B", value: 25, valueLabel: "25 services" },
+    ],
+  });
+
+  assert.match(html, /composition-pie__value">75 services/);
+  assert.match(html, /composition-pie__share">75\.0%/);
+  assert.match(html, /composition-pie__value">25 services/);
+  assert.match(html, /composition-pie__share">25\.0%/);
 });
 
 test("shows percentages in report legend when raw metrics are hidden", () => {
@@ -87,6 +128,16 @@ test("assigns distinct matching colors to 50 chart slices and legend items", () 
   assert.equal(sliceColors.length, 50);
   assert.equal(new Set(sliceColors).size, sliceColors.length);
   assert.deepEqual(legendColors, sliceColors);
+});
+
+test("starts with a distinct color-vision-friendly categorical palette", () => {
+  const { html } = renderLabels(Array.from({ length: 8 }, (_, index) => [`Component ${index + 1}`, 1]));
+  const sliceColors = Array.from(html.matchAll(/class="composition-pie__shape"[^>]*fill="([^"]+)"/g), match => match[1]);
+
+  assert.deepEqual(sliceColors, [
+    "#E69F00", "#56B4E9", "#009E73", "#B08A00",
+    "#0072B2", "#D55E00", "#CC79A7", "#4D4D4D",
+  ]);
 });
 
 test("keeps colors distinct when a chart has more than 50 slices", () => {
