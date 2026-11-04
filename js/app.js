@@ -17,7 +17,7 @@
   // All answers live here while the app is open. A view receives this object,
   // reads values from it when it is drawn, and writes new values back into it.
   // -----------------------------------------------------------------
-  // Set to false when the estimator is ready for normal blank starts.
+  // Keep false for normal blank starts; enable only for local testing.
   const TESTING_DEFAULTS_ENABLED = true;
   const TESTING_DEFAULTS = {
     clinic: {

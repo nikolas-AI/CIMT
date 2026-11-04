@@ -70,7 +70,9 @@ features need network access. If the XLSX library is unavailable, Excel export
 reports that it cannot prepare the download. PDF export opens a print-ready
 browser window; allow pop-ups and use the browser's print dialog to save as PDF.
 
-Make sure `TESTING_DEFAULTS_ENABLED` is false before you use the tool. 
+The app starts with a blank report. The sample clinic and activity values in
+`js/app.js` are for local testing only; enable `TESTING_DEFAULTS_ENABLED` there
+only when you want to load that sample data.
 
 ## Batch activity import
 

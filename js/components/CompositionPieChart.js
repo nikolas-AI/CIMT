@@ -8,15 +8,27 @@
 
 const CompositionPieChart = (() => {
   const COLORS = [
-    "#E69F00", "#56B4E9", "#009E73", "#B08A00",
-    "#0072B2", "#D55E00", "#CC79A7", "#4D4D4D",
+    "hsl(25, 52%, 73%)", "hsl(163, 48%, 73%)", "hsl(300, 54%, 73%)",
+    "hsl(78, 50%, 73%)", "hsl(215, 56%, 73%)", "hsl(353, 50%, 73%)",
+    "hsl(130, 54%, 73%)", "hsl(268, 48%, 73%)", "hsl(45, 56%, 73%)",
+    "hsl(183, 50%, 73%)", "hsl(320, 54%, 73%)", "hsl(98, 48%, 73%)",
+    "hsl(235, 52%, 73%)", "hsl(13, 56%, 73%)", "hsl(150, 50%, 73%)",
+    "hsl(288, 54%, 73%)", "hsl(65, 48%, 73%)", "hsl(203, 56%, 73%)",
+    "hsl(340, 50%, 73%)", "hsl(118, 54%, 73%)", "hsl(255, 48%, 73%)",
+    "hsl(33, 52%, 73%)", "hsl(170, 56%, 73%)", "hsl(308, 50%, 73%)",
+    "hsl(85, 54%, 73%)",
   ];
+  const OTHER_COLOR = "#B8B8B8";
 
   function render({ id, title, description, items, otherLabel, unitLabel, formatValue, hideLegendValues = false, totalInHeading = false }) {
     const chartItems = _groupItems(items, otherLabel, unitLabel, formatValue);
     const total = chartItems.reduce((sum, item) => sum + item.value, 0);
     if (chartItems.length === 0 || total <= 0) return "";
-    const colorByItem = new Map(chartItems.map((item, index) => [item, _color(index)]));
+    let colorIndex = 0;
+    const colorByItem = new Map(chartItems.map(item => [
+      item,
+      item.isOther ? OTHER_COLOR : _color(colorIndex++),
+    ]));
 
     let angle = -90;
     const slices = chartItems.map((item, index) => {
@@ -141,6 +153,7 @@ const CompositionPieChart = (() => {
         label: otherLabel,
         value: otherValue,
         valueLabel: `${formatValue(otherValue)} ${unitLabel}`,
+        isOther: true,
       },
     ];
   }
@@ -149,8 +162,8 @@ const CompositionPieChart = (() => {
     if (index < COLORS.length) return COLORS[index];
     const extraIndex = index - COLORS.length;
     const hue = (extraIndex * 137.508 + 24) % 360;
-    const saturation = [62, 72, 82][Math.floor(extraIndex / 12) % 3];
-    const lightness = [40, 50, 60, 45][Math.floor(extraIndex / 36) % 4];
+    const saturation = [38, 44, 50][Math.floor(extraIndex / 12) % 3];
+    const lightness = [68, 74, 80, 65][Math.floor(extraIndex / 36) % 4];
     return `hsl(${hue.toFixed(1)}, ${saturation}%, ${lightness}%)`;
   }
 

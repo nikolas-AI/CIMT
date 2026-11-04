@@ -42,6 +42,7 @@ test("groups the smallest components once their combined share reaches 10%", () 
 
   assert.deepEqual(labels, ["A", "B", "C", "Other"]);
   assert.match(html, /composition-pie__value">10 units</);
+  assert.match(html, /fill="#B8B8B8"/);
 });
 
 test("keeps all larger components visible when the smallest component crosses 10%", () => {
@@ -130,14 +131,22 @@ test("assigns distinct matching colors to 50 chart slices and legend items", () 
   assert.deepEqual(legendColors, sliceColors);
 });
 
-test("starts with a distinct color-vision-friendly categorical palette", () => {
-  const { html } = renderLabels(Array.from({ length: 8 }, (_, index) => [`Component ${index + 1}`, 1]));
+test("starts with 25 distinct, muted categorical colors", () => {
+  const { html } = renderLabels(Array.from({ length: 28 }, (_, index) => [`Component ${index + 1}`, 1]));
+  const sliceColors = Array.from(html.matchAll(/class="composition-pie__shape"[^>]*fill="([^"]+)"/g), match => match[1]);
+  const nonOtherColors = sliceColors.filter(color => color !== "#B8B8B8");
+
+  assert.equal(nonOtherColors.length, 25);
+  assert.equal(new Set(nonOtherColors).size, 25);
+  assert.ok(nonOtherColors.every(color => color.startsWith("hsl(")));
+});
+
+test("does not use gray for a single ordinary slice", () => {
+  const { html } = renderLabels([["Component 1", 1]]);
   const sliceColors = Array.from(html.matchAll(/class="composition-pie__shape"[^>]*fill="([^"]+)"/g), match => match[1]);
 
-  assert.deepEqual(sliceColors, [
-    "#E69F00", "#56B4E9", "#009E73", "#B08A00",
-    "#0072B2", "#D55E00", "#CC79A7", "#4D4D4D",
-  ]);
+  assert.equal(sliceColors.length, 1);
+  assert.ok(!sliceColors.includes("#B8B8B8"));
 });
 
 test("keeps colors distinct when a chart has more than 50 slices", () => {
@@ -147,4 +156,18 @@ test("keeps colors distinct when a chart has more than 50 slices", () => {
 
   assert.equal(sliceColors.length, 52);
   assert.equal(new Set(sliceColors).size, sliceColors.length);
+});
+
+test("reserves gray for the grouped Other slice", () => {
+  const { html } = renderLabels([
+    ["A", 50],
+    ["B", 25],
+    ["C", 15],
+    ["D", 7],
+    ["E", 3],
+  ]);
+  const slices = Array.from(html.matchAll(/class="composition-pie__shape"[^>]*fill="([^"]+)"/g), match => match[1]);
+
+  assert.equal(slices.filter(color => color === "#B8B8B8").length, 1);
+  assert.equal(slices.at(-1), "#B8B8B8");
 });
