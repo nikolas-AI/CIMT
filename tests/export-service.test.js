@@ -16,7 +16,9 @@ const context = vm.createContext({
   AppCopy: {
     exportCopy: { pdfTitle: "Impact report", workbookSummary: "Impact Summary" },
     summary: {
-      shortDisclaimer: () => "Estimated value is based on reference rates and reported service counts. This is a planning and communication estimate, not revenue, reimbursement, savings, financial ROI, or a measure of care quality.",
+      shortDisclaimer: method => method === "volunteerHours"
+        ? "Estimated value is based on reference rates and reported volunteer hours; it represents the replacement value of donated time. This is a planning and communication estimate, not revenue, reimbursement, savings, financial ROI, or a measure of care quality."
+        : "Estimated value is based on reference rates and reported service counts. This is a planning and communication estimate, not revenue, reimbursement, savings, financial ROI, or a measure of care quality.",
       funderReadyVolunteerStatement: () => "Volunteer impact statement",
       funderReadyTitle: "Funder-ready summary",
       costComparisonNote: "Compares reported clinic costs for this period with the estimated value of the activity entered; it is not actual financial ROI, revenue, reimbursement, profit, or confirmed healthcare savings.",
@@ -196,4 +198,75 @@ test("clinical services Excel export follows the requested order and has sortabl
   assert.ok(rows.some(row => row[0] === context.AppCopy.summary.costComparisonNote));
   assert.ok(rows.some(row => row[0] === "Reference Organization"));
   assert.equal(rows.at(-1)[0], context.AppCopy.summary.shortDisclaimer());
+});
+
+test("volunteer Excel export follows the requested order and shows dashes for empty categories", () => {
+  context.summary = {
+    impactMethod: "volunteerHours",
+    clinicName: "Test Clinic",
+    streetAddress: "1 Main Street",
+    city: "Austin",
+    state: "TX",
+    zipCode: "78701",
+    reportingPeriodFrom: "2026-01-01",
+    reportingPeriodTo: "2026-01-31",
+    reportingPeriodClinicCost: null,
+    valueToCostRatio: null,
+    volunteerValue: 100,
+    medicalProfessionalVolunteerValue: 0,
+    nonMedicalVolunteerValue: 100,
+    volunteerBreakdown: [
+      { roleName: "Unused Medical Role", category: "medical professional", hours: 0, benchmarkRate: 50, estimatedValue: 0 },
+      { roleName: "Active Non-Medical Role", category: "non medical", hours: 4, benchmarkRate: 25, estimatedValue: 100 },
+    ],
+  };
+
+  vm.runInContext("ExportService.downloadExcel(summary)", context, { timeout: 1000 });
+
+  const rows = Array.from(Object.entries(exportedSheet)
+    .filter(([cell]) => /^[A-F]\d+$/.test(cell))
+    .reduce((allRows, [cell, value]) => {
+      const [, column, row] = cell.match(/^([A-F])(\d+)$/);
+      (allRows[Number(row) - 1] ||= [])[column.charCodeAt(0) - 65] = value.v;
+      return allRows;
+    }, []), row => row || []);
+  const expectedSections = [
+    "Clinic Details",
+    "Method Selected",
+    "Volunteer Hours Breakdown",
+    "Total Estimated Value Provided",
+    "Cost and Value Comparison",
+    "Volunteer Roles",
+    "Sources and References",
+  ];
+  assert.deepEqual(rows.map(row => row[0]).filter(title => expectedSections.includes(title)), expectedSections);
+  expectedSections.slice(1).forEach(title => {
+    const sectionIndex = rows.findIndex(row => row[0] === title);
+    assert.ok(rows[sectionIndex - 1].every(value => value === undefined));
+  });
+  const methodRow = rows.find(row => row[0] === "Method Selected");
+  assert.equal(methodRow[1], "Volunteer hours");
+
+  const medicalHoursRow = rows.find(row => row[0] === "Medical Professional Volunteer Hours");
+  const nonMedicalHoursRow = rows.find(row => row[0] === "Non-Medical Volunteer Hours");
+  const medicalValueRow = rows.find(row => row[0] === "Medical Professional Volunteer Value");
+  const nonMedicalValueRow = rows.find(row => row[0] === "Non-Medical Volunteer Value");
+  assert.equal(medicalHoursRow[1], "-");
+  assert.equal(nonMedicalHoursRow[1], 4);
+  assert.equal(medicalValueRow[1], "-");
+  assert.equal(nonMedicalValueRow[1], 100);
+  assert.ok(rows.some(row => row[0] === "Total Volunteer Hours" && row[1] === 4));
+  assert.ok(rows.some(row => row[0] === "Total Estimated Value" && row[1] === 100));
+
+  const rolesHeaderIndex = rows.findIndex(row => row[0] === "Role");
+  assert.deepEqual(rows[rolesHeaderIndex], [
+    "Role", "Type", "Hours", "Rate", "Value", "Value Share",
+  ]);
+  assert.deepEqual(rows.slice(rolesHeaderIndex + 1, rolesHeaderIndex + 2).map(row => row[0]), [
+    "Active Non-Medical Role",
+  ]);
+  assert.equal(exportedSheet["!autofilter"].ref, `A${rolesHeaderIndex + 1}:F${rolesHeaderIndex + 2}`);
+  assert.ok(rows.some(row => row[0] === context.AppCopy.summary.costComparisonNote));
+  assert.ok(rows.some(row => row[0] === "Reference Organization"));
+  assert.equal(rows.at(-1)[0], context.AppCopy.summary.shortDisclaimer("volunteerHours"));
 });

@@ -47,6 +47,10 @@ const ExportService = (() => {
       _downloadClinicalServicesExcel(summary);
       return;
     }
+    if (summary.impactMethod === "volunteerHours") {
+      _downloadVolunteerExcel(summary);
+      return;
+    }
 
     const rows = [
       [AppCopy.exportCopy.pdfTitle],
@@ -294,6 +298,231 @@ const ExportService = (() => {
       }
       formatCurrency(volunteerTotalRow, 4);
     }
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, sheet, AppCopy.exportCopy.workbookSummary);
+    const xlsxData = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    _triggerDownload(
+      xlsxData,
+      `${_safeFilename(summary.clinicName)}-impact-breakdown.xlsx`,
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+  }
+
+  function _downloadVolunteerExcel(summary) {
+    const volunteerHours = summary.volunteerBreakdown.reduce((sum, row) => sum + row.hours, 0);
+    const medicalHours = summary.volunteerBreakdown
+      .filter(row => row.category === "medical professional")
+      .reduce((sum, row) => sum + row.hours, 0);
+    const nonMedicalHours = summary.volunteerBreakdown
+      .filter(row => row.category === "non medical")
+      .reduce((sum, row) => sum + row.hours, 0);
+    const roles = summary.volunteerBreakdown
+      .filter(row => row.hours > 0)
+      .slice()
+      .sort((a, b) =>
+        b.estimatedValue - a.estimatedValue ||
+        b.hours - a.hours ||
+        a.roleName.localeCompare(b.roleName)
+      );
+    const rows = [];
+    const sectionRows = [];
+    const summaryLabelRows = [];
+    const boldRows = [];
+    const currencyCells = [];
+    const percentageCells = [];
+    const addSection = title => {
+      if (rows.length > 0) rows.push([]);
+      const row = rows.length;
+      rows.push([title]);
+      sectionRows.push(row);
+      return row;
+    };
+    const addSummaryRow = (label, value) => {
+      if (rows.length > 0) rows.push([]);
+      const row = rows.length;
+      rows.push([label, value]);
+      summaryLabelRows.push(row);
+    };
+    const nonzeroOrDash = value => value > 0 ? value : "-";
+
+    const clinicDetailsRow = addSection("Clinic Details");
+    rows.push(["Clinic Name", summary.clinicName]);
+    rows.push(["Street Address", summary.streetAddress]);
+    rows.push(["City", summary.city]);
+    rows.push(["State", summary.state]);
+    rows.push(["ZIP Code", summary.zipCode]);
+    rows.push(["Reporting Period From", summary.reportingPeriodFrom]);
+    rows.push(["Reporting Period To", summary.reportingPeriodTo]);
+
+    addSummaryRow("Method Selected", "Volunteer hours");
+
+    const hoursSectionRow = addSection("Volunteer Hours Breakdown");
+    const hoursDataStartRow = rows.length;
+    rows.push(["Medical Professional Volunteer Hours", nonzeroOrDash(medicalHours)]);
+    rows.push(["Non-Medical Volunteer Hours", nonzeroOrDash(nonMedicalHours)]);
+    rows.push(["Total Volunteer Hours", volunteerHours]);
+    const hoursTotalRow = rows.length - 1;
+
+    const valueSectionRow = addSection("Total Estimated Value Provided");
+    const valueDataStartRow = rows.length;
+    rows.push(["Medical Professional Volunteer Value", nonzeroOrDash(summary.medicalProfessionalVolunteerValue)]);
+    rows.push(["Non-Medical Volunteer Value", nonzeroOrDash(summary.nonMedicalVolunteerValue)]);
+    rows.push(["Total Estimated Value", summary.volunteerValue]);
+    const valueTotalRow = rows.length - 1;
+    currencyCells.push([valueDataStartRow, 1], [valueDataStartRow + 1, 1], [valueTotalRow, 1]);
+
+    const costSectionRow = addSection("Cost and Value Comparison");
+    const costRow = rows.length;
+    rows.push([
+      "Reported Clinic Cost",
+      summary.reportingPeriodClinicCost === null ? "Not reported" : summary.reportingPeriodClinicCost,
+    ]);
+    rows.push(["Estimated Value of Volunteer Time", summary.volunteerValue]);
+    currencyCells.push([costRow, 1], [costRow + 1, 1]);
+    rows.push([
+      "Estimated Value per $1 of Reported Clinic Cost",
+      summary.valueToCostRatio === null ? "Not available" : summary.valueToCostRatio,
+    ]);
+    currencyCells.push([costRow + 2, 1]);
+    rows.push([
+      "Estimated Value as a Share of Reported Clinic Cost",
+      summary.reportingPeriodClinicCost > 0
+        ? summary.volunteerValue / summary.reportingPeriodClinicCost
+        : "Not available",
+    ]);
+    percentageCells.push([costRow + 3, 1]);
+    const costNoteRow = rows.length;
+    rows.push([AppCopy.summary.costComparisonNote]);
+
+    const rolesSectionRow = addSection("Volunteer Roles");
+    const rolesHeaderRow = rows.length;
+    rows.push(["Role", "Type", "Hours", "Rate", "Value", "Value Share"]);
+    const rolesDataStartRow = rows.length;
+    rows.push(...roles.map(row => [
+      row.roleName,
+      row.category,
+      row.hours,
+      row.benchmarkRate,
+      row.estimatedValue,
+      summary.volunteerValue > 0 ? row.estimatedValue / summary.volunteerValue : 0,
+    ]));
+    const rolesTotalRow = rows.length;
+    rows.push([
+      "Total",
+      "",
+      volunteerHours,
+      "",
+      summary.volunteerValue,
+      summary.volunteerValue > 0 ? 1 : 0,
+    ]);
+
+    addSection("Sources and References");
+    const referencesHeaderRow = rows.length;
+    rows.push(["Organization", "Period", "Reference", "URL"]);
+    const referenceRows = getRelevantReferences("volunteerHours").map(reference => [
+      reference.organization,
+      reference.ratePeriod || "",
+      reference.title,
+      reference.url,
+    ]);
+    rows.push(...referenceRows);
+    rows.push([]);
+    const disclaimerRow = rows.length;
+    rows.push([AppCopy.summary.shortDisclaimer("volunteerHours")]);
+
+    boldRows.push(hoursSectionRow, hoursTotalRow, valueSectionRow, valueTotalRow, costSectionRow, rolesTotalRow);
+    const sheet = XLSX.utils.aoa_to_sheet(rows);
+    sheet["!rows"] = rows.map((_, index) => ({
+      hpx: index === costNoteRow || index === disclaimerRow ? 36 : 20,
+    }));
+    sheet["!autofilter"] = {
+      ref: `A${rolesHeaderRow + 1}:F${Math.max(rolesHeaderRow + 1, rolesDataStartRow + roles.length)}`,
+    };
+    sheet["!merges"] = [...sectionRows, costNoteRow, disclaimerRow].map(row => ({
+      s: { r: row, c: 0 },
+      e: { r: row, c: 5 },
+    }));
+
+    const mergedRows = new Set([...sectionRows, costNoteRow, disclaimerRow]);
+    sheet["!cols"] = Array.from({ length: 6 }, (_, columnIndex) => {
+      const maxLength = rows.reduce((max, row, rowIndex) => {
+        if (mergedRows.has(rowIndex)) return max;
+        const value = row[columnIndex];
+        return value === null || value === undefined
+          ? max
+          : Math.max(max, String(value).length);
+      }, 0);
+      return { wch: Math.min(Math.max(maxLength + 2, 12), columnIndex === 3 ? 18 : 48) };
+    });
+
+    const sectionStyle = {
+      font: { bold: true },
+      fill: { fgColor: { rgb: "D9EAF7" } },
+      alignment: { vertical: "center", horizontal: "left" },
+    };
+    const headerStyle = {
+      font: { bold: true },
+      fill: { fgColor: { rgb: "EAF2F8" } },
+      border: {
+        top: { style: "thin", color: { rgb: "D0D7DE" } },
+        bottom: { style: "thin", color: { rgb: "D0D7DE" } },
+        left: { style: "thin", color: { rgb: "D0D7DE" } },
+        right: { style: "thin", color: { rgb: "D0D7DE" } },
+      },
+    };
+    const styleRow = (rowIndex, style, columnCount = 6) => {
+      for (let columnIndex = 0; columnIndex < columnCount; columnIndex += 1) {
+        const cell = sheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })];
+        if (cell) cell.s = { ...(cell.s || {}), ...style };
+      }
+    };
+    sectionRows.forEach(row => styleRow(row, sectionStyle));
+    summaryLabelRows.forEach(row => styleRow(row, { font: { bold: true } }, 1));
+    boldRows.forEach(row => styleRow(row, { font: { bold: true } }));
+    styleRow(rolesHeaderRow, headerStyle);
+    styleRow(referencesHeaderRow, headerStyle, 4);
+    styleRow(rolesTotalRow, {
+      font: { bold: true },
+      border: { top: { style: "thin", color: { rgb: "808080" } } },
+    });
+    const labelStyle = { font: { bold: true } };
+    [clinicDetailsRow + 1, clinicDetailsRow + 2, clinicDetailsRow + 3,
+      clinicDetailsRow + 4, clinicDetailsRow + 5, clinicDetailsRow + 6,
+      hoursDataStartRow, hoursDataStartRow + 1, valueDataStartRow, valueDataStartRow + 1,
+      costRow, costRow + 1, costRow + 2, costRow + 3]
+      .forEach(row => styleRow(row, labelStyle, 1));
+
+    const currencyFormat = "$#,##0.00";
+    currencyCells.forEach(([row, column]) => {
+      const cell = sheet[XLSX.utils.encode_cell({ r: row, c: column })];
+      if (cell && typeof cell.v === "number") {
+        cell.s = { ...(cell.s || {}), numFmt: currencyFormat };
+      }
+    });
+    percentageCells.forEach(([row, column]) => {
+      const cell = sheet[XLSX.utils.encode_cell({ r: row, c: column })];
+      if (cell) cell.s = { ...(cell.s || {}), numFmt: "0.0%" };
+    });
+    for (let row = rolesDataStartRow; row <= rolesTotalRow; row += 1) {
+      [3, 4].forEach(column => {
+        const cell = sheet[XLSX.utils.encode_cell({ r: row, c: column })];
+        if (cell) cell.s = { ...(cell.s || {}), numFmt: currencyFormat };
+      });
+      const shareCell = sheet[XLSX.utils.encode_cell({ r: row, c: 5 })];
+      if (shareCell) shareCell.s = { ...(shareCell.s || {}), numFmt: "0.0%" };
+    }
+    [costNoteRow, disclaimerRow].forEach(row => {
+      sheet["A" + (row + 1)].s = {
+        font: { italic: true, color: { rgb: "475C8A" } },
+        alignment: { wrapText: true, vertical: "center" },
+      };
+    });
+    referenceRows.forEach((reference, index) => {
+      if (!reference[3]) return;
+      const cell = sheet[XLSX.utils.encode_cell({ r: referencesHeaderRow + 1 + index, c: 3 })];
+      if (cell) cell.l = { Target: reference[3] };
+    });
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, sheet, AppCopy.exportCopy.workbookSummary);
