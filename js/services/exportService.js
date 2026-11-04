@@ -43,6 +43,10 @@ const ExportService = (() => {
       alert("The Excel download could not be prepared. Check your internet connection and try again.");
       return;
     }
+    if (summary.impactMethod === "clinicalServices") {
+      _downloadClinicalServicesExcel(summary);
+      return;
+    }
 
     const rows = [
       [AppCopy.exportCopy.pdfTitle],
@@ -290,6 +294,213 @@ const ExportService = (() => {
       }
       formatCurrency(volunteerTotalRow, 4);
     }
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, sheet, AppCopy.exportCopy.workbookSummary);
+    const xlsxData = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    _triggerDownload(
+      xlsxData,
+      `${_safeFilename(summary.clinicName)}-impact-breakdown.xlsx`,
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+  }
+
+  function _downloadClinicalServicesExcel(summary) {
+    const serviceCount = summary.serviceBreakdown.reduce((sum, row) => sum + row.count, 0);
+    const services = summary.serviceBreakdown
+      .filter(row => row.count > 0)
+      .slice()
+      .sort((a, b) =>
+        b.estimatedValue - a.estimatedValue ||
+        b.count - a.count ||
+        a.serviceName.localeCompare(b.serviceName)
+      );
+    const rows = [];
+    const sectionRows = [];
+    const summaryLabelRows = [];
+    const boldRows = [];
+    const currencyCells = [];
+    const percentageCells = [];
+
+    const addSection = title => {
+      if (rows.length > 0) rows.push([]);
+      const row = rows.length;
+      rows.push([title]);
+      sectionRows.push(row);
+      return row;
+    };
+    const addSummaryRow = (label, value) => {
+      if (rows.length > 0) rows.push([]);
+      const row = rows.length;
+      rows.push([label, value]);
+      summaryLabelRows.push(row);
+      return row;
+    };
+
+    const clinicDetailsRow = addSection("Clinic Details");
+    rows.push(["Clinic Name", summary.clinicName]);
+    rows.push(["Street Address", summary.streetAddress]);
+    rows.push(["City", summary.city]);
+    rows.push(["State", summary.state]);
+    rows.push(["ZIP Code", summary.zipCode]);
+    rows.push(["Reporting Period From", summary.reportingPeriodFrom]);
+    rows.push(["Reporting Period To", summary.reportingPeriodTo]);
+
+    addSummaryRow("Method Selected", "Clinical services");
+    addSummaryRow("Total Service Counts", serviceCount);
+    const estimatedValueRow = addSummaryRow("Total Estimated Value Provided", summary.clinicalServiceValue);
+    currencyCells.push([estimatedValueRow, 1]);
+
+    const costSectionRow = addSection("Cost and Value Comparison");
+    const costRow = rows.length;
+    rows.push([
+      "Reported Clinic Cost",
+      summary.reportingPeriodClinicCost === null ? "Not reported" : summary.reportingPeriodClinicCost,
+    ]);
+    rows.push(["Estimated Value of Services", summary.clinicalServiceValue]);
+    currencyCells.push([costRow, 1], [costRow + 1, 1]);
+    rows.push([
+      "Estimated Value per $1 of Reported Clinic Cost",
+      summary.valueToCostRatio === null ? "Not available" : summary.valueToCostRatio,
+    ]);
+    currencyCells.push([costRow + 2, 1]);
+    rows.push([
+      "Estimated Value as a Share of Reported Clinic Cost",
+      summary.reportingPeriodClinicCost > 0
+        ? summary.clinicalServiceValue / summary.reportingPeriodClinicCost
+        : "Not available",
+    ]);
+    percentageCells.push([costRow + 3, 1]);
+    const costNoteRow = rows.length;
+    rows.push([AppCopy.summary.costComparisonNote]);
+
+    const servicesSectionRow = addSection("Services");
+    const servicesHeaderRow = rows.length;
+    rows.push(["Service", "Code", "Units", "Rate", "Value", "Value Share"]);
+    const serviceDataStartRow = rows.length;
+    rows.push(...services.map(row => [
+      row.serviceName,
+      row.code,
+      row.count,
+      row.benchmarkRate,
+      row.estimatedValue,
+      summary.clinicalServiceValue > 0
+        ? row.estimatedValue / summary.clinicalServiceValue
+        : 0,
+    ]));
+    const serviceTotalRow = rows.length;
+    rows.push([
+      "Total",
+      "",
+      serviceCount,
+      "",
+      summary.clinicalServiceValue,
+      summary.clinicalServiceValue > 0 ? 1 : 0,
+    ]);
+
+    const referencesSectionRow = addSection("Sources and References");
+    rows.push(["Organization", "Period", "Reference", "URL"]);
+    const referencesHeaderRow = rows.length - 1;
+    const referenceRows = getRelevantReferences("clinicalServices").map(reference => [
+      reference.organization,
+      reference.ratePeriod || "",
+      reference.title,
+      reference.url,
+    ]);
+    rows.push(...referenceRows);
+    rows.push([]);
+    const disclaimerRow = rows.length;
+    rows.push([AppCopy.summary.shortDisclaimer("clinicalServices")]);
+
+    boldRows.push(costSectionRow, serviceTotalRow);
+    const sheet = XLSX.utils.aoa_to_sheet(rows);
+    sheet["!rows"] = rows.map((_, index) => ({
+      hpx: index === costNoteRow || index === disclaimerRow ? 36 : 20,
+    }));
+    sheet["!autofilter"] = {
+      ref: `A${servicesHeaderRow + 1}:F${Math.max(servicesHeaderRow + 1, serviceDataStartRow + services.length)}`,
+    };
+    sheet["!merges"] = [...sectionRows, costNoteRow, disclaimerRow].map(row => ({
+      s: { r: row, c: 0 },
+      e: { r: row, c: 5 },
+    }));
+
+    const mergedRows = new Set([...sectionRows, costNoteRow, disclaimerRow]);
+    sheet["!cols"] = Array.from({ length: 6 }, (_, columnIndex) => {
+      const maxLength = rows.reduce((max, row, rowIndex) => {
+        if (mergedRows.has(rowIndex)) return max;
+        const value = row[columnIndex];
+        return value === null || value === undefined
+          ? max
+          : Math.max(max, String(value).length);
+      }, 0);
+      return { wch: Math.min(Math.max(maxLength + 2, 12), columnIndex === 3 ? 18 : 48) };
+    });
+
+    const sectionStyle = {
+      font: { bold: true },
+      fill: { fgColor: { rgb: "D9EAF7" } },
+      alignment: { vertical: "center", horizontal: "left" },
+    };
+    const headerStyle = {
+      font: { bold: true },
+      fill: { fgColor: { rgb: "EAF2F8" } },
+      border: {
+        top: { style: "thin", color: { rgb: "D0D7DE" } },
+        bottom: { style: "thin", color: { rgb: "D0D7DE" } },
+        left: { style: "thin", color: { rgb: "D0D7DE" } },
+        right: { style: "thin", color: { rgb: "D0D7DE" } },
+      },
+    };
+    const styleRow = (rowIndex, style, columnCount = 6) => {
+      for (let columnIndex = 0; columnIndex < columnCount; columnIndex += 1) {
+        const cell = sheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })];
+        if (cell) cell.s = { ...(cell.s || {}), ...style };
+      }
+    };
+    sectionRows.forEach(row => styleRow(row, sectionStyle));
+    summaryLabelRows.forEach(row => styleRow(row, { font: { bold: true } }, 1));
+    boldRows.forEach(row => styleRow(row, { font: { bold: true } }));
+    styleRow(servicesHeaderRow, headerStyle);
+    styleRow(referencesHeaderRow, headerStyle, 4);
+    styleRow(serviceTotalRow, {
+      font: { bold: true },
+      border: { top: { style: "thin", color: { rgb: "808080" } } },
+    });
+    const labelStyle = { font: { bold: true } };
+    [clinicDetailsRow + 1, clinicDetailsRow + 2, clinicDetailsRow + 3,
+      clinicDetailsRow + 4, clinicDetailsRow + 5, clinicDetailsRow + 6,
+      costRow, costRow + 1, costRow + 2, costRow + 3]
+      .forEach(row => styleRow(row, labelStyle, 1));
+
+    const currencyFormat = "$#,##0.00";
+    currencyCells.forEach(([row, column]) => {
+      const cell = sheet[XLSX.utils.encode_cell({ r: row, c: column })];
+      if (cell) cell.s = { ...(cell.s || {}), numFmt: currencyFormat };
+    });
+    percentageCells.forEach(([row, column]) => {
+      const cell = sheet[XLSX.utils.encode_cell({ r: row, c: column })];
+      if (cell) cell.s = { ...(cell.s || {}), numFmt: "0.0%" };
+    });
+    for (let row = serviceDataStartRow; row <= serviceTotalRow; row += 1) {
+      [3, 4].forEach(column => {
+        const cell = sheet[XLSX.utils.encode_cell({ r: row, c: column })];
+        if (cell) cell.s = { ...(cell.s || {}), numFmt: currencyFormat };
+      });
+      const shareCell = sheet[XLSX.utils.encode_cell({ r: row, c: 5 })];
+      if (shareCell) shareCell.s = { ...(shareCell.s || {}), numFmt: "0.0%" };
+    }
+    [costNoteRow, disclaimerRow].forEach(row => {
+      sheet["A" + (row + 1)].s = {
+        font: { italic: true, color: { rgb: "475C8A" } },
+        alignment: { wrapText: true, vertical: "center" },
+      };
+    });
+    referenceRows.forEach((reference, index) => {
+      if (!reference[3]) return;
+      const cell = sheet[XLSX.utils.encode_cell({ r: referencesHeaderRow + 1 + index, c: 3 })];
+      if (cell) cell.l = { Target: reference[3] };
+    });
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, sheet, AppCopy.exportCopy.workbookSummary);
