@@ -412,7 +412,9 @@ const ExportService = (() => {
       </tr>
     `);
 
-    const volRows = summary.volunteerBreakdown.map(row => `
+    const volRows = summary.volunteerBreakdown
+      .filter(row => row.hours > 0)
+      .map(row => `
       <tr>
         <td>${_escapeHTML(row.roleName)}</td>
         <td>${_escapeHTML(row.category)}</td>
