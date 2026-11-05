@@ -7,17 +7,6 @@
 "use strict";
 
 const CompositionPieChart = (() => {
-  const COLORS = [
-    "hsl(25, 52%, 73%)", "hsl(163, 48%, 73%)", "hsl(300, 54%, 73%)",
-    "hsl(78, 50%, 73%)", "hsl(215, 56%, 73%)", "hsl(353, 50%, 73%)",
-    "hsl(130, 54%, 73%)", "hsl(268, 48%, 73%)", "hsl(45, 56%, 73%)",
-    "hsl(183, 50%, 73%)", "hsl(320, 54%, 73%)", "hsl(98, 48%, 73%)",
-    "hsl(235, 52%, 73%)", "hsl(13, 56%, 73%)", "hsl(150, 50%, 73%)",
-    "hsl(288, 54%, 73%)", "hsl(65, 48%, 73%)", "hsl(203, 56%, 73%)",
-    "hsl(340, 50%, 73%)", "hsl(118, 54%, 73%)", "hsl(255, 48%, 73%)",
-    "hsl(33, 52%, 73%)", "hsl(170, 56%, 73%)", "hsl(308, 50%, 73%)",
-    "hsl(85, 54%, 73%)",
-  ];
   const OTHER_COLOR = "#B8B8B8";
 
   function render({ id, title, description, items, otherLabel, unitLabel, formatValue, hideLegendValues = false, totalInHeading = false }) {
@@ -185,11 +174,10 @@ const CompositionPieChart = (() => {
   }
 
   function _color(index) {
-    if (index < COLORS.length) return COLORS[index];
-    const extraIndex = index - COLORS.length;
-    const hue = (extraIndex * 137.508 + 24) % 360;
-    const saturation = [38, 44, 50][Math.floor(extraIndex / 12) % 3];
-    const lightness = [68, 74, 80, 65][Math.floor(extraIndex / 36) % 4];
+    const hue = 158 + (index * 17) % 31;
+    const paletteBand = Math.floor(index / 31);
+    const saturation = 44 + (paletteBand % 3) * 4;
+    const lightness = [62, 72, 82, 67, 77][index % 5];
     return `hsl(${hue.toFixed(1)}, ${saturation}%, ${lightness}%)`;
   }
 

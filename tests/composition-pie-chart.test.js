@@ -160,14 +160,17 @@ test("assigns distinct matching colors to 50 chart slices and legend items", () 
   assert.deepEqual(legendColors, sliceColors);
 });
 
-test("starts with 25 distinct, muted categorical colors", () => {
+test("keeps the first 25 muted colors within a coordinated teal-green range", () => {
   const { html } = renderLabels(Array.from({ length: 28 }, (_, index) => [`Component ${index + 1}`, 1]));
   const sliceColors = Array.from(html.matchAll(/class="composition-pie__shape"[^>]*fill="([^"]+)"/g), match => match[1]);
   const nonOtherColors = sliceColors.filter(color => color !== "#B8B8B8");
+  const hues = nonOtherColors.map(color => Number(color.match(/hsl\(([\d.]+)/)[1]));
+  const lightnesses = nonOtherColors.map(color => Number(color.match(/,\s*\d+%,\s*(\d+)%\)/)[1]));
 
   assert.equal(nonOtherColors.length, 25);
   assert.equal(new Set(nonOtherColors).size, 25);
-  assert.ok(nonOtherColors.every(color => color.startsWith("hsl(")));
+  assert.ok(hues.every(hue => hue >= 158 && hue <= 188));
+  assert.ok(new Set(lightnesses).size >= 5);
 });
 
 test("does not use gray for a single ordinary slice", () => {
