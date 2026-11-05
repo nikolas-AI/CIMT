@@ -62,12 +62,29 @@ test("does not rename the only component as Other", () => {
   assert.deepEqual(labels, ["A"]);
 });
 
-test("renders a full pie with its total and unit label", () => {
+test("renders a raised pie with its total and unit label", () => {
   const { html } = renderLabels([["A", 100]]);
 
+  assert.match(html, /viewBox="0 0 200 208"/);
+  assert.match(html, /composition-pie__depth" aria-hidden="true"><g transform="translate\(0 8\)">/);
+  assert.match(html, /composition-pie__depth-shape" cx="100" cy="100" r="94"/);
   assert.doesNotMatch(html, /composition-pie__center/);
   assert.match(html, /composition-pie__total" x="100" y="97"/);
   assert.match(html, /composition-pie__total-label" x="100" y="108"/);
+});
+
+test("adds a darkened extrusion beneath every pie slice", () => {
+  const { html } = renderLabels([["A", 75], ["B", 25]]);
+  const depthSlices = Array.from(html.matchAll(/composition-pie__depth-shape/g));
+  const topSlices = Array.from(html.matchAll(/class="composition-pie__shape"/g));
+  const depthLayerIndex = html.indexOf('class="composition-pie__depth"');
+  const topLayerIndex = html.indexOf('class="composition-pie__slice"');
+
+  assert.equal(depthSlices.length, 2);
+  assert.equal(topSlices.length, 2);
+  assert.match(html, /composition-pie__depth-shape" d="M /);
+  assert.ok(depthLayerIndex < topLayerIndex);
+  assert.equal((html.match(/class="composition-pie__depth"/g) || []).length, 1);
 });
 
 test("puts the service total in the heading instead of the pie center", () => {

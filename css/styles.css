@@ -1617,6 +1617,13 @@ body {
   stroke-linejoin: round;
 }
 
+.composition-pie__depth-shape {
+  filter: brightness(0.68);
+  stroke: rgba(0, 0, 0, 0.14);
+  stroke-width: 0.6px;
+  stroke-linejoin: round;
+}
+
 .composition-pie__total {
   fill: var(--color-navy);
   font-size: 12px;

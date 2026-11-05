@@ -44,13 +44,15 @@ const CompositionPieChart = (() => {
       const shape = chartItems.length === 1
         ? `<circle class="composition-pie__shape" cx="100" cy="100" r="94" fill="${color}" />`
         : `<path class="composition-pie__shape" d="${_slicePath(startAngle, endAngle)}" fill="${color}" />`;
+      const depthShape = shape.replace("composition-pie__shape", "composition-pie__depth-shape");
+      const depthPath = `<g transform="translate(0 8)">${depthShape}</g>`;
       const path = `
         <g class="composition-pie__slice" tabindex="0" role="img"
           aria-label="${_escape(tooltip)}" style="--slice-x: ${offsetX}px; --slice-y: ${offsetY}px">
           ${shape}
         </g>
       `;
-      return { item, index, color, percentage: item.value / total * 100, path };
+      return { item, index, color, percentage: item.value / total * 100, depthPath, path };
     });
     const safeId = _escape(id);
     const totalText = formatValue(total);
@@ -60,9 +62,10 @@ const CompositionPieChart = (() => {
         <h2 class="summary-section__heading" id="${safeId}-heading">${_escape(title)}${totalInHeading ? `<span class="composition-pie__heading-total">${_escape(totalText)} ${_escape(unitLabel)}</span>` : ""}</h2>
         <p class="summary-section__intro">${_escape(description)}</p>
         <div class="composition-pie__content">
-          <svg class="composition-pie__chart" viewBox="0 0 200 200" role="group"
+          <svg class="composition-pie__chart" viewBox="0 0 200 208" role="group"
             aria-label="${_escape(title)}" aria-describedby="${safeId}-svg-desc">
             <desc id="${safeId}-svg-desc">${_escape(description)} Total: ${_escape(totalText)} ${_escape(unitLabel)}.</desc>
+            <g class="composition-pie__depth" aria-hidden="true">${slices.map(slice => slice.depthPath).join("")}</g>
             ${slices.map(slice => slice.path).join("")}
             ${totalInHeading ? "" : `
               <text class="composition-pie__total" x="100" y="97" text-anchor="middle">${_escape(totalText)}</text>
