@@ -1668,6 +1668,16 @@ body {
   pointer-events: none;
 }
 
+.composition-pie__slice-percentage {
+  fill: var(--color-navy);
+  stroke: #FFFFFF;
+  stroke-width: 1.5px;
+  paint-order: stroke;
+  font-size: 4px;
+  font-weight: 700;
+  pointer-events: none;
+}
+
 .composition-pie__heading-total {
   display: block;
   color: var(--color-navy);

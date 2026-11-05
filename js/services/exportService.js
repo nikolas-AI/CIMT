@@ -1195,6 +1195,7 @@ const ExportService = (() => {
   .composition-pie__slice-number-bg { fill: #fff; stroke: var(--navy); stroke-width: .8px; pointer-events: none; }
   .composition-pie__leader { stroke: var(--slate); stroke-width: .8px; pointer-events: none; }
   .composition-pie__slice-number { fill: var(--navy); font-size: 4px; font-weight: 700; pointer-events: none; }
+  .composition-pie__slice-percentage { fill: var(--navy); stroke: #fff; stroke-width: 1.5px; paint-order: stroke; font-size: 4px; font-weight: 700; pointer-events: none; }
   .composition-pie__total { fill: var(--navy); font-size: 12px; font-weight: 700; }
   .composition-pie__total-label { fill: var(--slate); font-size: 6px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
   .composition-pie__heading-total { display: block; margin-top: 4px; color: var(--navy); font: 700 12px/1.4 Inter, "Segoe UI", Arial, sans-serif; letter-spacing: normal; text-transform: none; }

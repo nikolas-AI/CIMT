@@ -28,10 +28,14 @@ const CompositionPieChart = (() => {
       const offsetX = (Math.cos(midpoint) * 5).toFixed(2);
       const offsetY = (Math.sin(midpoint) * 5).toFixed(2);
       const labelAngle = chartItems.length === 1 ? -Math.PI / 2 : midpoint;
+      const lowerHalfOffset = Math.sin(labelAngle) > 0 ? 4 : 0;
       const lineStartX = (100 + 94 * Math.cos(labelAngle)).toFixed(2);
-      const lineStartY = (100 + 94 * Math.sin(labelAngle)).toFixed(2);
+      const lineStartY = (100 + 94 * Math.sin(labelAngle) + lowerHalfOffset).toFixed(2);
       const labelX = (100 + 106 * Math.cos(labelAngle)).toFixed(2);
-      const labelY = (100 + 106 * Math.sin(labelAngle)).toFixed(2);
+      const labelY = (100 + 106 * Math.sin(labelAngle) + lowerHalfOffset).toFixed(2);
+      const percentageX = (100 + 78 * Math.cos(midpoint)).toFixed(2);
+      const percentageY = (100 + 78 * Math.sin(midpoint)).toFixed(2);
+      const percentage = item.value / total * 100;
       const tooltip = `${item.label}: ${item.valueLabel} (${(item.value / total * 100).toFixed(1)}%)`;
       const color = colorByItem.get(item);
 
@@ -48,12 +52,13 @@ const CompositionPieChart = (() => {
         <g class="composition-pie__slice" data-slice-index="${index}" tabindex="0" role="img"
           aria-label="${_escape(tooltip)}" style="--slice-x: ${offsetX}px; --slice-y: ${offsetY}px">
           ${shape}
+          <text class="composition-pie__slice-percentage" x="${percentageX}" y="${percentageY}" text-anchor="middle" dominant-baseline="central" aria-hidden="true">${percentage.toFixed(1)}%</text>
           <line class="composition-pie__leader" x1="${lineStartX}" y1="${lineStartY}" x2="${labelX}" y2="${labelY}" aria-hidden="true" />
           <circle class="composition-pie__slice-number-bg" cx="${labelX}" cy="${labelY}" r="4" aria-hidden="true" />
           <text class="composition-pie__slice-number" x="${labelX}" y="${labelY}" text-anchor="middle" dominant-baseline="central" aria-hidden="true">${index + 1}</text>
         </g>
       `;
-      return { item, index, color, percentage: item.value / total * 100, depthPath, path };
+      return { item, index, color, percentage, depthPath, path };
     });
     const safeId = _escape(id);
     const totalText = formatValue(total);

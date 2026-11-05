@@ -101,6 +101,25 @@ test("numbers each slice and its matching legend entry in the same order", () =>
   assert.match(html, /composition-pie__slice-number-bg" cx="[^"]+" cy="[^"]+" r="4"/);
 });
 
+test("anchors lower-half leader lines midway down the visible extrusion", () => {
+  const { html } = renderLabels([["A", 25], ["B", 25], ["C", 25], ["D", 25]]);
+  const leaderStartY = Array.from(html.matchAll(/class="composition-pie__leader" x1="-?\d+\.\d+" y1="(-?\d+\.\d+)"/g), match => Number(match[1]));
+
+  assert.equal(leaderStartY.length, 4);
+  assert.ok(leaderStartY.filter(y => y > 100).every(y => y > 169 && y < 171));
+  assert.ok(leaderStartY.filter(y => y < 100).every(y => y > 33 && y < 34));
+});
+
+test("shows each slice percentage inside the corresponding slice", () => {
+  const { html } = renderLabels([["A", 60], ["B", 25], ["C", 15]]);
+  const percentages = Array.from(html.matchAll(/class="composition-pie__slice-percentage"[^>]*>([\d.]+%)</g), match => match[1]);
+
+  assert.deepEqual(percentages, ["60.0%", "25.0%", "15.0%"]);
+  const firstPosition = html.match(/composition-pie__slice-percentage" x="(-?\d+\.\d+)" y="(-?\d+\.\d+)"/);
+  assert.ok(firstPosition);
+  assert.ok(Math.hypot(Number(firstPosition[1]) - 100, Number(firstPosition[2]) - 100) >= 77);
+});
+
 test("puts the service total in the heading instead of the pie center", () => {
   const { html } = renderLabels([["A", 125], ["B", 75]], {
     title: "Clinical services by count",
