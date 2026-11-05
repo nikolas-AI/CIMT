@@ -1192,12 +1192,15 @@ const ExportService = (() => {
   .composition-pie__chart { display: block; width: min(100%, 440px); height: auto; margin: 0 auto; overflow: visible; }
   .composition-pie__shape { stroke: #fff; stroke-width: .6px; stroke-linejoin: round; }
   .composition-pie__depth-shape { filter: brightness(.68); stroke: rgba(0,0,0,.14); stroke-width: .6px; stroke-linejoin: round; }
+  .composition-pie__slice-number-bg { fill: #fff; stroke: var(--navy); stroke-width: .8px; pointer-events: none; }
+  .composition-pie__slice-number { fill: var(--navy); font-size: 4px; font-weight: 700; pointer-events: none; }
   .composition-pie__total { fill: var(--navy); font-size: 12px; font-weight: 700; }
   .composition-pie__total-label { fill: var(--slate); font-size: 6px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
   .composition-pie__heading-total { display: block; margin-top: 4px; color: var(--navy); font: 700 12px/1.4 Inter, "Segoe UI", Arial, sans-serif; letter-spacing: normal; text-transform: none; }
   .composition-pie__legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 6px; min-width: 0; margin: 0; padding: 0; list-style: none; }
-  .composition-pie__item { display: grid; grid-template-columns: 7px minmax(0, 1fr) auto auto; align-items: center; gap: 3px; min-width: 0; padding: 2px 0; background: transparent; font-size: 7px; }
-  .composition-pie__item--percentage-only { grid-template-columns: 8px minmax(0, 1fr) auto; }
+  .composition-pie__item { display: grid; grid-template-columns: 11px 7px minmax(0, 1fr) auto auto; align-items: center; gap: 3px; min-width: 0; padding: 2px 0; background: transparent; font-size: 7px; }
+  .composition-pie__item--percentage-only { grid-template-columns: 11px 7px minmax(0, 1fr) auto; }
+  .composition-pie__number { display: inline-grid; width: 10px; height: 10px; place-items: center; border: 1px solid var(--border); border-radius: 50%; background: #fff; color: var(--navy); font-size: 7px; font-weight: 700; line-height: 1; }
   .composition-pie__swatch { width: 7px; height: 7px; border-radius: 50%; background: var(--pie-color); }
   .composition-pie__label { min-width: 0; overflow-wrap: anywhere; }
   .composition-pie__value, .composition-pie__share { color: var(--navy); white-space: nowrap; }

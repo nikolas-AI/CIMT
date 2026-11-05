@@ -1642,10 +1642,24 @@ body {
 
 .composition-pie__total-label {
   fill: var(--color-slate);
-  font-size: 6px;
+  font-size: 5px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+.composition-pie__slice-number-bg {
+  fill: #FFFFFF;
+  stroke: var(--color-navy);
+  stroke-width: 0.8px;
+  pointer-events: none;
+}
+
+.composition-pie__slice-number {
+  fill: var(--color-navy);
+  font-size: 4px;
+  font-weight: 700;
+  pointer-events: none;
 }
 
 .composition-pie__heading-total {
@@ -1670,7 +1684,7 @@ body {
 
 .composition-pie__item {
   display: grid;
-  grid-template-columns: 0.65rem minmax(0, 1fr) auto auto;
+  grid-template-columns: 1.1rem 0.65rem minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 0.2rem;
   min-width: 0;
@@ -1680,7 +1694,21 @@ body {
 }
 
 .composition-pie__item--percentage-only {
-  grid-template-columns: 0.65rem minmax(0, 1fr) auto;
+  grid-template-columns: 1.1rem 0.65rem minmax(0, 1fr) auto;
+}
+
+.composition-pie__number {
+  display: inline-grid;
+  width: 1rem;
+  height: 1rem;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: #FFFFFF;
+  color: var(--color-navy);
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .composition-pie__swatch {

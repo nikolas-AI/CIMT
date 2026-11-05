@@ -38,6 +38,9 @@ const CompositionPieChart = (() => {
       const midpoint = (startAngle + endAngle) / 2 * Math.PI / 180;
       const offsetX = (Math.cos(midpoint) * 5).toFixed(2);
       const offsetY = (Math.sin(midpoint) * 5).toFixed(2);
+      const labelAngle = chartItems.length === 1 ? -Math.PI / 2 : midpoint;
+      const labelX = (100 + 67 * Math.cos(labelAngle)).toFixed(2);
+      const labelY = (100 + 67 * Math.sin(labelAngle)).toFixed(2);
       const tooltip = `${item.label}: ${item.valueLabel} (${(item.value / total * 100).toFixed(1)}%)`;
       const color = colorByItem.get(item);
 
@@ -54,6 +57,8 @@ const CompositionPieChart = (() => {
         <g class="composition-pie__slice" data-slice-index="${index}" tabindex="0" role="img"
           aria-label="${_escape(tooltip)}" style="--slice-x: ${offsetX}px; --slice-y: ${offsetY}px">
           ${shape}
+          <circle class="composition-pie__slice-number-bg" cx="${labelX}" cy="${labelY}" r="4" aria-hidden="true" />
+          <text class="composition-pie__slice-number" x="${labelX}" y="${labelY}" text-anchor="middle" dominant-baseline="central" aria-hidden="true">${index + 1}</text>
         </g>
       `;
       return { item, index, color, percentage: item.value / total * 100, depthPath, path };
@@ -79,6 +84,7 @@ const CompositionPieChart = (() => {
           <ul class="composition-pie__legend">
             ${slices.map(slice => `
               <li class="composition-pie__item${hideLegendValues ? " composition-pie__item--percentage-only" : ""}">
+                <span class="composition-pie__number" aria-hidden="true">${slice.index + 1}</span>
                 <span class="composition-pie__swatch" style="--pie-color: ${slice.color}" aria-hidden="true"></span>
                 <span class="composition-pie__label">${_escape(slice.item.label)}</span>
                 ${hideLegendValues ? "" : `

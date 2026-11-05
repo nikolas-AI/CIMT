@@ -89,6 +89,16 @@ test("adds a darkened extrusion beneath every pie slice", () => {
   assert.equal((html.match(/class="composition-pie__depth"/g) || []).length, 1);
 });
 
+test("numbers each slice and its matching legend entry in the same order", () => {
+  const { html } = renderLabels([["A", 60], ["B", 25], ["C", 15]]);
+  const sliceNumbers = Array.from(html.matchAll(/class="composition-pie__slice-number"[^>]*>(\d+)</g), match => match[1]);
+  const legendNumbers = Array.from(html.matchAll(/class="composition-pie__number"[^>]*>(\d+)</g), match => match[1]);
+
+  assert.deepEqual(sliceNumbers, ["1", "2", "3"]);
+  assert.deepEqual(legendNumbers, sliceNumbers);
+  assert.match(html, /composition-pie__slice-number-bg" cx="[^"]+" cy="[^"]+" r="4"/);
+});
+
 test("puts the service total in the heading instead of the pie center", () => {
   const { html } = renderLabels([["A", 125], ["B", 75]], {
     title: "Clinical services by count",
