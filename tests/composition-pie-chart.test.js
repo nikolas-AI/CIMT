@@ -66,7 +66,7 @@ test("renders a raised pie with its total and unit label", () => {
   const { html } = renderLabels([["A", 100]]);
 
   assert.match(html, /viewBox="0 0 200 208"/);
-  assert.match(html, /composition-pie__depth" aria-hidden="true"><g transform="translate\(0 8\)">/);
+  assert.match(html, /composition-pie__depth" aria-hidden="true">\s*<g class="composition-pie__depth-slice" data-slice-index="0" transform="translate\(0 8\)">/);
   assert.match(html, /composition-pie__depth-shape" cx="100" cy="100" r="94"/);
   assert.doesNotMatch(html, /composition-pie__center/);
   assert.match(html, /composition-pie__total" x="100" y="97"/);
@@ -83,6 +83,8 @@ test("adds a darkened extrusion beneath every pie slice", () => {
   assert.equal(depthSlices.length, 2);
   assert.equal(topSlices.length, 2);
   assert.match(html, /composition-pie__depth-shape" d="M /);
+  assert.match(html, /composition-pie__depth-slice" data-slice-index="0" transform="translate\(0 8\)">\s*<g class="composition-pie__depth-lift" style="--slice-x: /);
+  assert.match(html, /composition-pie__slice" data-slice-index="0"/);
   assert.ok(depthLayerIndex < topLayerIndex);
   assert.equal((html.match(/class="composition-pie__depth"/g) || []).length, 1);
 });

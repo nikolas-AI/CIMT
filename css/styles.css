@@ -1624,6 +1624,16 @@ body {
   stroke-linejoin: round;
 }
 
+.composition-pie__depth-lift {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 220ms cubic-bezier(0.2, 0.75, 0.3, 1);
+}
+
+.composition-pie__depth-lift.is-raised {
+  transform: translate(var(--slice-x), var(--slice-y));
+}
+
 .composition-pie__total {
   fill: var(--color-navy);
   font-size: 12px;

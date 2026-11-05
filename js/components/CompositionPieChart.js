@@ -45,9 +45,13 @@ const CompositionPieChart = (() => {
         ? `<circle class="composition-pie__shape" cx="100" cy="100" r="94" fill="${color}" />`
         : `<path class="composition-pie__shape" d="${_slicePath(startAngle, endAngle)}" fill="${color}" />`;
       const depthShape = shape.replace("composition-pie__shape", "composition-pie__depth-shape");
-      const depthPath = `<g transform="translate(0 8)">${depthShape}</g>`;
+      const depthPath = `
+        <g class="composition-pie__depth-slice" data-slice-index="${index}" transform="translate(0 8)">
+          <g class="composition-pie__depth-lift" style="--slice-x: ${offsetX}px; --slice-y: ${offsetY}px">${depthShape}</g>
+        </g>
+      `;
       const path = `
-        <g class="composition-pie__slice" tabindex="0" role="img"
+        <g class="composition-pie__slice" data-slice-index="${index}" tabindex="0" role="img"
           aria-label="${_escape(tooltip)}" style="--slice-x: ${offsetX}px; --slice-y: ${offsetY}px">
           ${shape}
         </g>
@@ -93,6 +97,12 @@ const CompositionPieChart = (() => {
     const content = section.querySelector(".composition-pie__content");
     const slices = section.querySelectorAll(".composition-pie__slice");
     if (!content || slices.length === 0) return;
+    const depthSlices = new Map(
+      Array.from(content.querySelectorAll(".composition-pie__depth-slice"), depthSlice => [
+        depthSlice.getAttribute("data-slice-index"),
+        depthSlice.querySelector(".composition-pie__depth-lift"),
+      ])
+    );
 
     const tooltip = document.createElement("div");
     tooltip.className = "composition-pie__tooltip";
@@ -112,20 +122,27 @@ const CompositionPieChart = (() => {
     }
 
     slices.forEach(slice => {
+      const depthLift = depthSlices.get(slice.getAttribute("data-slice-index"));
+      const setRaised = raised => depthLift?.classList.toggle("is-raised", raised);
+
       slice.addEventListener("pointerenter", event => {
+        setRaised(true);
         showTooltip(slice, event.clientX, event.clientY);
       });
       slice.addEventListener("pointermove", event => {
         showTooltip(slice, event.clientX, event.clientY);
       });
       slice.addEventListener("pointerleave", () => {
+        setRaised(false);
         tooltip.hidden = true;
       });
       slice.addEventListener("focus", () => {
+        setRaised(true);
         const bounds = slice.getBoundingClientRect();
         showTooltip(slice, bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
       });
       slice.addEventListener("blur", () => {
+        setRaised(false);
         tooltip.hidden = true;
       });
     });
