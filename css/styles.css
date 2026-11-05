@@ -1655,6 +1655,12 @@ body {
   pointer-events: none;
 }
 
+.composition-pie__leader {
+  stroke: var(--color-slate);
+  stroke-width: 0.8px;
+  pointer-events: none;
+}
+
 .composition-pie__slice-number {
   fill: var(--color-navy);
   font-size: 4px;

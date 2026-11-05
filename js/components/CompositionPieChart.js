@@ -28,8 +28,10 @@ const CompositionPieChart = (() => {
       const offsetX = (Math.cos(midpoint) * 5).toFixed(2);
       const offsetY = (Math.sin(midpoint) * 5).toFixed(2);
       const labelAngle = chartItems.length === 1 ? -Math.PI / 2 : midpoint;
-      const labelX = (100 + 67 * Math.cos(labelAngle)).toFixed(2);
-      const labelY = (100 + 67 * Math.sin(labelAngle)).toFixed(2);
+      const lineStartX = (100 + 94 * Math.cos(labelAngle)).toFixed(2);
+      const lineStartY = (100 + 94 * Math.sin(labelAngle)).toFixed(2);
+      const labelX = (100 + 106 * Math.cos(labelAngle)).toFixed(2);
+      const labelY = (100 + 106 * Math.sin(labelAngle)).toFixed(2);
       const tooltip = `${item.label}: ${item.valueLabel} (${(item.value / total * 100).toFixed(1)}%)`;
       const color = colorByItem.get(item);
 
@@ -46,6 +48,7 @@ const CompositionPieChart = (() => {
         <g class="composition-pie__slice" data-slice-index="${index}" tabindex="0" role="img"
           aria-label="${_escape(tooltip)}" style="--slice-x: ${offsetX}px; --slice-y: ${offsetY}px">
           ${shape}
+          <line class="composition-pie__leader" x1="${lineStartX}" y1="${lineStartY}" x2="${labelX}" y2="${labelY}" aria-hidden="true" />
           <circle class="composition-pie__slice-number-bg" cx="${labelX}" cy="${labelY}" r="4" aria-hidden="true" />
           <text class="composition-pie__slice-number" x="${labelX}" y="${labelY}" text-anchor="middle" dominant-baseline="central" aria-hidden="true">${index + 1}</text>
         </g>
@@ -60,7 +63,7 @@ const CompositionPieChart = (() => {
         <h2 class="summary-section__heading" id="${safeId}-heading">${_escape(title)}${totalInHeading ? `<span class="composition-pie__heading-total">${_escape(totalText)} ${_escape(unitLabel)}</span>` : ""}</h2>
         <p class="summary-section__intro">${_escape(description)}</p>
         <div class="composition-pie__content">
-          <svg class="composition-pie__chart" viewBox="0 0 200 208" role="group"
+          <svg class="composition-pie__chart" viewBox="-16 -16 232 240" role="group"
             aria-label="${_escape(title)}" aria-describedby="${safeId}-svg-desc">
             <desc id="${safeId}-svg-desc">${_escape(description)} Total: ${_escape(totalText)} ${_escape(unitLabel)}.</desc>
             <g class="composition-pie__depth" aria-hidden="true">${slices.map(slice => slice.depthPath).join("")}</g>

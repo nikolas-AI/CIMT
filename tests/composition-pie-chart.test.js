@@ -65,7 +65,7 @@ test("does not rename the only component as Other", () => {
 test("renders a raised pie with its total and unit label", () => {
   const { html } = renderLabels([["A", 100]]);
 
-  assert.match(html, /viewBox="0 0 200 208"/);
+  assert.match(html, /viewBox="-16 -16 232 240"/);
   assert.match(html, /composition-pie__depth" aria-hidden="true">\s*<g class="composition-pie__depth-slice" data-slice-index="0" transform="translate\(0 8\)">/);
   assert.match(html, /composition-pie__depth-shape" cx="100" cy="100" r="94"/);
   assert.doesNotMatch(html, /composition-pie__center/);
@@ -96,6 +96,8 @@ test("numbers each slice and its matching legend entry in the same order", () =>
 
   assert.deepEqual(sliceNumbers, ["1", "2", "3"]);
   assert.deepEqual(legendNumbers, sliceNumbers);
+  assert.equal((html.match(/class="composition-pie__leader"/g) || []).length, 3);
+  assert.match(html, /composition-pie__leader" x1="-?\d+\.\d+" y1="-?\d+\.\d+" x2="-?\d+\.\d+" y2="-?\d+\.\d+"/);
   assert.match(html, /composition-pie__slice-number-bg" cx="[^"]+" cy="[^"]+" r="4"/);
 });
 

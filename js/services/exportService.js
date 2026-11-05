@@ -1193,6 +1193,7 @@ const ExportService = (() => {
   .composition-pie__shape { stroke: #fff; stroke-width: .6px; stroke-linejoin: round; }
   .composition-pie__depth-shape { filter: brightness(.68); stroke: rgba(0,0,0,.14); stroke-width: .6px; stroke-linejoin: round; }
   .composition-pie__slice-number-bg { fill: #fff; stroke: var(--navy); stroke-width: .8px; pointer-events: none; }
+  .composition-pie__leader { stroke: var(--slate); stroke-width: .8px; pointer-events: none; }
   .composition-pie__slice-number { fill: var(--navy); font-size: 4px; font-weight: 700; pointer-events: none; }
   .composition-pie__total { fill: var(--navy); font-size: 12px; font-weight: 700; }
   .composition-pie__total-label { fill: var(--slate); font-size: 6px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
