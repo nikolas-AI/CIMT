@@ -44,12 +44,10 @@ const ExportService = (() => {
       return;
     }
     if (summary.impactMethod === "clinicalServices") {
-      _downloadClinicalServicesExcel(summary);
-      return;
+      return _downloadClinicalServicesExcel(summary);
     }
     if (summary.impactMethod === "volunteerHours") {
-      _downloadVolunteerExcel(summary);
-      return;
+      return _downloadVolunteerExcel(summary);
     }
 
     const rows = [
@@ -301,12 +299,7 @@ const ExportService = (() => {
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, sheet, AppCopy.exportCopy.workbookSummary);
-    const xlsxData = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    _triggerDownload(
-      xlsxData,
-      `${_safeFilename(summary.clinicName)}-impact-breakdown.xlsx`,
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    );
+    return _downloadWorkbook(workbook, summary, false);
   }
 
   function _downloadVolunteerExcel(summary) {
@@ -526,12 +519,11 @@ const ExportService = (() => {
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, sheet, AppCopy.exportCopy.workbookSummary);
-    const xlsxData = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    _triggerDownload(
-      xlsxData,
-      `${_safeFilename(summary.clinicName)}-impact-breakdown.xlsx`,
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    );
+    const pieChart = _appendActivityChartSheet(workbook, {
+      quantityLabel: "Hours",
+      items: roles.map(role => ({ label: role.roleName, value: role.hours })),
+    });
+    return _downloadWorkbook(workbook, summary, pieChart);
   }
 
   function _downloadClinicalServicesExcel(summary) {
@@ -733,17 +725,176 @@ const ExportService = (() => {
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, sheet, AppCopy.exportCopy.workbookSummary);
-    const xlsxData = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    _triggerDownload(
-      xlsxData,
-      `${_safeFilename(summary.clinicName)}-impact-breakdown.xlsx`,
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    );
+    const pieChart = _appendActivityChartSheet(workbook, {
+      quantityLabel: "Service count",
+      items: services.map(service => ({
+        label: service.serviceDescription,
+        value: service.count,
+      })),
+    });
+    return _downloadWorkbook(workbook, summary, pieChart);
   }
 
   // ---------------------------------------------------------------
   // Private helpers
   // ---------------------------------------------------------------
+
+  function _appendActivityChartSheet(workbook, { quantityLabel, items }) {
+    if (items.length === 0) return false;
+    const chartItems = _groupChartItems(items);
+    const sheet = XLSX.utils.aoa_to_sheet([
+      ["Activity", quantityLabel],
+      ...chartItems.map(item => [item.label, item.value]),
+    ]);
+    sheet["!cols"] = [{ wch: 36 }, { wch: 18 }];
+    XLSX.utils.book_append_sheet(workbook, sheet, "Activity Chart");
+    return {
+      otherSliceIndex: chartItems.some(item => item.isOther) ? chartItems.length - 1 : null,
+    };
+  }
+
+  function _groupChartItems(items) {
+    const rankedItems = items
+      .filter(item => Number.isFinite(item.value) && item.value > 0)
+      .slice()
+      .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label));
+    const total = rankedItems.reduce((sum, item) => sum + item.value, 0);
+    const groupedItems = [];
+    let groupedValue = 0;
+    let firstGroupedIndex = rankedItems.length;
+
+    while (firstGroupedIndex > 1 && groupedValue < total * 0.1) {
+      const item = rankedItems[--firstGroupedIndex];
+      groupedItems.unshift(item);
+      groupedValue += item.value;
+    }
+
+    if (groupedItems.length === 0) return rankedItems;
+    return [
+      ...rankedItems.slice(0, firstGroupedIndex),
+      { label: "Other", value: groupedValue, isOther: true },
+    ];
+  }
+
+  async function _downloadWorkbook(workbook, summary, pieChart) {
+    try {
+      let xlsxData = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+      if (pieChart) {
+        if (typeof JSZip === "undefined") {
+          throw new Error("The Excel chart library could not be loaded.");
+        }
+        xlsxData = await _addNativePieChart(
+          xlsxData,
+          summary.impactMethod,
+          pieChart.otherSliceIndex
+        );
+      }
+      _triggerDownload(
+        xlsxData,
+        `${_safeFilename(summary.clinicName)}-impact-breakdown.xlsx`,
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+    } catch (error) {
+      console.error("Failed to prepare the Excel report:", error);
+      alert("The Excel report could not be prepared. Check your internet connection and try again.");
+    }
+  }
+
+  async function _addNativePieChart(xlsxData, impactMethod, otherSliceIndex) {
+    const zip = await JSZip.loadAsync(xlsxData);
+    const worksheetPath = "xl/worksheets/sheet2.xml";
+    const contentTypesPath = "[Content_Types].xml";
+    const worksheetFile = zip.file(worksheetPath);
+    const contentTypesFile = zip.file(contentTypesPath);
+    if (!worksheetFile || !contentTypesFile) {
+      throw new Error("The Excel workbook is missing chart worksheet metadata.");
+    }
+    const [worksheetXml, contentTypesXml] = await Promise.all([
+      worksheetFile.async("string"),
+      contentTypesFile.async("string"),
+    ]);
+    const drawingId = "rId1";
+    const drawingXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <xdr:oneCellAnchor>
+    <xdr:from><xdr:col>3</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>1</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>
+    <xdr:ext cx="9144000" cy="5943600"/>
+    <xdr:graphicFrame macro="">
+      <xdr:nvGraphicFramePr><xdr:cNvPr id="2" name="Activity pie chart"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr>
+      <xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm>
+      <a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/chart"><c:chart xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:id="${drawingId}"/></a:graphicData></a:graphic>
+    </xdr:graphicFrame>
+    <xdr:clientData/>
+  </xdr:oneCellAnchor>
+</xdr:wsDr>`;
+    const drawingRelsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="${drawingId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="../charts/chart1.xml"/>
+</Relationships>`;
+    const title = impactMethod === "volunteerHours"
+      ? "VOLUNTEER HOURS BY ROLE"
+      : "CLINICAL SERVICES BY COUNT";
+    const sheetName = "Activity Chart";
+    const rowMatches = [...worksheetXml.matchAll(/<row\b[^>]*\br="(\d+)"/g)];
+    const dataLastRow = rowMatches.length > 0
+      ? Math.max(...rowMatches.map(match => Number(match[1])))
+      : 2;
+    const chartXml = _buildPieChartXml(title, sheetName, Math.max(2, dataLastRow), otherSliceIndex);
+    const chartRelationshipXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/>
+</Relationships>`;
+    const updatedWorksheetXml = worksheetXml.replace(
+      /<worksheet\b([^>]*)>/,
+      (match, attributes) => {
+        const withRelationshipNamespace = attributes.includes("xmlns:r=")
+          ? attributes
+          : `${attributes} xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"`;
+        return `<worksheet${withRelationshipNamespace}>`;
+      }
+    ).replace("</worksheet>", '<drawing r:id="rId1"/></worksheet>');
+    const chartContentTypes = `
+  <Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>
+  <Override PartName="/xl/charts/chart1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>`;
+    zip.file(worksheetPath, updatedWorksheetXml);
+    zip.file("xl/worksheets/_rels/sheet2.xml.rels", chartRelationshipXml);
+    zip.file("xl/drawings/drawing1.xml", drawingXml);
+    zip.file("xl/drawings/_rels/drawing1.xml.rels", drawingRelsXml);
+    zip.file("xl/charts/chart1.xml", chartXml);
+    zip.file(contentTypesPath, contentTypesXml.replace("</Types>", `${chartContentTypes}\n</Types>`));
+    return zip.generateAsync({ type: "uint8array" });
+  }
+
+  function _buildPieChartXml(title, sheetName, lastDataRow, otherSliceIndex) {
+    const escapedTitle = _escapeXML(title);
+    const escapedSheetName = _escapeXML(sheetName);
+    const otherSliceStyle = otherSliceIndex === null
+      ? ""
+      : `<c:dPt><c:idx val="${otherSliceIndex}"/><c:spPr><a:solidFill><a:srgbClr val="B8B8B8"/></a:solidFill><a:ln><a:noFill/></a:ln></c:spPr></c:dPt>`;
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<c:chartSpace xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <c:lang val="en-US"/>
+  <c:chart>
+    <c:title><c:tx><c:rich><a:bodyPr/><a:lstStyle/><a:p><a:pPr><a:defRPr/></a:pPr><a:r><a:rPr lang="en-US"/><a:t>${escapedTitle}</a:t></a:r><a:endParaRPr lang="en-US"/></a:p></c:rich></c:tx><c:layout/><c:overlay val="0"/></c:title>
+    <c:plotArea><c:layout/><c:pieChart><c:varyColors val="1"/><c:ser>
+      <c:idx val="0"/><c:order val="0"/>
+      ${otherSliceStyle}
+      <c:cat><c:strRef><c:f>'${escapedSheetName}'!$A$2:$A$${lastDataRow}</c:f></c:strRef></c:cat>
+      <c:val><c:numRef><c:f>'${escapedSheetName}'!$B$2:$B$${lastDataRow}</c:f></c:numRef></c:val>
+    </c:ser><c:dLbls><c:showLegendKey val="0"/><c:showVal val="0"/><c:showCatName val="1"/><c:showSerName val="0"/><c:showPercent val="1"/><c:showLeaderLines val="1"/><c:dLblPos val="outEnd"/></c:dLbls><c:firstSliceAng val="0"/></c:pieChart></c:plotArea>
+    <c:plotVisOnly val="1"/><c:dispBlanksAs val="gap"/>
+  </c:chart>
+</c:chartSpace>`;
+  }
+
+  function _escapeXML(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+  }
 
   function _fmt(value) {
     // Exports keep two decimal places so downloaded data retains full rate detail.

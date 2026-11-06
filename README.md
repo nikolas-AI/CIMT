@@ -64,10 +64,10 @@ python3 -m http.server 8000
 
 Then visit <http://localhost:8000>. Stop the server with `Ctrl+C`.
 
-The app is plain HTML, CSS, and JavaScript. It loads `xlsx-js-style` 1.2.0 from
-jsDelivr and the DM Serif Display and Inter fonts from Google Fonts, so those
-features need network access. If the XLSX library is unavailable, Excel export
-reports that it cannot prepare the download. PDF export opens a print-ready
+The app is plain HTML, CSS, and JavaScript. It loads `xlsx-js-style` 1.2.0 and
+JSZip 3.10.1 from jsDelivr and the DM Serif Display and Inter fonts from Google
+Fonts, so those features need network access. Excel exports include a separate
+activity worksheet with an editable pie chart. PDF export opens a print-ready
 browser window; allow pop-ups and use the browser's print dialog to save as PDF.
 
 The app starts with a blank report. The sample clinic and activity values in
