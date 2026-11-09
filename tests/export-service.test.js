@@ -167,6 +167,85 @@ test("the volunteer final report omits roles with zero hours", () => {
   assert.doesNotMatch(reportHTML, /Unused Role/);
 });
 
+test("the volunteer roles table is ranked by reported hours", () => {
+  context.summary = {
+    impactMethod: "volunteerHours",
+    serviceBreakdown: [],
+    volunteerBreakdown: [
+      { roleName: "Few Hours", category: "non medical", hours: 2, benchmarkRate: 100, estimatedValue: 200 },
+      { roleName: "Most Hours", category: "medical professional", hours: 8, benchmarkRate: 10, estimatedValue: 80 },
+      { roleName: "Middle Hours", category: "non medical", hours: 5, benchmarkRate: 20, estimatedValue: 100 },
+    ],
+    reportingPeriodFrom: "2026-01-01",
+    reportingPeriodTo: "2026-01-31",
+    clinicName: "Test Clinic",
+    totalEstimatedValue: 380,
+    volunteerValue: 380,
+    reportingPeriodClinicCost: null,
+  };
+
+  vm.runInContext("ExportService.downloadPDF(summary)", context, { timeout: 1000 });
+
+  const table = reportHTML.match(/<h2>Volunteer Roles \(Ranked By Hours\)<\/h2>[\s\S]*?<table>([\s\S]*?)<\/table>/);
+  assert.ok(table);
+  const roleNames = Array.from(table[1].matchAll(/<td>([^<]+)<\/td>/g), match => match[1]);
+  assert.deepEqual(roleNames, ["Most Hours", "Middle Hours", "Few Hours"]);
+});
+
+test("the clinical services breakdown table is ranked by reported counts", () => {
+  context.summary = {
+    impactMethod: "clinicalServices",
+    clinicName: "Test Clinic",
+    reportingPeriodFrom: "2026-01-01",
+    reportingPeriodTo: "2026-01-31",
+    totalEstimatedValue: 360,
+    clinicalServiceValue: 360,
+    reportingPeriodClinicCost: null,
+    serviceBreakdown: [
+      { serviceName: "Few Counts", code: "A", count: 4, benchmarkRate: 10, estimatedValue: 40 },
+      { serviceName: "Most Counts", code: "B", count: 12, benchmarkRate: 10, estimatedValue: 120 },
+      { serviceName: "Middle Counts", code: "C", count: 8, benchmarkRate: 25, estimatedValue: 200 },
+    ],
+    volunteerBreakdown: [],
+  };
+
+  vm.runInContext("ExportService.downloadPDF(summary)", context, { timeout: 1000 });
+
+  const table = reportHTML.match(/<h2>Clinical Services Breakdown \(Ranked by counts\)<\/h2>[\s\S]*?<table>([\s\S]*?)<\/table>/);
+  assert.ok(table);
+  const serviceNames = Array.from(table[1].matchAll(/<td>([^<]+)<\/td>/g), match => match[1]);
+  assert.deepEqual(serviceNames, ["Most Counts", "Middle Counts", "Few Counts"]);
+});
+
+test("the volunteer final report shows up to ten roles in its horizontal bars", () => {
+  const volunteerBreakdown = Array.from({ length: 12 }, (_value, index) => ({
+    roleName: `Role ${index + 1}`,
+    category: "non medical",
+    hours: index + 1,
+    benchmarkRate: 10,
+    estimatedValue: (index + 1) * 10,
+  }));
+  const totalEstimatedValue = volunteerBreakdown.reduce((sum, role) => sum + role.estimatedValue, 0);
+  context.summary = {
+    impactMethod: "volunteerHours",
+    serviceBreakdown: [],
+    volunteerBreakdown,
+    reportingPeriodFrom: "2026-01-01",
+    reportingPeriodTo: "2026-01-31",
+    clinicName: "Test Clinic",
+    totalEstimatedValue,
+    volunteerValue: totalEstimatedValue,
+    reportingPeriodClinicCost: null,
+  };
+
+  vm.runInContext("ExportService.downloadPDF(summary)", context, { timeout: 1000 });
+
+  assert.match(reportHTML, /Top ten volunteer roles by estimated value/);
+  assert.equal((reportHTML.match(/<div class="chart-row">/g) || []).length, 10);
+  assert.match(reportHTML, /Role 10/);
+  assert.doesNotMatch(reportHTML, /Role 11|Role 12/);
+});
+
 test("clinical services Excel export includes an editable activity pie chart", async () => {
   context.summary = {
     impactMethod: "clinicalServices",

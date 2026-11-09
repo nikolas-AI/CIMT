@@ -522,8 +522,8 @@ const ImpactSummaryView = (() => {
       const rows = ranking[mode === "visits" ? "byVisits" : "byValue"];
       const totalReportedUnits = ranking.byVisits.reduce((sum, row) => sum + row.count, 0);
       title.textContent = mode === "visits"
-        ? "Top services by number reported"
-        : "Top services by estimated value";
+        ? "Services by number reported"
+        : "Services by estimated value";
       const rankingNote = mode === "visits"
         ? AppCopy.summary.rankingByCountNote
         : AppCopy.summary.rankingNote;
@@ -585,7 +585,7 @@ const ImpactSummaryView = (() => {
   function _buildVolunteerHoursPieChart(summary) {
     return _buildQuantityPieChart({
       id: "volunteer-hours-composition",
-      title: "Volunteer hours by role",
+      title: "Distribution of volunteer roles",
       description: "Reported volunteer hours split by role. The smallest shares, totaling about 10%, are combined into Other.",
       otherLabel: "Other roles",
       unitLabel: "hours",
@@ -602,7 +602,7 @@ const ImpactSummaryView = (() => {
   function _buildServiceCountPieChart(summary) {
     return _buildQuantityPieChart({
       id: "clinical-services-composition",
-      title: "Clinical services by count",
+      title: "Distribution of clinical services provided",
       description: "Reported clinical service counts split by type. The smallest shares, totaling about 10%, are combined into Other.",
       otherLabel: "Other services",
       unitLabel: "services",
@@ -678,7 +678,7 @@ const ImpactSummaryView = (() => {
     section.className = "summary-section service-ranking";
     section.setAttribute("aria-labelledby", "volunteer-ranking-heading");
     section.innerHTML = `
-      <h2 class="summary-section__heading" id="volunteer-ranking-heading">Volunteer roles ranked by total hours</h2>
+      <h2 class="summary-section__heading" id="volunteer-ranking-heading">Volunteer roles ranked by hours</h2>
       <p class="summary-section__intro">Roles are ranked by reported volunteer hours. Share shows each role’s portion of the total estimated volunteer value.</p>
       <div class="service-ranking__table-wrap">
         <table class="rate-table service-ranking__table" aria-label="Volunteer role ranking by total hours">

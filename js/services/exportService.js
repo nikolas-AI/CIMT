@@ -832,8 +832,8 @@ const ExportService = (() => {
   <Relationship Id="${drawingId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="../charts/chart1.xml"/>
 </Relationships>`;
     const title = impactMethod === "volunteerHours"
-      ? "VOLUNTEER HOURS BY ROLE"
-      : "CLINICAL SERVICES BY COUNT";
+      ? "VOLUNTEER ROLES DISTRIBUTION"
+      : "DISTRIBUTION OF CLINICAL SERVICES PROVIDED";
     const sheetName = "Activity Chart";
     const rowMatches = [...worksheetXml.matchAll(/<row\b[^>]*\br="(\d+)"/g)];
     const dataLastRow = rowMatches.length > 0
@@ -990,7 +990,11 @@ const ExportService = (() => {
       </div>
     `;
 
-    const svcRows = summary.serviceBreakdown.filter(row => row.count > 0).map(row => `
+    const svcRows = summary.serviceBreakdown
+      .filter(row => row.count > 0)
+      .slice()
+      .sort((a, b) => b.count - a.count || a.serviceName.localeCompare(b.serviceName))
+      .map(row => `
       <tr>
         <td>${_escapeHTML(row.serviceName)}</td>
         <td class="service-code">${_escapeHTML(row.code)}</td>
@@ -1005,6 +1009,8 @@ const ExportService = (() => {
 
     const volRows = summary.volunteerBreakdown
       .filter(row => row.hours > 0)
+      .slice()
+      .sort((a, b) => b.hours - a.hours || a.roleName.localeCompare(b.roleName))
       .map(row => `
       <tr>
         <td>${_escapeHTML(row.roleName)}</td>
@@ -1088,12 +1094,12 @@ const ExportService = (() => {
         </section>`
       : "";
 
-    const topVolunteerRoles = rankedVolunteerRoles.slice(0, 5);
-    const volunteerChartHeading = rankedVolunteerRoles.length > 5
-      ? "Top five volunteer roles by estimated value"
+    const topVolunteerRoles = rankedVolunteerRoles.slice(0, 10);
+    const volunteerChartHeading = rankedVolunteerRoles.length > 10
+      ? "Top ten volunteer roles by estimated value"
       : "Volunteer roles by estimated value";
-    const volunteerChartIntro = rankedVolunteerRoles.length > 5
-      ? "Showing the five highest-value reported volunteer roles."
+    const volunteerChartIntro = rankedVolunteerRoles.length > 10
+      ? "Showing the ten highest-value reported volunteer roles."
       : "Reported volunteer roles ranked by estimated value.";
     const maximumVolunteerValue = Math.max(
       ...topVolunteerRoles.map(role => role.estimatedValue),
@@ -1119,12 +1125,12 @@ const ExportService = (() => {
       : "";
 
     const rankedServices = summary.serviceImpactRanking?.byValue || [];
-    const topServices = rankedServices.slice(0, 5);
-    const serviceChartHeading = rankedServices.length > 5
-      ? "Top five services by estimated value"
+    const topServices = rankedServices.slice(0, 10);
+    const serviceChartHeading = rankedServices.length > 10
+      ? "Top ten services by estimated value"
       : "Services by estimated value";
-    const serviceChartIntro = rankedServices.length > 5
-      ? "Showing the five highest-value reported services."
+    const serviceChartIntro = rankedServices.length > 10
+      ? "Showing the ten highest-value reported services."
       : "Reported services ranked by estimated value.";
     const maximumServiceValue = Math.max(
       ...topServices.map(service => service.estimatedValue),
@@ -1149,7 +1155,7 @@ const ExportService = (() => {
     const volunteerHoursPieHTML = isVolunteerReport
       ? CompositionPieChart.render({
         id: "volunteer-hours-composition",
-        title: "Volunteer hours by role",
+        title: "Distribution of volunteer roles",
         description: "Reported volunteer hours split by role. Small shares are combined into Other.",
         otherLabel: "Other roles",
         unitLabel: "hours",
@@ -1165,7 +1171,7 @@ const ExportService = (() => {
     const clinicalCountsPieHTML = !isVolunteerReport
       ? CompositionPieChart.render({
         id: "clinical-services-composition",
-        title: "Clinical services by count",
+        title: "Distribution of clinical services provided",
         description: "Reported clinical service counts split by type. Small shares are combined into Other.",
         otherLabel: "Other services",
         unitLabel: "services",
@@ -1421,7 +1427,7 @@ ${volunteerChartHTML}
 ${volunteerBreakdownHTML}
 ${budgetHTML}
 ${!isVolunteerReport ? `<section class="report-section service-breakdown">
-  <h2>Clinical Services Breakdown</h2>
+  <h2>Clinical Services Breakdown (Ranked by counts)</h2>
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Service</th><th class="service-code" scope="col">Code</th><th class="numeric" scope="col">Reported units</th><th class="numeric" scope="col">Reference rate</th><th class="numeric" scope="col">Estimated value</th><th class="numeric" scope="col">Value share</th></tr></thead>
     ${tableBodyHTML(svcRows, `<tr class="table-total"><th colspan="4" class="numeric" scope="row">Clinical services total</th><th class="numeric">${_fmt(summary.clinicalServiceValue)}</th><th class="numeric">${summary.clinicalServiceValue > 0 ? "100.0%" : "0.0%"}</th></tr>`)}
@@ -1430,7 +1436,7 @@ ${!isVolunteerReport ? `<section class="report-section service-breakdown">
 ${!isVolunteerReport ? rateDataNoteHTML : ""}
 ${clinicalCountsPieHTML}
 ${isVolunteerReport ? `<section class="report-section">
-  <h2>Volunteer Time</h2>
+  <h2>Volunteer Roles (Ranked By Hours)</h2>
   <div class="table-wrap"><table>
     <thead><tr><th scope="col">Role</th><th scope="col">Type</th><th class="numeric" scope="col">Volunteer hours</th><th class="numeric" scope="col">Reference rate / hour</th><th class="numeric" scope="col">Estimated value</th></tr></thead>
     ${tableBodyHTML(volRows, `<tr class="table-total"><th colspan="4" class="numeric" scope="row">Total volunteer time value</th><th class="numeric">${_fmt(summary.volunteerValue)}</th></tr>`)}
