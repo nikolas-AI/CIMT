@@ -782,7 +782,8 @@ const ExportService = (() => {
         otherSliceIndex: activityChartItems.some(item => item.isOther)
           ? activityChartItems.length - 1
           : null,
-        anchorColumn: 3,
+        anchorColumn: 0,
+        anchorRow: rows.length + 2,
       },
     ];
     if (valueChartItems.length > 0) {
@@ -795,7 +796,8 @@ const ExportService = (() => {
           otherSliceIndex: valueChartItems.some(item => item.isOther)
             ? valueChartItems.length - 1
             : null,
-          anchorColumn: 18,
+          anchorColumn: 0,
+          anchorRow: rows.length + 36,
         }
       );
     }
@@ -864,7 +866,7 @@ const ExportService = (() => {
     const drawingXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
 ${charts.map((chart, index) => `  <xdr:oneCellAnchor>
-    <xdr:from><xdr:col>${chart.anchorColumn}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>1</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>
+    <xdr:from><xdr:col>${chart.anchorColumn}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${chart.anchorRow}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>
     <xdr:ext cx="9144000" cy="5943600"/>
     <xdr:graphicFrame macro="">
       <xdr:nvGraphicFramePr><xdr:cNvPr id="${index + 2}" name="${_escapeXML(chart.name)}"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr>

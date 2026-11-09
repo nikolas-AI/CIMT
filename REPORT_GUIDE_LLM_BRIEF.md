@@ -72,7 +72,7 @@ The PDF action opens a print-ready report in a new browser window and invokes th
 
 ## Excel workbook
 
-The Excel download creates a formatted `.xlsx` workbook in the browser. The primary worksheet is named **Impact Summary** and contains clinic/report details, method-specific summary and breakdown data, source references, and a disclaimer. A second worksheet named **Activity Chart** is added when there are positive activity items. It contains two side-by-side data tables and native pie charts: activity quantity (hours or service counts) and estimated value (USD). Each chart groups its own smallest shares into **Other** as needed; the detailed method table retains the reported positive items.
+The Excel download creates a formatted `.xlsx` workbook in the browser. The primary worksheet is named **Impact Summary** and contains clinic/report details, method-specific summary and breakdown data, source references, and a disclaimer. A second worksheet named **Activity Chart** is added when there are positive activity items. It contains two side-by-side data tables for activity quantity (hours or service counts) and estimated value (USD), with the corresponding native pie charts placed below the data tables and stacked vertically to avoid covering data. Each chart groups its own smallest shares into **Other** as needed; the detailed method table retains the reported positive items.
 
 The workbook uses formatted section headings, currency/percentage number formats, column filters for the method-specific activity table, and clickable source URLs. It is a structured workbook, not a second copy of the complete narrative PDF.
 
@@ -149,4 +149,3 @@ Explain that rates are in-app reference values, not the clinic's actual charges 
 6. Step-by-step copy, print/save-as-PDF, and Excel download instructions.
 7. How to interpret ranks, shares, charts, “Other,” and reference rates.
 8. Limitations, source-rate caveat, privacy, and troubleshooting.
-

@@ -340,7 +340,19 @@ test("clinical services Excel export includes an editable activity pie chart", a
   assert.doesNotMatch(lastZipFiles["xl/charts/chart1.xml"], /<c:legend>/);
   assert.doesNotMatch(lastZipFiles["xl/charts/chart2.xml"], /<c:legend>/);
   assert.match(lastZipFiles["xl/worksheets/sheet2.xml"], /<drawing r:id="rId1"\/>/);
-  assert.equal((lastZipFiles["xl/drawings/drawing1.xml"].match(/<xdr:oneCellAnchor>/g) || []).length, 2);
+  const drawingXml = lastZipFiles["xl/drawings/drawing1.xml"];
+  const chartAnchors = Array.from(
+    drawingXml.matchAll(/<xdr:from><xdr:col>(\d+)<\/xdr:col>.*?<xdr:row>(\d+)<\/xdr:row>/g),
+    match => ({ column: Number(match[1]), row: Number(match[2]) })
+  );
+  const lastDataRow = Math.max(...Array.from(
+    lastZipFiles["xl/worksheets/sheet2.xml"].matchAll(/<row\b[^>]*\br="(\d+)"/g),
+    match => Number(match[1])
+  ));
+  assert.equal(chartAnchors.length, 2);
+  assert.deepEqual(chartAnchors.map(anchor => anchor.column), [0, 0]);
+  assert.ok(chartAnchors.every(anchor => anchor.row > lastDataRow));
+  assert.ok(chartAnchors[1].row - chartAnchors[0].row >= 32);
   assert.match(lastZipFiles["xl/drawings/_rels/drawing1.xml.rels"], /Target="\.\.\/charts\/chart2\.xml"/);
   assert.match(lastZipFiles["[Content_Types].xml"], /PartName="\/xl\/charts\/chart2\.xml"/);
   assert.equal(appendedSheets["Activity Chart"].A2.v, "Higher value description");
