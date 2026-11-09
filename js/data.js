@@ -138,8 +138,6 @@ const VOLUNTEER_ROLES = [
 
 // -----------------------------------------------------------------
 // CLINICAL SERVICES
-// Benchmark rates are temporary randomized placeholders, not reimbursement
-// estimates. Codes are CPT/HCPCS.
 // -----------------------------------------------------------------
 // Clinical services additionally carry their CPT/HCPCS code and benchmark rate.
 // UI components read these fields instead of maintaining a second service list.
