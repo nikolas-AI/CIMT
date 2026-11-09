@@ -14,7 +14,7 @@ let lastZipFiles;
 const zip = {
   loadAsync: async workbook => {
     const lastRow = Math.max(...Object.keys(workbook.chartRows)
-      .filter(cell => /^[AB]\d+$/.test(cell)).map(cell =>
+      .filter(cell => /^[A-E]\d+$/.test(cell)).map(cell =>
       Number(cell.match(/\d+$/)[0])
       ));
     const files = {
@@ -326,21 +326,38 @@ test("clinical services Excel export includes an editable activity pie chart", a
   assert.ok(rows.some(row => row[0] === context.AppCopy.summary.costComparisonNote));
   assert.ok(rows.some(row => row[0] === "Reference Organization"));
   assert.equal(rows.at(-1)[0], context.AppCopy.summary.shortDisclaimer());
-  assert.match(lastZipFiles["xl/charts/chart1.xml"], /CLINICAL SERVICES BY COUNT/);
+  assert.match(lastZipFiles["xl/charts/chart1.xml"], /DISTRIBUTION OF CLINICAL SERVICES PROVIDED/);
   assert.match(lastZipFiles["xl/charts/chart1.xml"], /'Activity Chart'!\$A\$2:\$A\$4/);
   assert.match(lastZipFiles["xl/charts/chart1.xml"], /'Activity Chart'!\$B\$2:\$B\$4/);
+  assert.match(lastZipFiles["xl/charts/chart2.xml"], /ESTIMATED VALUE BY CLINICAL SERVICE/);
+  assert.match(lastZipFiles["xl/charts/chart2.xml"], /'Activity Chart'!\$D\$2:\$D\$4/);
+  assert.match(lastZipFiles["xl/charts/chart2.xml"], /'Activity Chart'!\$E\$2:\$E\$4/);
   assert.match(lastZipFiles["xl/charts/chart1.xml"], /<c:showLeaderLines val="1"\/><c:dLblPos val="outEnd"\/>/);
   assert.match(lastZipFiles["xl/charts/chart1.xml"], /<c:showSerName val="0"\/>/);
   assert.match(lastZipFiles["xl/charts/chart1.xml"], /<c:showPercent val="1"\/>/);
+  assert.match(lastZipFiles["xl/charts/chart2.xml"], /<c:showLeaderLines val="1"\/><c:dLblPos val="outEnd"\/>/);
+  assert.match(lastZipFiles["xl/charts/chart2.xml"], /<c:showPercent val="1"\/>/);
   assert.doesNotMatch(lastZipFiles["xl/charts/chart1.xml"], /<c:legend>/);
+  assert.doesNotMatch(lastZipFiles["xl/charts/chart2.xml"], /<c:legend>/);
   assert.match(lastZipFiles["xl/worksheets/sheet2.xml"], /<drawing r:id="rId1"\/>/);
+  assert.equal((lastZipFiles["xl/drawings/drawing1.xml"].match(/<xdr:oneCellAnchor>/g) || []).length, 2);
+  assert.match(lastZipFiles["xl/drawings/_rels/drawing1.xml.rels"], /Target="\.\.\/charts\/chart2\.xml"/);
+  assert.match(lastZipFiles["[Content_Types].xml"], /PartName="\/xl\/charts\/chart2\.xml"/);
   assert.equal(appendedSheets["Activity Chart"].A2.v, "Higher value description");
   assert.equal(appendedSheets["Activity Chart"].B2.v, 100);
   assert.equal(appendedSheets["Activity Chart"].A3.v, "Lower value description");
   assert.equal(appendedSheets["Activity Chart"].B3.v, 8);
   assert.equal(appendedSheets["Activity Chart"].A4.v, "Other");
   assert.equal(appendedSheets["Activity Chart"].B4.v, 12);
+  assert.equal(appendedSheets["Activity Chart"].D2.v, "Higher value description");
+  assert.equal(appendedSheets["Activity Chart"].E2.v, 200);
+  assert.equal(appendedSheets["Activity Chart"].D3.v, "Lower value description");
+  assert.equal(appendedSheets["Activity Chart"].E3.v, 50);
+  assert.equal(appendedSheets["Activity Chart"].D4.v, "Other");
+  assert.equal(appendedSheets["Activity Chart"].E4.v, 50);
+  assert.equal(appendedSheets["Activity Chart"].E2.s.numFmt, "$#,##0.00");
   assert.match(lastZipFiles["xl/charts/chart1.xml"], /<c:dPt><c:idx val="2"\/><c:spPr><a:solidFill><a:srgbClr val="B8B8B8"\/><\/a:solidFill>/);
+  assert.match(lastZipFiles["xl/charts/chart2.xml"], /<c:dPt><c:idx val="2"\/><c:spPr><a:solidFill><a:srgbClr val="B8B8B8"\/><\/a:solidFill>/);
 });
 
 test("volunteer Excel export includes hours by role in its activity pie chart", async () => {
@@ -412,9 +429,14 @@ test("volunteer Excel export includes hours by role in its activity pie chart", 
   assert.ok(rows.some(row => row[0] === context.AppCopy.summary.costComparisonNote));
   assert.ok(rows.some(row => row[0] === "Reference Organization"));
   assert.equal(rows.at(-1)[0], context.AppCopy.summary.shortDisclaimer("volunteerHours"));
-  assert.match(lastZipFiles["xl/charts/chart1.xml"], /VOLUNTEER HOURS BY ROLE/);
+  assert.match(lastZipFiles["xl/charts/chart1.xml"], /VOLUNTEER ROLES DISTRIBUTION/);
+  assert.match(lastZipFiles["xl/charts/chart2.xml"], /ESTIMATED VALUE BY VOLUNTEER ROLE/);
+  assert.match(lastZipFiles["xl/charts/chart2.xml"], /'Activity Chart'!\$D\$2:\$D\$2/);
+  assert.match(lastZipFiles["xl/charts/chart2.xml"], /'Activity Chart'!\$E\$2:\$E\$2/);
   assert.equal(lastZipFiles["xl/worksheets/sheet2.xml"].match(/<drawing\b/g)?.length, 1);
   assert.equal(appendedSheets["Activity Chart"].A2.v, "Active Non-Medical Role");
   assert.equal(appendedSheets["Activity Chart"].B2.v, 4);
+  assert.equal(appendedSheets["Activity Chart"].D2.v, "Active Non-Medical Role");
+  assert.equal(appendedSheets["Activity Chart"].E2.v, 100);
   assert.equal(appendedSheets["Activity Chart"].A3, undefined);
 });

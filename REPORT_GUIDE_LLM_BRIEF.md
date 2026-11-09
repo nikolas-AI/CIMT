@@ -72,7 +72,7 @@ The PDF action opens a print-ready report in a new browser window and invokes th
 
 ## Excel workbook
 
-The Excel download creates a formatted `.xlsx` workbook in the browser. The primary worksheet is named **Impact Summary** and contains clinic/report details, method-specific summary and breakdown data, source references, and a disclaimer. A second worksheet named **Activity Chart** is added when there are positive activity items; it contains the quantities used for a native pie chart. The smaller activity shares may be grouped as **Other** in this chart worksheet/chart; the detailed method table retains the reported positive items.
+The Excel download creates a formatted `.xlsx` workbook in the browser. The primary worksheet is named **Impact Summary** and contains clinic/report details, method-specific summary and breakdown data, source references, and a disclaimer. A second worksheet named **Activity Chart** is added when there are positive activity items. It contains two side-by-side data tables and native pie charts: activity quantity (hours or service counts) and estimated value (USD). Each chart groups its own smallest shares into **Other** as needed; the detailed method table retains the reported positive items.
 
 The workbook uses formatted section headings, currency/percentage number formats, column filters for the method-specific activity table, and clickable source URLs. It is a structured workbook, not a second copy of the complete narrative PDF.
 
@@ -89,7 +89,7 @@ The **Impact Summary** worksheet has these sections:
 7. **Sources and References** — organization, period, reference title, and URL.
 8. Disclaimer.
 
-When positive role hours exist, **Activity Chart** contains the role labels and hours and supports a pie chart titled **Volunteer Roles Distribution**.
+When positive role hours exist, **Activity Chart** contains role labels/hours and role labels/estimated values. It includes a **Volunteer Roles Distribution** pie chart and an **Estimated Value by Volunteer Role** pie chart.
 
 ### Excel: clinical-services method
 
@@ -104,7 +104,7 @@ The **Impact Summary** worksheet has these sections:
 7. **Sources and References** — organization, period, reference title, and URL.
 8. Disclaimer.
 
-When positive service counts exist, **Activity Chart** contains service labels and counts and supports a pie chart titled **Distribution of Clinical Services Provided**.
+When positive service counts exist, **Activity Chart** contains service labels/counts and service labels/estimated values. It includes a **Distribution of Clinical Services Provided** pie chart and an **Estimated Value by Clinical Service** pie chart.
 
 ### Important distinction: Excel vs. PDF/on-screen rankings
 
@@ -112,7 +112,7 @@ When positive service counts exist, **Activity Chart** contains service labels a
 - The clinical Excel **Services** table is sorted by **estimated value**.
 - The PDF volunteer role table is ranked by **hours**; the Excel volunteer **Volunteer Roles** table is sorted by **estimated value**.
 - Do not imply that every table or chart uses the same ranking. Tell users to check the section title and column headings.
-- Workbook chart sheets summarize quantities (hours or service counts), not estimated dollar values. The workbook detailed tables contain rate and estimated-value columns.
+- The workbook includes separate pie charts for activity quantity and estimated value. The value chart shows each role/service's share of the total estimated value; it is not revenue or a measure of reimbursement.
 - The Excel workbook does not include the full PDF narrative, PDF horizontal ranking charts, or the interactive on-screen clinical ranking toggle.
 
 ## How to describe the fields
@@ -149,5 +149,4 @@ Explain that rates are in-app reference values, not the clinic's actual charges 
 6. Step-by-step copy, print/save-as-PDF, and Excel download instructions.
 7. How to interpret ranks, shares, charts, “Other,” and reference rates.
 8. Limitations, source-rate caveat, privacy, and troubleshooting.
-
 

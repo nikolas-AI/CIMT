@@ -519,11 +519,13 @@ const ExportService = (() => {
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, sheet, AppCopy.exportCopy.workbookSummary);
-    const pieChart = _appendActivityChartSheet(workbook, {
+    const pieCharts = _appendActivityChartSheet(workbook, {
+      impactMethod: "volunteerHours",
       quantityLabel: "Hours",
-      items: roles.map(role => ({ label: role.roleName, value: role.hours })),
+      activityItems: roles.map(role => ({ label: role.roleName, value: role.hours })),
+      valueItems: roles.map(role => ({ label: role.roleName, value: role.estimatedValue })),
     });
-    return _downloadWorkbook(workbook, summary, pieChart);
+    return _downloadWorkbook(workbook, summary, pieCharts);
   }
 
   function _downloadClinicalServicesExcel(summary) {
@@ -725,32 +727,82 @@ const ExportService = (() => {
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, sheet, AppCopy.exportCopy.workbookSummary);
-    const pieChart = _appendActivityChartSheet(workbook, {
+    const pieCharts = _appendActivityChartSheet(workbook, {
+      impactMethod: "clinicalServices",
       quantityLabel: "Service count",
-      items: services.map(service => ({
+      activityItems: services.map(service => ({
         label: service.serviceDescription,
         value: service.count,
       })),
+      valueItems: services.map(service => ({
+        label: service.serviceDescription,
+        value: service.estimatedValue,
+      })),
     });
-    return _downloadWorkbook(workbook, summary, pieChart);
+    return _downloadWorkbook(workbook, summary, pieCharts);
   }
 
   // ---------------------------------------------------------------
   // Private helpers
   // ---------------------------------------------------------------
 
-  function _appendActivityChartSheet(workbook, { quantityLabel, items }) {
-    if (items.length === 0) return false;
-    const chartItems = _groupChartItems(items);
-    const sheet = XLSX.utils.aoa_to_sheet([
-      ["Activity", quantityLabel],
-      ...chartItems.map(item => [item.label, item.value]),
-    ]);
-    sheet["!cols"] = [{ wch: 36 }, { wch: 18 }];
+  function _appendActivityChartSheet(workbook, { impactMethod, quantityLabel, activityItems, valueItems }) {
+    if (activityItems.length === 0) return false;
+    const activityChartItems = _groupChartItems(activityItems);
+    const valueChartItems = _groupChartItems(valueItems);
+    const rowCount = Math.max(activityChartItems.length, valueChartItems.length);
+    const rows = [
+      ["Activity", quantityLabel, undefined, "Activity", "Estimated value (USD)"],
+      ...Array.from({ length: rowCount }, (_, index) => [
+        activityChartItems[index]?.label,
+        activityChartItems[index]?.value,
+        undefined,
+        valueChartItems[index]?.label,
+        valueChartItems[index]?.value,
+      ]),
+    ];
+    const sheet = XLSX.utils.aoa_to_sheet(rows);
+    sheet["!cols"] = [{ wch: 36 }, { wch: 18 }, { wch: 3 }, { wch: 36 }, { wch: 22 }];
+    valueChartItems.forEach((_item, index) => {
+      const cell = sheet[XLSX.utils.encode_cell({ r: index + 1, c: 4 })];
+      if (cell) cell.s = { ...(cell.s || {}), numFmt: "$#,##0.00" };
+    });
     XLSX.utils.book_append_sheet(workbook, sheet, "Activity Chart");
-    return {
-      otherSliceIndex: chartItems.some(item => item.isOther) ? chartItems.length - 1 : null,
-    };
+    const chartPrefix = impactMethod === "volunteerHours"
+      ? "VOLUNTEER ROLES"
+      : "CLINICAL SERVICES";
+    const charts = [
+      {
+        title: impactMethod === "volunteerHours"
+          ? "VOLUNTEER ROLES DISTRIBUTION"
+          : "DISTRIBUTION OF CLINICAL SERVICES PROVIDED",
+        categoryColumn: "A",
+        valueColumn: "B",
+        lastDataRow: activityChartItems.length + 1,
+        otherSliceIndex: activityChartItems.some(item => item.isOther)
+          ? activityChartItems.length - 1
+          : null,
+        anchorColumn: 3,
+      },
+    ];
+    if (valueChartItems.length > 0) {
+      charts.push(
+        {
+          title: `ESTIMATED VALUE BY ${impactMethod === "volunteerHours" ? "VOLUNTEER ROLE" : "CLINICAL SERVICE"}`,
+          categoryColumn: "D",
+          valueColumn: "E",
+          lastDataRow: valueChartItems.length + 1,
+          otherSliceIndex: valueChartItems.some(item => item.isOther)
+            ? valueChartItems.length - 1
+            : null,
+          anchorColumn: 18,
+        }
+      );
+    }
+    return charts.map((chart, index) => ({
+      ...chart,
+      name: `${chartPrefix} pie chart ${index + 1}`,
+    }));
   }
 
   function _groupChartItems(items) {
@@ -776,18 +828,14 @@ const ExportService = (() => {
     ];
   }
 
-  async function _downloadWorkbook(workbook, summary, pieChart) {
+  async function _downloadWorkbook(workbook, summary, pieCharts) {
     try {
       let xlsxData = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-      if (pieChart) {
+      if (pieCharts) {
         if (typeof JSZip === "undefined") {
           throw new Error("The Excel chart library could not be loaded.");
         }
-        xlsxData = await _addNativePieChart(
-          xlsxData,
-          summary.impactMethod,
-          pieChart.otherSliceIndex
-        );
+        xlsxData = await _addNativePieCharts(xlsxData, pieCharts);
       }
       _triggerDownload(
         xlsxData,
@@ -800,7 +848,7 @@ const ExportService = (() => {
     }
   }
 
-  async function _addNativePieChart(xlsxData, impactMethod, otherSliceIndex) {
+  async function _addNativePieCharts(xlsxData, charts) {
     const zip = await JSZip.loadAsync(xlsxData);
     const worksheetPath = "xl/worksheets/sheet2.xml";
     const contentTypesPath = "[Content_Types].xml";
@@ -813,33 +861,24 @@ const ExportService = (() => {
       worksheetFile.async("string"),
       contentTypesFile.async("string"),
     ]);
-    const drawingId = "rId1";
     const drawingXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
-  <xdr:oneCellAnchor>
-    <xdr:from><xdr:col>3</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>1</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>
+${charts.map((chart, index) => `  <xdr:oneCellAnchor>
+    <xdr:from><xdr:col>${chart.anchorColumn}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>1</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>
     <xdr:ext cx="9144000" cy="5943600"/>
     <xdr:graphicFrame macro="">
-      <xdr:nvGraphicFramePr><xdr:cNvPr id="2" name="Activity pie chart"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr>
+      <xdr:nvGraphicFramePr><xdr:cNvPr id="${index + 2}" name="${_escapeXML(chart.name)}"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr>
       <xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm>
-      <a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/chart"><c:chart xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:id="${drawingId}"/></a:graphicData></a:graphic>
+      <a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/chart"><c:chart xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:id="rId${index + 1}"/></a:graphicData></a:graphic>
     </xdr:graphicFrame>
     <xdr:clientData/>
-  </xdr:oneCellAnchor>
+  </xdr:oneCellAnchor>`).join("\n")}
 </xdr:wsDr>`;
     const drawingRelsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="${drawingId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="../charts/chart1.xml"/>
+${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="../charts/chart${index + 1}.xml"/>`).join("\n")}
 </Relationships>`;
-    const title = impactMethod === "volunteerHours"
-      ? "VOLUNTEER ROLES DISTRIBUTION"
-      : "DISTRIBUTION OF CLINICAL SERVICES PROVIDED";
     const sheetName = "Activity Chart";
-    const rowMatches = [...worksheetXml.matchAll(/<row\b[^>]*\br="(\d+)"/g)];
-    const dataLastRow = rowMatches.length > 0
-      ? Math.max(...rowMatches.map(match => Number(match[1])))
-      : 2;
-    const chartXml = _buildPieChartXml(title, sheetName, Math.max(2, dataLastRow), otherSliceIndex);
     const chartRelationshipXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/>
@@ -853,19 +892,34 @@ const ExportService = (() => {
         return `<worksheet${withRelationshipNamespace}>`;
       }
     ).replace("</worksheet>", '<drawing r:id="rId1"/></worksheet>');
-    const chartContentTypes = `
-  <Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>
-  <Override PartName="/xl/charts/chart1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>`;
+    const chartContentTypes = [
+      '  <Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>',
+      ...charts.map((_chart, index) =>
+        `  <Override PartName="/xl/charts/chart${index + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>`
+      ),
+    ].join("\n");
     zip.file(worksheetPath, updatedWorksheetXml);
     zip.file("xl/worksheets/_rels/sheet2.xml.rels", chartRelationshipXml);
     zip.file("xl/drawings/drawing1.xml", drawingXml);
     zip.file("xl/drawings/_rels/drawing1.xml.rels", drawingRelsXml);
-    zip.file("xl/charts/chart1.xml", chartXml);
+    charts.forEach((chart, index) => {
+      zip.file(
+        `xl/charts/chart${index + 1}.xml`,
+        _buildPieChartXml(
+          chart.title,
+          sheetName,
+          chart.lastDataRow,
+          chart.otherSliceIndex,
+          chart.categoryColumn,
+          chart.valueColumn
+        )
+      );
+    });
     zip.file(contentTypesPath, contentTypesXml.replace("</Types>", `${chartContentTypes}\n</Types>`));
     return zip.generateAsync({ type: "uint8array" });
   }
 
-  function _buildPieChartXml(title, sheetName, lastDataRow, otherSliceIndex) {
+  function _buildPieChartXml(title, sheetName, lastDataRow, otherSliceIndex, categoryColumn, valueColumn) {
     const escapedTitle = _escapeXML(title);
     const escapedSheetName = _escapeXML(sheetName);
     const otherSliceStyle = otherSliceIndex === null
@@ -879,8 +933,8 @@ const ExportService = (() => {
     <c:plotArea><c:layout/><c:pieChart><c:varyColors val="1"/><c:ser>
       <c:idx val="0"/><c:order val="0"/>
       ${otherSliceStyle}
-      <c:cat><c:strRef><c:f>'${escapedSheetName}'!$A$2:$A$${lastDataRow}</c:f></c:strRef></c:cat>
-      <c:val><c:numRef><c:f>'${escapedSheetName}'!$B$2:$B$${lastDataRow}</c:f></c:numRef></c:val>
+      <c:cat><c:strRef><c:f>'${escapedSheetName}'!$${categoryColumn}$2:$${categoryColumn}$${lastDataRow}</c:f></c:strRef></c:cat>
+      <c:val><c:numRef><c:f>'${escapedSheetName}'!$${valueColumn}$2:$${valueColumn}$${lastDataRow}</c:f></c:numRef></c:val>
     </c:ser><c:dLbls><c:showLegendKey val="0"/><c:showVal val="0"/><c:showCatName val="1"/><c:showSerName val="0"/><c:showPercent val="1"/><c:showLeaderLines val="1"/><c:dLblPos val="outEnd"/></c:dLbls><c:firstSliceAng val="0"/></c:pieChart></c:plotArea>
     <c:plotVisOnly val="1"/><c:dispBlanksAs val="gap"/>
   </c:chart>
