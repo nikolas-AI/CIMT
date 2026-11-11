@@ -1023,20 +1023,6 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
       Number(summary.mostImpactfulService.clinicalValueShare || 0) > 0
       ? ` ${summary.mostImpactfulService.serviceName} represented ${_sharePercent(summary.mostImpactfulService.clinicalValueShare)}% of the estimated service value.`
       : "";
-    const funderReadyStatement = isVolunteerReport
-      ? AppCopy.summary.funderReadyVolunteerStatement(
-        clinicName,
-        activityCount,
-        period.replace("–", " to "),
-        _fmt(summary.totalEstimatedValue)
-      )
-      : AppCopy.summary.funderReadyServicesStatement(
-        clinicName,
-        serviceCount > 0 ? `${activityCount} clinical services` : "clinical activity",
-        period.replace("–", " to "),
-        _fmt(summary.totalEstimatedValue),
-        topServiceSentence
-      );
 
     const metricCard = (label, value, note = "") => `
       <div class="metric-card">
@@ -1365,7 +1351,6 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
   .callout strong { color: var(--navy); }
   .callout--note { margin-top: 12px; font-size: 10px; }
   .narrative { margin: 0 0 20px; color: var(--slate); font-size: 13px; line-height: 1.7; }
-  .funder-statement { padding: 16px 18px; color: var(--navy); background: rgba(30,107,99,.04); border: 1px solid rgba(30,107,99,.18); border-left: 4px solid var(--teal); }
   .report-section { margin: 0 0 22px; break-inside: auto; page-break-inside: auto; }
   h2 {
     margin: 0 0 10px;
@@ -1500,10 +1485,6 @@ ${isVolunteerReport ? `<section class="report-section">
 </section>` : ""}
 ${isVolunteerReport ? rateDataNoteHTML : ""}
 ${volunteerHoursPieHTML}
-<section class="report-section funder-section">
-  <h2>${_escapeHTML(AppCopy.summary.funderReadyTitle)}</h2>
-  <p class="funder-statement">${_escapeHTML(funderReadyStatement)}</p>
-</section>
 <section class="report-section">
   <h2>${_escapeHTML(AppCopy.summaryView.methodologySectionTitle)}</h2>
   <ul class="sources">${methodologyItems}</ul>

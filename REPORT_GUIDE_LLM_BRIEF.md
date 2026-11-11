@@ -30,11 +30,10 @@ The summary screen and print/PDF report identify the clinic and reporting period
 - A prominent total estimated value, labeled for the selected method.
 - A method-specific activity total: volunteer hours or clinical-service counts.
 - An estimate disclaimer and a short narrative explaining the estimate.
-- A suggested impact statement for grants and donors. Users can copy it; they should review and adapt it before sharing.
 - Methodology and relevant source references.
 - If clinic cost was entered, an additional cost comparison, including the reported clinic cost, estimated value, value per dollar of reported cost, and a percentage comparison.
 
-On the summary screen, users can also view method-specific charts and, for clinical services, switch the ranking between estimated value and count. The screen includes a **Copy impact statement** action and **Download PDF report** and **Download Excel workbook** actions.
+On the summary screen, users can also view method-specific charts and, for clinical services, switch the ranking between estimated value and count. The screen includes **Download PDF report** and **Download Excel workbook** actions.
 
 The clinic-cost comparison is omitted when no clinic cost is provided. If a cost comparison is unavailable, the interface may show a dash or “Not available” rather than a numeric ratio.
 
@@ -50,7 +49,6 @@ The PDF action opens a print-ready report in a new browser window and invokes th
 - KPI cards for reported activity and estimated community value. A value-per-dollar KPI appears when clinic cost was supplied.
 - Narrative summary.
 - Optional clinic-cost comparison with the same-period reported cost, total estimated value, estimated value per dollar, percentage comparison, and a caution note.
-- Suggested grant/donor impact statement.
 - Methodology bullets and relevant linked sources.
 
 ### PDF: volunteer-hours method

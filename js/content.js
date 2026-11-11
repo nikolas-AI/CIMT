@@ -30,14 +30,6 @@ const AppCopy = (() => {
     costComparisonNote: "Compares reported clinic costs for this period with the estimated value of the activity entered; it is not actual financial ROI, revenue, reimbursement, profit, or confirmed healthcare savings.",
     rankingNote: "Ranked by estimated value using the reported activity and reference rates.",
     rankingByCountNote: "Ranked by reported units; share shows each service’s portion of all reported units.",
-    funderReadyTitle: "Impact statement for grants and donors",
-    copySuccess: "Statement copied. Review it and adjust it for your organization.",
-    impactStatementButton: "Copy impact statement",
-    impactStatementButtonSecondary: "Copy for grant or donor use",
-    funderReadyVolunteerStatement: (clinicName, volunteerHours, periodLabel, totalText) =>
-      `${clinicName} received ${volunteerHours} hours of donated volunteer support during ${periodLabel}. Using public reference hourly rates, the estimated replacement value of this time is ${totalText}.`,
-    funderReadyServicesStatement: (clinicName, reportedActivity, periodLabel, totalText, serviceSentence) =>
-      `${clinicName} reported ${reportedActivity} during ${periodLabel}. Using national reference rates, the estimated value of these services is ${totalText}.${serviceSentence}`,
   };
 
   const impactMethod = {

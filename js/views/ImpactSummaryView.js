@@ -60,8 +60,6 @@ const ImpactSummaryView = (() => {
       view.appendChild(_buildVolunteerRateSource());
     }
 
-    view.appendChild(_buildFunderReadyStatement(summary));
-
     const detailGrid = document.createElement("div");
     detailGrid.className = "summary-detail-grid";
     detailGrid.appendChild(_buildMethodologySection(summary));
@@ -276,82 +274,6 @@ const ImpactSummaryView = (() => {
     );
 
     return section;
-  }
-
-  function _buildFunderReadyStatement(summary) {
-    const section = document.createElement("section");
-    section.className = "summary-section";
-
-    const townText = _buildFunderReadyText(summary);
-    const statement = document.createElement("p");
-    statement.className = "funder-ready-statement";
-    statement.textContent = townText;
-    statement.setAttribute("aria-label", "Impact statement for grants and donors");
-
-    const copyButton = document.createElement("button");
-    copyButton.type = "button";
-    copyButton.className = "btn btn--secondary";
-    copyButton.textContent = AppCopy.summary.impactStatementButton;
-    copyButton.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(townText);
-        copyButton.textContent = AppCopy.summary.copySuccess;
-      } catch (error) {
-        const selection = window.getSelection();
-        const range = document.createRange();
-        range.selectNodeContents(statement);
-        selection.removeAllRanges();
-        selection.addRange(range);
-        document.execCommand("copy");
-        copyButton.textContent = AppCopy.summary.copySuccess;
-      }
-    });
-
-    const buttonWrap = document.createElement("div");
-    buttonWrap.className = "download-actions";
-    buttonWrap.appendChild(copyButton);
-
-    section.innerHTML = `
-      <h2 class="summary-section__heading">${AppCopy.summary.funderReadyTitle}</h2>
-    `;
-    section.appendChild(statement);
-    section.appendChild(buttonWrap);
-    return section;
-  }
-
-  function _buildFunderReadyText(summary) {
-    const clinicName = summary.clinicName || "Your clinic";
-    const periodLabel = `${_formatDate(summary.reportingPeriodFrom)} to ${_formatDate(summary.reportingPeriodTo)}`;
-    const totalText = Formatting.currency(summary.totalEstimatedValue);
-
-    if (summary.impactMethod === "volunteerHours") {
-      const volunteerHours = Formatting.number(_totalVolunteerHours(summary), 1);
-      return AppCopy.summary.funderReadyVolunteerStatement(clinicName, volunteerHours, periodLabel, totalText);
-    }
-
-    const serviceCount = _serviceCount(summary);
-    const topService = summary.mostImpactfulService;
-    const serviceSentence = topService && Number(topService.clinicalValueShare || 0) > 0
-      ? ` ${topService.serviceName} represented ${Formatting.number(topService.clinicalValueShare, 1)}% of the estimated service value.`
-      : "";
-
-    if (serviceCount > 0) {
-      return AppCopy.summary.funderReadyServicesStatement(
-        clinicName,
-        `${Formatting.number(serviceCount, 0)} clinical services`,
-        periodLabel,
-        totalText,
-        serviceSentence
-      );
-    }
-
-    return AppCopy.summary.funderReadyServicesStatement(
-      clinicName,
-      "clinical activity",
-      periodLabel,
-      totalText,
-      serviceSentence
-    );
   }
 
   function _buildCard(label, value, note, variant, share = 0) {

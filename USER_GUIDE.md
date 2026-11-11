@@ -88,9 +88,9 @@ Select **See impact summary** once manual entries are complete, or once an impor
 
 ### 5. Review the impact summary
 
-The summary shows the estimated value for the selected method, along with the related activity totals and available breakdowns. Depending on your method and entries, it may also show rate information, source references, rankings, a suggested impact statement, and an optional clinic-cost comparison.
+The summary shows the estimated value for the selected method, along with the related activity totals and available breakdowns. Depending on your method and entries, it may also show rate information, source references, rankings, and an optional clinic-cost comparison.
 
-Review the clinic name, address, dates, method, and activity totals carefully before using the report. The suggested statement is a starting point: review it and adapt it to your organization’s context.
+Review the clinic name, address, dates, method, and activity totals carefully before using the report.
 
 ## Understand the estimate
 
@@ -111,7 +111,6 @@ If you enter clinic cost, the summary may compare that amount with the estimated
 
 On the summary screen, you can:
 
-- Select **Copy impact statement** to copy the suggested text. Review and edit it before sharing.
 - Select **Download PDF report** to open a print-ready report. In the browser’s print dialog, choose a printer or **Save as PDF**. Allow pop-ups for the site if the report window does not open.
 - Select **Download Excel workbook** to download a workbook of the report. This feature requires the workbook library to load; if it is unavailable, try again with an internet connection or contact the tool administrator.
 
