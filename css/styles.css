@@ -1844,7 +1844,8 @@ body {
 }
 
 .references-list {
-  list-style: none;
+  list-style: disc;
+  padding-left: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -1857,6 +1858,7 @@ body {
   color: var(--color-slate);
   width: 100%;
   line-height: 1.6;
+  padding-left: 0.2rem;
 }
 
 .references-list a {

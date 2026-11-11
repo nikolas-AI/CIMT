@@ -1373,6 +1373,16 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
     font-size: 12px;
     line-height: 1.6;
   }
+  .appendix-page ul {
+    margin: 0 0 14px 18px;
+    padding-left: 18px;
+    color: var(--slate);
+  }
+  .appendix-page li {
+    margin: 0 0 8px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
   h2 {
     margin: 0 0 10px;
     padding-bottom: 7px;
