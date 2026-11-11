@@ -246,6 +246,61 @@ test("the volunteer final report shows up to ten roles in its horizontal bars", 
   assert.doesNotMatch(reportHTML, /Role 11|Role 12/);
 });
 
+test("the volunteer value-at-a-glance cards appear before the role bar chart", () => {
+  const volunteerBreakdown = [
+    { roleName: "Medical Role", category: "medical professional", hours: 2, benchmarkRate: 50, estimatedValue: 100 },
+    { roleName: "Non-medical Role", category: "non medical", hours: 3, benchmarkRate: 20, estimatedValue: 60 },
+  ];
+  context.summary = {
+    impactMethod: "volunteerHours",
+    serviceBreakdown: [],
+    volunteerBreakdown,
+    reportingPeriodFrom: "2026-01-01",
+    reportingPeriodTo: "2026-01-31",
+    clinicName: "Test Clinic",
+    totalEstimatedValue: 160,
+    volunteerValue: 160,
+    medicalProfessionalVolunteerValue: 100,
+    nonMedicalVolunteerValue: 60,
+    reportingPeriodClinicCost: null,
+  };
+
+  vm.runInContext("ExportService.downloadPDF(summary)", context, { timeout: 1000 });
+
+  const atAGlanceIndex = reportHTML.indexOf("<h2>Estimated value at a glance</h2>");
+  const chartIndex = reportHTML.indexOf("<h2>Volunteer roles by estimated value</h2>");
+  assert.notEqual(reportHTML.indexOf('<h2 class="glance-heading">Estimated value at a glance</h2>'), -1);
+  assert.notEqual(chartIndex, -1);
+  assert.ok(reportHTML.indexOf('<h2 class="glance-heading">Estimated value at a glance</h2>') < chartIndex);
+  assert.match(reportHTML, /glance-card__share/);
+  assert.match(reportHTML, /Includes both medical and non-medical volunteer time\./);
+});
+
+test("the volunteer value-at-a-glance cards are kept together in the compact print layout", () => {
+  context.summary = {
+    impactMethod: "volunteerHours",
+    serviceBreakdown: [],
+    volunteerBreakdown: [
+      { roleName: "Medical Role", category: "medical professional", hours: 2, benchmarkRate: 50, estimatedValue: 100 },
+      { roleName: "Non-medical Role", category: "non medical", hours: 3, benchmarkRate: 20, estimatedValue: 60 },
+    ],
+    reportingPeriodFrom: "2026-01-01",
+    reportingPeriodTo: "2026-01-31",
+    clinicName: "Test Clinic",
+    totalEstimatedValue: 160,
+    volunteerValue: 160,
+    medicalProfessionalVolunteerValue: 100,
+    nonMedicalVolunteerValue: 60,
+    reportingPeriodClinicCost: null,
+  };
+
+  vm.runInContext("ExportService.downloadPDF(summary)", context, { timeout: 1000 });
+
+  assert.match(reportHTML, /@media print \{[\s\S]*?\.hero \{[\s\S]*?padding: 19px 22px/);
+  assert.match(reportHTML, /\.volunteer-value-glance \{ break-inside: avoid; page-break-inside: avoid; \}/);
+  assert.match(reportHTML, /<section class="report-section volunteer-value-glance">/);
+});
+
 test("clinical services Excel export includes an editable activity pie chart", async () => {
   context.summary = {
     impactMethod: "clinicalServices",

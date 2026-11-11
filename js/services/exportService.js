@@ -1233,13 +1233,42 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
     const hasNonMedicalVolunteerHours = summary.volunteerBreakdown.some(
       row => row.category === "non medical" && row.hours > 0
     );
+    const volunteerGlanceCard = (label, value, note, share) => `
+      <article class="glance-card">
+        <p class="glance-card__label">${_escapeHTML(label)}</p>
+        <p class="glance-card__value">${_escapeHTML(_fmt(value))}</p>
+        <p class="glance-card__note">${_escapeHTML(note)}</p>
+        <div class="glance-card__share" aria-hidden="true">
+          <span style="width:${Math.min(100, Math.max(0, share))}%"></span>
+        </div>
+      </article>
+    `;
     const volunteerBreakdownHTML = isVolunteerReport && hasMedicalVolunteerHours && hasNonMedicalVolunteerHours
-      ? `<section class="report-section">
-          <h2>Estimated value at a glance</h2>
-          <div class="metric-grid">
-            ${metricCard("Estimated value of medical volunteer time", _fmt(summary.medicalProfessionalVolunteerValue))}
-            ${metricCard("Estimated value of non-medical volunteer time", _fmt(summary.nonMedicalVolunteerValue))}
-            ${metricCard("Estimated value of total volunteer time", _fmt(summary.totalEstimatedValue))}
+      ? `<section class="report-section volunteer-value-glance">
+          <h2 class="glance-heading">Estimated value at a glance</h2>
+          <div class="glance-grid">
+            ${volunteerGlanceCard(
+              "Estimated value of medical volunteer time",
+              summary.medicalProfessionalVolunteerValue,
+              AppCopy.metric.estimatedMedicalProfessionalVolunteerValueNote,
+              summary.totalEstimatedValue > 0
+                ? summary.medicalProfessionalVolunteerValue / summary.totalEstimatedValue * 100
+                : 0
+            )}
+            ${volunteerGlanceCard(
+              "Estimated value of non-medical volunteer time",
+              summary.nonMedicalVolunteerValue,
+              AppCopy.metric.estimatedNonMedicalVolunteerValueNote,
+              summary.totalEstimatedValue > 0
+                ? summary.nonMedicalVolunteerValue / summary.totalEstimatedValue * 100
+                : 0
+            )}
+            ${volunteerGlanceCard(
+              "Estimated value of total volunteer time",
+              summary.totalEstimatedValue,
+              "Estimated value of the total reported donated time. Includes both medical and non-medical volunteer time.",
+              100
+            )}
           </div>
         </section>`
       : "";
@@ -1343,6 +1372,59 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
   .metric-card__label { min-height: 2.5em; margin: 0 0 5px; color: var(--slate); font-size: 9px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
   .metric-card__value { margin: 0 0 4px; color: var(--navy); font: 24px/1.1 "DM Serif Display", Georgia, serif; overflow-wrap: anywhere; }
   .metric-card__note { margin: 0; color: var(--muted); font-size: 10px; }
+  .glance-heading {
+    margin: 0;
+    padding: 14px 18px;
+    color: var(--navy);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-bottom: 0;
+    font-size: 15px;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+  .glance-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-bottom: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .glance-card {
+    min-width: 0;
+    padding: 18px 20px;
+    border-top: 3px solid var(--teal);
+    border-right: 1px solid var(--border);
+  }
+  .glance-card:last-child { border-right: 0; }
+  .glance-card__label {
+    min-height: 2.5em;
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+  }
+  .glance-card__value {
+    margin: 0 0 8px;
+    color: var(--navy);
+    font: 29px/1.05 "DM Serif Display", Georgia, serif;
+    overflow-wrap: anywhere;
+  }
+  .glance-card__note {
+    min-height: 3em;
+    margin: 0;
+    color: var(--slate);
+    font-size: 10px;
+    line-height: 1.5;
+  }
+  .glance-card__share {
+    height: 5px;
+    margin-top: 14px;
+    background: #DFE7E3;
+  }
+  .glance-card__share span { display: block; height: 100%; background: var(--teal); }
   .callout {
     margin: 0 0 18px;
     padding: 14px 16px;
@@ -1464,6 +1546,33 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
   }
   @media print {
     body { max-width: none; margin: 0; padding: 0; background: #fff; font-size: 10pt; }
+    .hero {
+      margin-bottom: 14px;
+      padding: 19px 22px;
+    }
+    .status { margin-bottom: 8px; padding: 4px 10px; }
+    .eyebrow { margin-bottom: 6px; }
+    h1 { margin-bottom: 6px; font-size: 23px; }
+    .period { margin-bottom: 11px; }
+    .total { margin-bottom: 4px; font-size: 42px; }
+    .total-label { font-size: 13px; }
+    .callout { margin-bottom: 14px; padding: 11px 14px; }
+    .metric-grid { margin-bottom: 14px; }
+    .metric-card { padding: 10px 14px; }
+    .metric-card__label { min-height: 0; margin-bottom: 4px; }
+    .metric-card__value { font-size: 22px; }
+    .metric-card__note { font-size: 9.5px; }
+    .narrative { margin-bottom: 14px; font-size: 12px; }
+    .feature, .volunteer-value-glance { margin-bottom: 14px; }
+    .feature { padding: 14px; }
+    .volunteer-value-glance { break-inside: avoid; page-break-inside: avoid; }
+    .glance-heading { padding: 10px 12px; }
+    .glance-grid { margin-bottom: 14px; }
+    .glance-card { padding: 11px 12px; }
+    .glance-card__label { min-height: 0; margin-bottom: 5px; font-size: 8px; }
+    .glance-card__value { margin-bottom: 5px; font-size: 24px; }
+    .glance-card__note { min-height: 0; font-size: 9px; }
+    .glance-card__share { height: 4px; margin-top: 9px; }
     .hero, .metric-grid, .feature, .chart-section, .callout,
     .cost-comparison, .funder-section { break-inside: avoid; page-break-inside: avoid; }
     .report-section h2, .report-section .section-intro { break-after: avoid; page-break-after: avoid; }
@@ -1496,8 +1605,8 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
 ${serviceImpactHTML}
 ${serviceChartHTML}
 ${volunteerImpactHTML}
-${volunteerChartHTML}
 ${volunteerBreakdownHTML}
+${volunteerChartHTML}
 ${budgetHTML}
 ${!isVolunteerReport ? `<section class="report-section service-breakdown">
   <h2>Clinical Services Breakdown (Ranked by counts)</h2>
