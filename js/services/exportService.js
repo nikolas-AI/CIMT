@@ -774,8 +774,8 @@ const ExportService = (() => {
     const charts = [
       {
         title: impactMethod === "volunteerHours"
-          ? "VOLUNTEER ROLES DISTRIBUTION"
-          : "DISTRIBUTION OF CLINICAL SERVICES PROVIDED",
+          ? "VOLUNTEER ROLES BY HOURS"
+          : "CLINICAL SERVICES BY COUNT",
         categoryColumn: "A",
         valueColumn: "B",
         lastDataRow: activityChartItems.length + 1,
@@ -789,7 +789,7 @@ const ExportService = (() => {
     if (valueChartItems.length > 0) {
       charts.push(
         {
-          title: `ESTIMATED VALUE BY ${impactMethod === "volunteerHours" ? "VOLUNTEER ROLE" : "CLINICAL SERVICE"}`,
+          title: `${impactMethod === "volunteerHours" ? "VOLUNTEER ROLES BY VALUE" : "CLINICAL SERVICES BY VALUE"}`,
           categoryColumn: "D",
           valueColumn: "E",
           lastDataRow: valueChartItems.length + 1,
@@ -1197,7 +1197,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
     const volunteerHoursPieHTML = isVolunteerReport
       ? CompositionPieChart.render({
         id: "volunteer-hours-composition",
-        title: "Distribution of volunteer roles",
+        title: "Volunteer roles by hours",
         description: "Reported volunteer hours split by role. Small shares are combined into Other.",
         otherLabel: "Other roles",
         unitLabel: "hours",
@@ -1213,7 +1213,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
     const clinicalCountsPieHTML = !isVolunteerReport
       ? CompositionPieChart.render({
         id: "clinical-services-composition",
-        title: "Distribution of clinical services provided",
+        title: "Clinical services by count",
         description: "Reported clinical service counts split by type. Small shares are combined into Other.",
         otherLabel: "Other services",
         unitLabel: "services",

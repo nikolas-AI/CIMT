@@ -508,7 +508,7 @@ const ImpactSummaryView = (() => {
   function _buildVolunteerHoursPieChart(summary) {
     return _buildQuantityPieChart({
       id: "volunteer-hours-composition",
-      title: "Distribution of volunteer roles",
+      title: "Volunteer roles by hours",
       description: "Reported volunteer hours split by role. The smallest shares, totaling about 10%, are combined into Other.",
       otherLabel: "Other roles",
       unitLabel: "hours",
@@ -525,7 +525,7 @@ const ImpactSummaryView = (() => {
   function _buildServiceCountPieChart(summary) {
     return _buildQuantityPieChart({
       id: "clinical-services-composition",
-      title: "Distribution of clinical services provided",
+      title: "Clinical services by count",
       description: "Reported clinical service counts split by type. The smallest shares, totaling about 10%, are combined into Other.",
       otherLabel: "Other services",
       unitLabel: "services",
