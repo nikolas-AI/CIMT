@@ -246,6 +246,57 @@ test("the volunteer final report shows up to ten roles in its horizontal bars", 
   assert.doesNotMatch(reportHTML, /Role 11|Role 12/);
 });
 
+test("the volunteer final report appendix uses volunteer methodology and references", () => {
+  const originalGetRelevantReferences = context.getRelevantReferences;
+  const originalMethodologyBullets = context.AppCopy.summaryView.methodologyBullets;
+  context.getRelevantReferences = method => method === "volunteerHours"
+    ? [
+      {
+        title: "Occupational Employment and Wage Statistics",
+        organization: "U.S. Bureau of Labor Statistics",
+        description: "National occupational employment and hourly mean wage estimates.",
+        url: "https://www.bls.gov/oes/",
+        ratePeriod: "May 2025",
+      },
+      {
+        title: "Value of Volunteer Time",
+        organization: "Independent Sector / Do Good Institute",
+        description: "National volunteer valuation rates and methodology.",
+        url: "https://independentsector.org/research/value-of-volunteer-time/",
+        ratePeriod: "April, 2026",
+      },
+    ]
+    : [];
+  context.AppCopy.summaryView.methodologyBullets = method => method === "volunteerHours"
+    ? ["Reported volunteer hours are multiplied by role-specific hourly benchmarks."]
+    : [];
+  context.summary = {
+    impactMethod: "volunteerHours",
+    serviceBreakdown: [],
+    volunteerBreakdown: [
+      { roleName: "Physician", category: "medical professional", hours: 2, benchmarkRate: 50, estimatedValue: 100 },
+    ],
+    reportingPeriodFrom: "2026-01-01",
+    reportingPeriodTo: "2026-01-31",
+    clinicName: "Test Clinic",
+    totalEstimatedValue: 100,
+    volunteerValue: 100,
+    reportingPeriodClinicCost: null,
+  };
+
+  try {
+    vm.runInContext("ExportService.downloadPDF(summary)", context, { timeout: 1000 });
+
+    assert.match(reportHTML, /Reported volunteer hours are multiplied by role-specific hourly benchmarks\./);
+    assert.match(reportHTML, /U\.S\. Bureau of Labor Statistics/);
+    assert.match(reportHTML, /Independent Sector \/ Do Good Institute/);
+    assert.doesNotMatch(reportHTML, /CMS Physician Fee Schedule Look-Up Tool/);
+  } finally {
+    context.getRelevantReferences = originalGetRelevantReferences;
+    context.AppCopy.summaryView.methodologyBullets = originalMethodologyBullets;
+  }
+});
+
 test("the volunteer value-at-a-glance cards appear before the role bar chart", () => {
   const volunteerBreakdown = [
     { roleName: "Medical Role", category: "medical professional", hours: 2, benchmarkRate: 50, estimatedValue: 100 },

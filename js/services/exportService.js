@@ -1628,20 +1628,9 @@ ${isVolunteerReport ? rateDataNoteHTML : ""}
 ${volunteerHoursPieHTML}
 <section class="report-section appendix-page">
   <h2>HOW THESE ESTIMATES ARE CALCULATED</h2>
-  <ul>
-    <li>The estimate uses only aggregate activity totals reported for the selected method and reporting period.</li>
-    <li>Reported clinical service units are multiplied by the reference rate for each service.</li>
-    <li>The total estimates the value of reported services, not the clinic’s actual charges or reimbursement.</li>
-    <li>Rates are public national references, are not adjusted for ZIP code, and may differ from local costs or payment rates.</li>
-    <li>The estimate does not establish revenue, profit, financial return, savings, patient outcomes, care quality, or patient need.</li>
-    <li>If clinic cost is provided, it is compared with the activity estimate for the same period; this is not a measure of actual financial return or confirmed savings.</li>
-    <li>Use aggregate totals only; patient-level information is not needed.</li>
-  </ul>
+  <ul>${methodologyItems}</ul>
   <h2>SOURCES AND REFERENCES</h2>
-  <ul>
-    <li>CMS Physician Fee Schedule Look-Up Tool — Centers for Medicare & Medicaid Services (CMS) (2026).</li>
-    <li>Provides national and locality-specific Medicare payment rates for CPT/HCPCS codes.</li>
-  </ul>
+  <ul>${referenceItems}</ul>
 </section>
 </body></html>`;
   }
