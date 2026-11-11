@@ -975,6 +975,17 @@ body {
 }
 .btn--primary:hover { background: var(--color-accent-hover); border-color: var(--color-accent-hover); transform: translateY(-1px); box-shadow: var(--shadow-hover); }
 
+/* Match the summary's start-over action to its Edit reported activity button. */
+.summary-nav-buttons .btn--primary {
+  background: var(--color-surface);
+  color: var(--color-slate);
+  border-color: var(--color-border);
+}
+.summary-nav-buttons .btn--primary:hover {
+  background: var(--color-bg);
+  color: var(--color-navy);
+}
+
 /* Secondary / ghost: a lower-emphasis action such as Back. */
 .btn--secondary {
   background: transparent;
@@ -998,15 +1009,15 @@ body {
 
 /* Download: full-width actions on the summary screen. */
 .btn--download {
-  background: var(--color-surface);
-  color: var(--color-navy);
-  border-color: var(--color-border);
+  background: var(--color-accent);
+  color: #fff;
+  border-color: var(--color-accent);
   width: 100%;
   justify-content: center;
   padding: var(--space-4);
   font-size: var(--text-base);
 }
-.btn--download:hover { background: var(--color-bg); border-color: var(--color-accent); color: var(--color-accent); }
+.btn--download:hover { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
 
 /* Navigation row: keeps Back on the left and the forward action on the right. */
 .nav-buttons {

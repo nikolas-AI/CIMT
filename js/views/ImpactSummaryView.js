@@ -76,6 +76,7 @@ const ImpactSummaryView = (() => {
       nextLabel: AppCopy.summaryDashboard.startOverAction,
       onNext: onStartOver,
     });
+    nav.classList.add("summary-nav-buttons");
     view.appendChild(nav);
 
     container.appendChild(view);
