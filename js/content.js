@@ -60,11 +60,9 @@ const AppCopy = (() => {
   };
 
   const welcome = {
-    eyebrow: "Care in Action",
     heading: "Show the value of your clinic’s work",
     intro: "Use your clinic’s total service counts or volunteer hours to create a clear impact summary for a selected reporting period.",
     description: "The estimator helps you communicate the estimated value of care, donated volunteer time, and reported clinic activity, without entering any patient information. Your completed summary can support grant applications, donor communications, board reports, and conversations about your clinic’s role in the community.",
-    note: "Use the summary for grant applications, donor updates, board reports, and community conversations.",
     whatYouNeedTitle: "What you’ll need",
     list: [
       "Clinic name and reporting period",
@@ -78,7 +76,6 @@ const AppCopy = (() => {
   };
 
   const clinic = {
-    ariaLabel: "Clinic Information",
     heading: "Clinic information",
     intro: "Your clinic location and reporting period help identify the report and provide context for people who review it. Reference rates are national estimates and are not adjusted by ZIP code.",
     disclaimer: "Note: Adding your clinic cost lets the report compare your reported investment with an estimated value provided by your clinic. This is a comparison, not actual financial return or confirmed savings.",
@@ -94,56 +91,26 @@ const AppCopy = (() => {
     toLabel: "To",
     costLabel: "Total clinic cost for this reporting period",
     costHelp: "Include the clinic costs for this reporting period, such as supplies, facilities, staffing, technology, administration, or other operating expenses if available. This is optional, but it allows the report to compare your reported investment with an estimated value provided by your clinic.",
-    next: "Next",
-    back: "Back",
   };
 
   const volunteer = {
-    ariaLabel: "Volunteer Hours",
-    heading: "Recognize the value of volunteer support",
-    intro: "Enter the total hours donated during this reporting period for each volunteer role. The tool uses reference hourly rates to estimate the value of that time.",
-    note: "Important: This is the estimated value of donated time. It is not money received by the clinic.",
     roleLabel: "Volunteer role",
     hoursLabel: "Volunteer hours",
     addLabel: "Add a volunteer role",
-    emptyState: "No volunteer hours to report for this period",
-    next: "Next",
-    back: "Back",
   };
 
   const services = {
-    ariaLabel: "Clinical Services",
-    heading: "Document the care your clinic provided",
-    intro: "Enter the total number of each service your clinic provided during the reporting period. Use combined totals only. Do not enter patient information.",
-    note: "Important: Each service has a reference rate used to estimate its value. These rates are not your clinic’s charges, payments, or revenue.",
     label: "Service provided",
     countLabel: "Total number provided",
-    estimatedPerService: "Estimated value for one service",
-    estimatedTotal: "Estimated total value",
     addLabel: "Add another service",
-    emptyState: "No services to report for this period",
-    next: "See impact summary",
-    back: "Back",
   };
 
   const metric = {
-    estimatedTotalValue: "Estimated total value",
-    clinicalServiceCount: "Clinical services reported",
-    estimatedClinicalServiceValue: "Estimated value of clinical services",
-    volunteerHours: "Volunteer hours contributed",
-    estimatedVolunteerContributionValue: "Estimated value of volunteer time",
     mostImpactful: "Most impactful reported service",
     totalEstimatedValueServicesOnlyNote: "Estimated value of the clinical services reported.",
     totalEstimatedValueVolunteerOnlyNote: "Estimated value of the volunteer time reported.",
-    clinicalServiceCountNote: "Total services entered for this reporting period.",
-    estimatedClinicalServiceValueNote: "Estimated value of the clinical services reported.",
-    volunteerHoursNote: "Total hours donated across volunteer roles.",
-    estimatedVolunteerContributionValueNote: "Estimated value of all reported volunteer time.",
-    estimatedMedicalProfessionalVolunteerValue: "Estimated value of medical volunteer time",
     estimatedMedicalProfessionalVolunteerValueNote: "Estimated value of donated time from medical volunteers.",
-    estimatedNonMedicalVolunteerValue: "Estimated value of other volunteer time",
     estimatedNonMedicalVolunteerValueNote: "Estimated value of donated time from non-medical volunteers.",
-    mostImpactfulNote: "Service with the highest estimated value.",
   };
 
   const summaryView = {
@@ -154,7 +121,6 @@ const AppCopy = (() => {
       }
       return "Your clinic’s estimated community impact";
     },
-    periodText: (startDate, endDate) => `Reporting period: ${startDate || "Not specified"}–${endDate || "Not specified"}`,
     narrative: (impactMethod, clinicName, serviceCount, volunteerHours, totalValue) => {
       const name = clinicName || "Your clinic";
       if (impactMethod === "volunteerHours") {
@@ -165,15 +131,11 @@ const AppCopy = (() => {
       }
       return summary.emptyState;
     },
-    serviceNarrative: (serviceName, count, estimatedValue, share) => `The ${serviceName} service had the largest share of the total estimated service value, with ${count} services and an estimated value of ${Formatting.currency(estimatedValue)}.`,
-    rankTitle: "Services with the highest estimated value",
     rankIntro: "View services by estimated value or by the number reported.",
     costHeading: "Your clinic cost and estimated value",
     costIntro: (cost) => `You reported ${Formatting.currency(cost)} in clinic costs for this period. The report compares that cost with the estimated value of the activity entered here.`,
     valuePerDollarLabel: "Estimated value for each $1 of clinic cost",
-    valuePerDollarText: (ratio) => `For every $1 in reported clinic cost, the activity entered here has an estimated value of ${Formatting.currency(ratio)}.`,
     benchmarkComparisonLabel: "Estimated value and cost comparison",
-    benchmarkComparisonText: (percentDifference, direction) => `The estimated total value was ${Formatting.number(percentDifference, 1)}% ${direction} than the reported clinic cost.`,
     fundingTitle: "Ways to use this summary",
     fundingBullets: [
       "Grant applications and progress reports",
@@ -223,24 +185,13 @@ const AppCopy = (() => {
 
   const exportCopy = {
     pdfTitle: "Estimated Clinic Impact Summary",
-    pdfSubtitle: "Activity summary using reference-rate estimates",
     workbookSummary: "Impact Summary",
-    workbookClinical: "Clinical Services",
-    workbookVolunteer: "Volunteer Contributions",
-    workbookAssumptions: "Assumptions & Sources",
     labels: {
-      serviceCount: "Reported Service Count",
-      rate: "Reference Rate",
       total: "Estimated Value",
-      volunteerValue: "Estimated Value of Volunteer Time",
-      cost: "Reported Clinic Cost",
-      roi: "Estimated Value and Cost Comparison",
-      valuePerDollar: "Estimated Value per $1 of Reported Cost",
     },
   };
 
   return {
-    app: { title: "Care in Action", headerContext: "Community care impact summary" },
     validation,
     impactMethod,
     impactActivity,
@@ -249,7 +200,7 @@ const AppCopy = (() => {
     volunteer,
     services,
     metric,
-    summary: summary,
+    summary,
     summaryView,
     summaryDashboard,
     progress,

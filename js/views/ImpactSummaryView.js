@@ -1,5 +1,5 @@
 /**
- * ImpactSummaryView.js — View 4
+ * ImpactSummaryView.js — final workflow screen
  *
  * Receives a computed ImpactSummary object and renders the full
  * summary: hero metric, breakdown cards, rate tables, references,
@@ -655,7 +655,6 @@ const ImpactSummaryView = (() => {
   // ---------------------------------------------------------------
   function _buildVolunteerRateSource() {
     // This explains the source of volunteer rates separately from clinical rates.
-    // This explains the origin of volunteer rates separately from clinical rates.
     const section = document.createElement("div");
     section.className = "summary-section";
 
@@ -696,7 +695,7 @@ const ImpactSummaryView = (() => {
   }
 
   // ---------------------------------------------------------------
-  // Download actions (stubs connected to ExportService)
+  // PDF and Excel download actions.
   // ---------------------------------------------------------------
   function _buildMethodologySection(summary) {
     const section = document.createElement("section");

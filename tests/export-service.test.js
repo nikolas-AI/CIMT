@@ -51,8 +51,6 @@ const context = vm.createContext({
       shortDisclaimer: method => method === "volunteerHours"
         ? "Estimated value is based on reference rates and reported volunteer hours; it represents the replacement value of donated time. This is a planning and communication estimate, not revenue, reimbursement, savings, financial ROI, or a measure of care quality."
         : "Estimated value is based on reference rates and reported service counts. This is a planning and communication estimate, not revenue, reimbursement, savings, financial ROI, or a measure of care quality.",
-      funderReadyVolunteerStatement: () => "Volunteer impact statement",
-      funderReadyTitle: "Funder-ready summary",
       costComparisonNote: "Compares reported clinic costs for this period with the estimated value of the activity entered; it is not actual financial ROI, revenue, reimbursement, profit, or confirmed healthcare savings.",
     },
     summaryDashboard: copyGroup,

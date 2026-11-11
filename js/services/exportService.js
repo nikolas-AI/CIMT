@@ -953,9 +953,8 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
   }
 
   function _fmt(value) {
-    // Exports keep two decimal places so downloaded data retains full rate detail.
-    // Exported rates and totals use two decimal places so the data file keeps
-    // more precision than the abbreviated whole-dollar UI formatting.
+    // The PDF keeps two decimal places for rates and totals, unlike the UI's
+    // abbreviated whole-dollar formatting.
     return typeof value === "number"
       ? value.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 })
       : value;
@@ -972,7 +971,6 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
   }
 
   function _triggerDownload(content, filename, mimeType) {
-    // A temporary browser URL downloads generated content without sending it to a server.
     // A temporary object URL lets the browser download generated content
     // without sending report data to a server.
     const blob = new Blob([content], { type: mimeType });
@@ -987,7 +985,6 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
   }
 
   function _safeFilename(name) {
-    // Keep the filename readable while removing characters that are unsafe in filenames.
     // Keep the downloaded filename readable while removing unsafe characters.
     return (name || "clinic").replace(/[^a-z0-9]/gi, "-").toLowerCase().slice(0, 40);
   }
@@ -1019,11 +1016,6 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
       : serviceCount > 0
         ? `During this reporting period, ${clinicName} reported ${activityCount} clinical services. Using national reference rates, the estimated value of those services is ${_fmt(summary.totalEstimatedValue)}.`
         : AppCopy.summary.emptyState;
-    const topServiceSentence = summary.mostImpactfulService &&
-      Number(summary.mostImpactfulService.clinicalValueShare || 0) > 0
-      ? ` ${summary.mostImpactfulService.serviceName} represented ${_sharePercent(summary.mostImpactfulService.clinicalValueShare)}% of the estimated service value.`
-      : "";
-
     const metricCard = (label, value, note = "") => `
       <div class="metric-card">
         <p class="metric-card__label">${_escapeHTML(label)}</p>
@@ -1574,7 +1566,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
     .glance-card__note { min-height: 0; font-size: 9px; }
     .glance-card__share { height: 4px; margin-top: 9px; }
     .hero, .metric-grid, .feature, .chart-section, .callout,
-    .cost-comparison, .funder-section { break-inside: avoid; page-break-inside: avoid; }
+    .cost-comparison { break-inside: avoid; page-break-inside: avoid; }
     .report-section h2, .report-section .section-intro { break-after: avoid; page-break-after: avoid; }
     table { break-inside: auto; page-break-inside: auto; }
     tbody.table-opening, tbody.table-ending { break-inside: avoid; page-break-inside: avoid; }

@@ -1,7 +1,7 @@
 /**
  * EntryList.js — Reusable dynamic entry list (add/remove rows)
  *
- * Used by both VolunteerHoursView and ClinicalServicesView.
+ * Used by ImpactActivityView for either volunteer hours or clinical services.
  * Accepts a config object describing what options to show and how
  * to label things. All state lives in the parent view; this
  * component fires callbacks on changes.

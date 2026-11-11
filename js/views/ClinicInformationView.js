@@ -13,10 +13,10 @@ const ClinicInformationView = (() => {
 
   function render(state, { onBack, onNext }) {
     _activeState = state;
-    // This first screen asks for the clinic name and reporting dates. The
+    // This clinic-information screen asks for the clinic name and reporting dates. The
     // inputs are rebuilt from state whenever the user returns here, so saved
     // values are not lost.
-    // This view owns only the first form step. It reads the current name from
+    // This view owns only the clinic-information step. It reads the current name from
     // state so returning from a later step preserves edits until Start Over.
     const container = document.getElementById("view-container");
     container.innerHTML = "";

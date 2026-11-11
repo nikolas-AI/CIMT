@@ -352,7 +352,7 @@ body {
 .progress-step--done + .progress-step .progress-step__connector,
 .progress-step--done .progress-step__connector { background: var(--color-step-done); }
 
-/* Active: teal identifies the screen whose form is currently visible. */
+/* Active: the impact accent identifies the screen whose form is currently visible. */
 .progress-step--active .progress-step__dot {
   background: var(--color-step-active);
   border-color: var(--color-step-active);
@@ -866,8 +866,7 @@ body {
    --------------------------------------------------------- */
 .entry-list { display: flex; flex-direction: column; gap: var(--space-4); }
 
-/* Both repeated-entry screens use the same green lead accent so the form
-   surfaces feel like one consistent reporting workflow. */
+/* Activity rows use a green lead accent for a consistent reporting workflow. */
 .entry-list-wrapper .entry-row:first-child {
   border-top-color: var(--color-success);
 }
@@ -1834,7 +1833,7 @@ body {
   line-height: 1.6;
 }
 
-/* References list: readable linked sources without default bullet indentation. */
+/* References list: readable linked sources with clear bullet indentation. */
 .summary-detail-grid {
   display: grid;
   grid-template-columns: 1fr;

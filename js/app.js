@@ -17,7 +17,7 @@
   // All answers live here while the app is open. A view receives this object,
   // reads values from it when it is drawn, and writes new values back into it.
   // -----------------------------------------------------------------
-  // Keep false for normal blank starts; enable only for local testing.
+  // This is true for local sample data; set false to start with a blank report.
   const TESTING_DEFAULTS_ENABLED = true;
   const TESTING_DEFAULTS = {
     clinic: {
@@ -77,7 +77,7 @@
     /** @type {ImpactSummary|null} */
     impact: null,
 
-    /** @type {number} 0=Welcome, 1=Clinic, 2=Volunteers, 3=Services, 4=Impact */
+    /** @type {number} 0=Welcome, 1=Clinic, 2=Method, 3=Activity, 4=Impact summary */
     currentStep: 0,
   };
 
@@ -244,8 +244,8 @@
 
   // -----------------------------------------------------------------
   // IMPACT COMPUTATION
-  // Called when the user clicks "See Impact" on View 4.
-  // Runs the calculator and then navigates to View 4.
+  // Called when the user finishes entering activity.
+  // Runs the calculator and advances to the impact summary.
   // -----------------------------------------------------------------
   // Calculate once, save the result, and then show the summary screen. Keeping
   // the math here prevents the summary from using stale totals.

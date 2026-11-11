@@ -223,6 +223,13 @@ existing estimated-value bar charts. All roles or services are shown
 individually except for the smallest entries, which are combined as “Other”
 until their combined share is at least 10% of the total.
 
+The printable report includes a separate final appendix with methodology bullets
+and references relevant to the selected method. In volunteer-hours reports, the
+medical/non-medical/total estimated-value cards appear before the volunteer-role
+estimated-value bar chart when both volunteer categories have reported hours.
+The print layout is compacted to help keep those cards together on the first
+page; pagination can vary by browser.
+
 ### `js/services/batchImportService.js`
 
 This service supports the optional file-import path on the activity screen. It

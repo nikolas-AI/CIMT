@@ -139,8 +139,6 @@ const VOLUNTEER_ROLES = [
 // -----------------------------------------------------------------
 // CLINICAL SERVICES
 // -----------------------------------------------------------------
-// Clinical services additionally carry their CPT/HCPCS code and benchmark rate.
-// UI components read these fields instead of maintaining a second service list.
 // Services also store their CPT/HCPCS code and benchmark rate. Screens read
 // these fields instead of keeping a second, easily outdated service list.
 const CLINICAL_SERVICES = [

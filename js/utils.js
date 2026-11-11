@@ -122,7 +122,7 @@ const Validation = (() => {
     return null;
   }
 
-  /** Validate one clinical service and its reported visit count. */
+  /** Validate one clinical service and its reported count. */
   function serviceEntry(serviceId, count) {
     if (!serviceId) return AppCopy.validation.serviceRequired;
     const rawCount = String(count === null || count === undefined ? "" : count).trim();

@@ -46,9 +46,8 @@ The estimator guides users through five steps:
    services.
 4. **Activity** — records total hours by volunteer role, or total counts by
    clinical service. The methods are separate; one report does not combine them.
-5. **Impact summary** — presents the estimate, rate breakdown, methodology,
-   references, an optional cost comparison, a copyable impact statement, and
-   export actions.
+5. **Impact summary** — presents the estimate, activity breakdown, methodology,
+   references, an optional cost comparison, and PDF and Excel export actions.
 
 The application does not ask for patient names, medical records, or other
 patient-level data. Enter aggregate totals only.
@@ -69,10 +68,12 @@ JSZip 3.10.1 from jsDelivr and the DM Serif Display and Inter fonts from Google
 Fonts, so those features need network access. Excel exports include a separate
 activity worksheet with an editable pie chart. PDF export opens a print-ready
 browser window; allow pop-ups and use the browser's print dialog to save as PDF.
+The PDF includes a separate methodology and sources appendix for the selected
+calculation method.
 
-The app starts with a blank report. The sample clinic and activity values in
-`js/app.js` are for local testing only; enable `TESTING_DEFAULTS_ENABLED` there
-only when you want to load that sample data.
+`js/app.js` currently enables sample clinic and activity values through
+`TESTING_DEFAULTS_ENABLED`. Set it to `false` for a blank report; keep sample
+defaults disabled for normal use.
 
 ## Batch activity import
 
@@ -124,8 +125,8 @@ node --test tests/batch-import.test.js
   estimates and are not adjusted for the ZIP code.
 - The app keeps its current form/report state in page memory only. Starting over
   clears that state, and refreshing or closing the page discards it; there is no
-  save/resume facility. Downloaded reports and copied text are retained wherever
-  you choose to save or paste them.
+  save/resume facility. Downloaded reports are retained wherever you choose to
+  save them.
 
 See [PROJECT_REFERENCE.md](./PROJECT_REFERENCE.md) for the full project
 architecture, input rules, formulas, data sources, and export details.
@@ -148,9 +149,9 @@ before distribution or production use. This README is not a license opinion;
 confirm the project's own license terms and obtain any necessary permissions and
 legal review.
 
-There is no build step or automated test suite in this checkout. Print-to-PDF
-pagination is browser dependent, so visually inspect exported PDFs in the
-browser used for release.
+There is no build step. Tests can be run with `node --test tests/*.test.js`.
+Print-to-PDF pagination is browser dependent, so visually inspect exported
+PDFs in the browser used for release.
 
 ## Project map
 
