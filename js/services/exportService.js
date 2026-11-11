@@ -1352,6 +1352,27 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
   .callout--note { margin-top: 12px; font-size: 10px; }
   .narrative { margin: 0 0 20px; color: var(--slate); font-size: 13px; line-height: 1.7; }
   .report-section { margin: 0 0 22px; break-inside: auto; page-break-inside: auto; }
+  .appendix-page {
+    page-break-before: always;
+    padding: 18px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--teal);
+  }
+  .appendix-page h2 {
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    color: var(--oxblood);
+    border-bottom-color: rgba(126,41,57,.22);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .appendix-page p {
+    margin: 0 0 8px;
+    color: var(--slate);
+    font-size: 12px;
+    line-height: 1.6;
+  }
   h2 {
     margin: 0 0 10px;
     padding-bottom: 7px;
@@ -1485,14 +1506,22 @@ ${isVolunteerReport ? `<section class="report-section">
 </section>` : ""}
 ${isVolunteerReport ? rateDataNoteHTML : ""}
 ${volunteerHoursPieHTML}
-<section class="report-section">
-  <h2>${_escapeHTML(AppCopy.summaryView.methodologySectionTitle)}</h2>
-  <ul class="sources">${methodologyItems}</ul>
-</section>
-${volunteerSourceHTML}
-<section class="report-section">
-  <h2>Sources and references</h2>
-  <ul class="sources">${referenceItems}</ul>
+<section class="report-section appendix-page">
+  <h2>HOW THESE ESTIMATES ARE CALCULATED</h2>
+  <ul>
+    <li>The estimate uses only aggregate activity totals reported for the selected method and reporting period.</li>
+    <li>Reported clinical service units are multiplied by the reference rate for each service.</li>
+    <li>The total estimates the value of reported services, not the clinic’s actual charges or reimbursement.</li>
+    <li>Rates are public national references, are not adjusted for ZIP code, and may differ from local costs or payment rates.</li>
+    <li>The estimate does not establish revenue, profit, financial return, savings, patient outcomes, care quality, or patient need.</li>
+    <li>If clinic cost is provided, it is compared with the activity estimate for the same period; this is not a measure of actual financial return or confirmed savings.</li>
+    <li>Use aggregate totals only; patient-level information is not needed.</li>
+  </ul>
+  <h2>SOURCES AND REFERENCES</h2>
+  <ul>
+    <li>CMS Physician Fee Schedule Look-Up Tool — Centers for Medicare & Medicaid Services (CMS) (2026).</li>
+    <li>Provides national and locality-specific Medicare payment rates for CPT/HCPCS codes.</li>
+  </ul>
 </section>
 </body></html>`;
   }
