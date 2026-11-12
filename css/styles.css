@@ -581,6 +581,7 @@ body {
   color: var(--color-slate);
   display: grid;
   gap: var(--space-2);
+  font-size: var(--text-sm);
   line-height: 1.7;
 }
 
@@ -607,6 +608,7 @@ body {
 
 .welcome-about__content p {
   margin: 0;
+  font-size: var(--text-sm);
   line-height: 1.7;
 }
 
