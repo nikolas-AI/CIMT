@@ -1429,7 +1429,8 @@ body {
   background: #DDE7DF;
 }
 
-.service-impact__bar { margin-top: var(--space-3); }
+.service-impact__bar { height: 1rem; margin-top: var(--space-3); }
+.service-value-chart__track { height: 1rem; }
 
 .service-impact__bar span,
 .service-value-chart__track span {
@@ -1631,7 +1632,7 @@ body {
 
 .composition-pie__depth-shape {
   filter: brightness(0.68);
-  stroke: rgba(0, 0, 0, 0.14);
+  stroke: #FFFFFF;
   stroke-width: 0.6px;
   stroke-linejoin: round;
 }
@@ -1675,7 +1676,7 @@ body {
 
 .composition-pie__slice-number {
   fill: var(--color-navy);
-  font-size: 4px;
+  font-size: 5px;
   font-weight: 700;
   pointer-events: none;
 }
@@ -1703,7 +1704,7 @@ body {
 .composition-pie__legend {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-1) var(--space-2);
+  gap: var(--space-1) var(--space-5);
   min-width: 0;
   margin: 0;
   padding: 0;
@@ -1712,7 +1713,7 @@ body {
 
 .composition-pie__item {
   display: grid;
-  grid-template-columns: 1.1rem 0.65rem minmax(0, 1fr) auto auto;
+  grid-template-columns: 1.1rem 0.65rem minmax(0, 1fr);
   align-items: center;
   gap: 0.2rem;
   min-width: 0;
@@ -1722,7 +1723,15 @@ body {
 }
 
 .composition-pie__item--percentage-only {
-  grid-template-columns: 1.1rem 0.65rem minmax(0, 1fr) auto;
+  grid-template-columns: 1.1rem 0.65rem minmax(0, 1fr);
+}
+
+.composition-pie__details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-1);
+  min-width: 0;
 }
 
 .composition-pie__number {
@@ -1751,8 +1760,8 @@ body {
 .composition-pie__share { color: var(--color-navy); white-space: nowrap; }
 .composition-pie__value { color: var(--color-slate); }
 .composition-pie__share {
-  min-width: 2.5rem;
-  text-align: center;
+  min-width: 2rem;
+  text-align: right;
   font-size: 0.6rem;
   font-weight: 700;
 }

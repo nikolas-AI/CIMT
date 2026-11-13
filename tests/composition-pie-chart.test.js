@@ -98,7 +98,7 @@ test("numbers each slice and its matching legend entry in the same order", () =>
   assert.deepEqual(legendNumbers, sliceNumbers);
   assert.equal((html.match(/class="composition-pie__leader"/g) || []).length, 3);
   assert.match(html, /composition-pie__leader" x1="-?\d+\.\d+" y1="-?\d+\.\d+" x2="-?\d+\.\d+" y2="-?\d+\.\d+"/);
-  assert.match(html, /composition-pie__slice-number-bg" cx="[^"]+" cy="[^"]+" r="4"/);
+  assert.match(html, /composition-pie__slice-number-bg" cx="[^"]+" cy="[^"]+" r="5"/);
 });
 
 test("anchors lower-half leader lines midway down the visible extrusion", () => {
@@ -159,6 +159,7 @@ test("shows service counts alongside percentages in the legend", () => {
   assert.match(html, /composition-pie__share">75\.0%/);
   assert.match(html, /composition-pie__value">25 services/);
   assert.match(html, /composition-pie__share">25\.0%/);
+  assert.match(html, /composition-pie__details">\s*<span class="composition-pie__label">A<\/span>\s*<span class="composition-pie__value">75 services<\/span>\s*<strong class="composition-pie__share">75\.0%<\/strong>/);
 });
 
 test("shows percentages in report legend when raw metrics are hidden", () => {

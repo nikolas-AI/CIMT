@@ -54,7 +54,7 @@ const CompositionPieChart = (() => {
           ${shape}
           <text class="composition-pie__slice-percentage" x="${percentageX}" y="${percentageY}" text-anchor="middle" dominant-baseline="central" aria-hidden="true">${percentage.toFixed(1)}%</text>
           <line class="composition-pie__leader" x1="${lineStartX}" y1="${lineStartY}" x2="${labelX}" y2="${labelY}" aria-hidden="true" />
-          <circle class="composition-pie__slice-number-bg" cx="${labelX}" cy="${labelY}" r="4" aria-hidden="true" />
+          <circle class="composition-pie__slice-number-bg" cx="${labelX}" cy="${labelY}" r="5" aria-hidden="true" />
           <text class="composition-pie__slice-number" x="${labelX}" y="${labelY}" text-anchor="middle" dominant-baseline="central" aria-hidden="true">${index + 1}</text>
         </g>
       `;
@@ -83,11 +83,11 @@ const CompositionPieChart = (() => {
               <li class="composition-pie__item${hideLegendValues ? " composition-pie__item--percentage-only" : ""}">
                 <span class="composition-pie__number" aria-hidden="true">${slice.index + 1}</span>
                 <span class="composition-pie__swatch" style="--pie-color: ${slice.color}" aria-hidden="true"></span>
-                <span class="composition-pie__label">${_escape(slice.item.label)}</span>
-                ${hideLegendValues ? "" : `
-                  <span class="composition-pie__value">${_escape(slice.item.valueLabel)}</span>
-                `}
-                <strong class="composition-pie__share">${slice.percentage.toFixed(1)}%</strong>
+                <span class="composition-pie__details">
+                  <span class="composition-pie__label">${_escape(slice.item.label)}</span>
+                  ${hideLegendValues ? "" : `<span class="composition-pie__value">${_escape(slice.item.valueLabel)}</span>`}
+                  <strong class="composition-pie__share">${slice.percentage.toFixed(1)}%</strong>
+                </span>
               </li>
             `).join("")}
           </ul>

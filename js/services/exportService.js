@@ -1028,8 +1028,9 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
       .filter(row => row.count > 0)
       .slice()
       .sort((a, b) => b.count - a.count || a.serviceName.localeCompare(b.serviceName))
-      .map(row => `
-      <tr>
+      .map((row, index) => `
+      <tr class="table-row--${index % 2 === 0 ? "odd" : "even"}">
+        <td class="table-serial">${index + 1}</td>
         <td>${_escapeHTML(row.serviceName)}</td>
         <td class="service-code">${_escapeHTML(row.code)}</td>
         <td class="numeric">${row.count.toLocaleString("en-US")}</td>
@@ -1045,8 +1046,9 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
       .filter(row => row.hours > 0)
       .slice()
       .sort((a, b) => b.hours - a.hours || a.roleName.localeCompare(b.roleName))
-      .map(row => `
-      <tr>
+      .map((row, index) => `
+      <tr class="table-row--${index % 2 === 0 ? "odd" : "even"}">
+        <td class="table-serial">${index + 1}</td>
         <td>${_escapeHTML(row.roleName)}</td>
         <td>${_escapeHTML(row.category)}</td>
         <td class="numeric">${row.hours.toFixed(1)}</td>
@@ -1190,7 +1192,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
       ? CompositionPieChart.render({
         id: "volunteer-hours-composition",
         title: "Volunteer roles by hours",
-        description: "Reported volunteer hours split by role. Small shares are combined into Other.",
+        description: "Each slice shows a role's share of total reported volunteer hours. Small shares are combined into Other.",
         otherLabel: "Other roles",
         unitLabel: "hours",
         formatValue: value => value.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
@@ -1206,7 +1208,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
       ? CompositionPieChart.render({
         id: "clinical-services-composition",
         title: "Clinical services by count",
-        description: "Reported clinical service counts split by type. Small shares are combined into Other.",
+        description: "Each slice shows a service type's share of total reported counts. Small shares are combined into Other.",
         otherLabel: "Other services",
         unitLabel: "services",
         formatValue: value => value.toLocaleString("en-US"),
@@ -1314,7 +1316,8 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
     background: var(--impact-bg);
     border: 1px solid #B9D4CF;
     border-top: 4px solid var(--teal);
-    box-shadow: 5px 5px 0 rgba(20,46,44,.07);
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(20,46,44,.08);
   }
   .status {
     display: inline-block;
@@ -1355,6 +1358,9 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
     margin: 0 0 20px;
     background: var(--surface);
     border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 3px 12px rgba(20,46,44,.07);
   }
   .metric-grid--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .metric-card { min-width: 0; padding: 14px 16px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
@@ -1371,6 +1377,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
     background: var(--surface);
     border: 1px solid var(--border);
     border-bottom: 0;
+    border-radius: 8px 8px 0 0;
     font-size: 15px;
     letter-spacing: normal;
     text-transform: none;
@@ -1381,6 +1388,9 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
     margin-bottom: 20px;
     background: var(--surface);
     border: 1px solid var(--border);
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+    box-shadow: 0 3px 12px rgba(20,46,44,.07);
   }
   .glance-card {
     min-width: 0;
@@ -1424,6 +1434,8 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
     background: #F0E9DF;
     border: 1px solid #E1D6C9;
     border-left: 5px solid var(--oxblood);
+    border-radius: 8px;
+    box-shadow: 0 3px 12px rgba(20,46,44,.07);
   }
   .callout strong { color: var(--navy); }
   .callout--note { margin-top: 12px; font-size: 10px; }
@@ -1476,50 +1488,63 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
     background: #ECEFED;
     border: 1px solid #D2DAD6;
     border-left: 5px solid var(--teal);
+    border-radius: 8px;
+    box-shadow: 0 3px 12px rgba(20,46,44,.07);
   }
   .feature h2 { color: var(--navy); border-bottom-color: #C8D2CD; }
   .feature__statement { margin: 0; font: 16px/1.6 Inter, "Segoe UI", Arial, sans-serif; }
   .feature__statement strong { color: var(--navy); }
   .feature__meta { margin: 10px 0 0; color: var(--slate); font-size: 10px; font-weight: 700; }
+  .feature .value-track { height: 14px; margin-top: 6px; }
   .feature .value-track span { background: var(--oxblood); }
-  .chart { padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); }
+  .chart { padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 3px 12px rgba(20,46,44,.07); }
   .chart-row { margin-bottom: 12px; }
   .chart-row:last-child { margin-bottom: 0; }
   .chart-row__label { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 5px; color: var(--slate); font-size: 11px; }
   .chart-row__label strong { flex-shrink: 0; color: var(--navy); }
   .value-track { height: 7px; overflow: hidden; background: #DFE7E3; border-radius: 999px; }
+  .chart .value-track { height: 14px; }
   .value-track span { display: block; height: 100%; background: var(--teal); border-radius: inherit; }
-  .composition-pie { margin-bottom: 36px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--border); break-inside: avoid; page-break-inside: avoid; }
+  .composition-pie { margin-bottom: 36px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 3px 12px rgba(20,46,44,.07); break-inside: avoid; page-break-inside: avoid; }
   .composition-pie .summary-section__intro { margin-bottom: 14px; }
   .composition-pie h2 { color: var(--oxblood); font: 700 16px/1.3 "DM Serif Display", Georgia, serif; letter-spacing: normal; text-transform: none; border-bottom: 2px solid var(--oxblood); }
   .composition-pie__content { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; }
   .composition-pie__chart { display: block; width: min(100%, 440px); height: auto; margin: 0 auto; overflow: visible; }
   .composition-pie__shape { stroke: #fff; stroke-width: .6px; stroke-linejoin: round; }
-  .composition-pie__depth-shape { filter: brightness(.68); stroke: rgba(0,0,0,.14); stroke-width: .6px; stroke-linejoin: round; }
+  .composition-pie__depth-shape { filter: brightness(.68); stroke: #fff; stroke-width: .6px; stroke-linejoin: round; }
   .composition-pie__slice-number-bg { fill: #fff; stroke: var(--navy); stroke-width: .8px; pointer-events: none; }
   .composition-pie__leader { stroke: var(--slate); stroke-width: .8px; pointer-events: none; }
-  .composition-pie__slice-number { fill: var(--navy); font-size: 4px; font-weight: 700; pointer-events: none; }
+  .composition-pie__slice-number { fill: var(--navy); font-size: 5px; font-weight: 700; pointer-events: none; }
   .composition-pie__slice-percentage { fill: var(--navy); stroke: #fff; stroke-width: 1.5px; paint-order: stroke; font-size: 4px; font-weight: 700; pointer-events: none; }
   .composition-pie__total { fill: var(--navy); font-size: 12px; font-weight: 700; }
   .composition-pie__total-label { fill: var(--slate); font-size: 6px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
   .composition-pie__heading-total { display: block; margin-top: 4px; color: var(--navy); font: 700 12px/1.4 Inter, "Segoe UI", Arial, sans-serif; letter-spacing: normal; text-transform: none; }
-  .composition-pie__legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 6px; min-width: 0; margin: 0; padding: 0; list-style: none; }
-  .composition-pie__item { display: grid; grid-template-columns: 11px 7px minmax(0, 1fr) auto auto; align-items: center; gap: 3px; min-width: 0; padding: 2px 0; background: transparent; font-size: 7px; }
-  .composition-pie__item--percentage-only { grid-template-columns: 11px 7px minmax(0, 1fr) auto; }
-  .composition-pie__number { display: inline-grid; width: 10px; height: 10px; place-items: center; border: 1px solid var(--border); border-radius: 50%; background: #fff; color: var(--navy); font-size: 7px; font-weight: 700; line-height: 1; }
+  .composition-pie__legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 14px; min-width: 0; margin: 0; padding: 0; list-style: none; }
+  .composition-pie__item { display: grid; grid-template-columns: 13px 7px minmax(0, 1fr); align-items: center; gap: 3px; min-width: 0; padding: 2px 0; background: transparent; font-size: 7px; }
+  .composition-pie__item--percentage-only { grid-template-columns: 13px 7px minmax(0, 1fr); }
+  .composition-pie__details { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 3px; min-width: 0; }
+  .composition-pie__number { display: inline-grid; width: 13px; height: 13px; place-items: center; border: 1px solid var(--border); border-radius: 50%; background: #fff; color: var(--navy); font-size: 8px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
   .composition-pie__swatch { width: 7px; height: 7px; border-radius: 50%; background: var(--pie-color); }
   .composition-pie__label { min-width: 0; overflow-wrap: anywhere; }
   .composition-pie__value, .composition-pie__share { color: var(--navy); white-space: nowrap; }
   .composition-pie__value { color: var(--slate); }
-  .composition-pie__share { min-width: 24px; text-align: center; font-size: 6px; font-weight: 700; }
-  table { width: 100%; margin: 8px 0 0; border-collapse: collapse; font-size: 10px; }
+  .composition-pie__share { min-width: 20px; text-align: right; font-size: 6px; font-weight: 700; }
+  .table-wrap { margin-top: 8px; border-radius: 8px; }
+  table { width: 100%; margin: 0; border: 1px solid var(--border); border-collapse: separate; border-spacing: 0; border-radius: 8px; box-shadow: 0 3px 12px rgba(20,46,44,.07); font-size: 10px; }
   thead { display: table-header-group; break-after: avoid; page-break-after: avoid; }
   tbody.table-opening, tbody.table-ending { break-inside: avoid; page-break-inside: avoid; }
-  th { padding: 8px; color: var(--navy); background: #EDF1EF; font-size: 9px; font-weight: 700; text-align: left; }
+  th { padding: 8px; color: #FFFFFF; background: var(--teal); font-size: 9px; font-weight: 700; text-align: left; }
   td { padding: 7px 8px; color: var(--slate); border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+  .table-row--even td { background: #F3F6F4; }
+  .table-row--odd td { background: var(--surface); }
+  .table-serial { width: 3.5em; text-align: center; font-variant-numeric: tabular-nums; }
+  thead th:first-child { border-top-left-radius: 7px; }
+  thead th:last-child { border-top-right-radius: 7px; }
+  tbody.table-ending tr:last-child > :first-child { border-bottom-left-radius: 7px; }
+  tbody.table-ending tr:last-child > :last-child { border-bottom-right-radius: 7px; }
   .service-code { width: 6em; min-width: 6em; white-space: nowrap; }
   .numeric { text-align: right; font-variant-numeric: tabular-nums; }
-  .table-total th { background: #F0E9DF; }
+  .table-total th { color: var(--navy); background: #F0E9DF; }
   .sources { padding-left: 18px; }
   .sources li { margin: 0 0 9px; color: var(--slate); font-size: 10px; }
   .sources a { color: var(--teal); overflow-wrap: anywhere; }
@@ -1603,8 +1628,8 @@ ${budgetHTML}
 ${!isVolunteerReport ? `<section class="report-section service-breakdown">
   <h2>Clinical Services Breakdown (Ranked by counts)</h2>
   <div class="table-wrap"><table>
-    <thead><tr><th scope="col">Service</th><th class="service-code" scope="col">Code</th><th class="numeric" scope="col">Reported units</th><th class="numeric" scope="col">Reference rate</th><th class="numeric" scope="col">Estimated value</th><th class="numeric" scope="col">Value share</th></tr></thead>
-    ${tableBodyHTML(svcRows, `<tr class="table-total"><th colspan="4" class="numeric" scope="row">Clinical services total</th><th class="numeric">${_fmt(summary.clinicalServiceValue)}</th><th class="numeric">${summary.clinicalServiceValue > 0 ? "100.0%" : "0.0%"}</th></tr>`)}
+    <thead><tr><th scope="col" class="table-serial">S/N</th><th scope="col">Service</th><th class="service-code" scope="col">Code</th><th class="numeric" scope="col">Reported units</th><th class="numeric" scope="col">Reference rate</th><th class="numeric" scope="col">Estimated value</th><th class="numeric" scope="col">Value share</th></tr></thead>
+    ${tableBodyHTML(svcRows, `<tr class="table-total"><th colspan="5" class="numeric" scope="row">Clinical services total</th><th class="numeric">${_fmt(summary.clinicalServiceValue)}</th><th class="numeric">${summary.clinicalServiceValue > 0 ? "100.0%" : "0.0%"}</th></tr>`)}
   </table></div>
 </section>` : ""}
 ${!isVolunteerReport ? rateDataNoteHTML : ""}
@@ -1612,8 +1637,8 @@ ${clinicalCountsPieHTML}
 ${isVolunteerReport ? `<section class="report-section">
   <h2>Volunteer Roles (Ranked By Hours)</h2>
   <div class="table-wrap"><table>
-    <thead><tr><th scope="col">Role</th><th scope="col">Type</th><th class="numeric" scope="col">Volunteer hours</th><th class="numeric" scope="col">Reference rate / hour</th><th class="numeric" scope="col">Estimated value</th></tr></thead>
-    ${tableBodyHTML(volRows, `<tr class="table-total"><th colspan="4" class="numeric" scope="row">Total volunteer time value</th><th class="numeric">${_fmt(summary.volunteerValue)}</th></tr>`)}
+    <thead><tr><th scope="col" class="table-serial">S/N</th><th scope="col">Role</th><th scope="col">Type</th><th class="numeric" scope="col">Volunteer hours</th><th class="numeric" scope="col">Reference rate / hour</th><th class="numeric" scope="col">Estimated value</th></tr></thead>
+    ${tableBodyHTML(volRows, `<tr class="table-total"><th colspan="5" class="numeric" scope="row">Total volunteer time value</th><th class="numeric">${_fmt(summary.volunteerValue)}</th></tr>`)}
   </table></div>
 </section>` : ""}
 ${isVolunteerReport ? rateDataNoteHTML : ""}
