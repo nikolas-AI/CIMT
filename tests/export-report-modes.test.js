@@ -12,7 +12,9 @@ function report({mode='clinicalServices', cost=null, category='mixed', count=12,
   }
   ctx.options={mode,cost,category,count,name};
   vm.runInContext(`
-    const selectedRoles = options.category === 'mixed'
+    const selectedRoles = options.category === 'all'
+      ? VOLUNTEER_ROLES
+      : options.category === 'mixed'
       ? [...VOLUNTEER_ROLES.filter(r=>r.category==='medical professional').slice(0,6), ...VOLUNTEER_ROLES.filter(r=>r.category==='non medical').slice(0,6)]
       : VOLUNTEER_ROLES.filter(r=>r.category===options.category);
     const state={impactMethod:options.mode,clinic:{name:options.name,streetAddress:'123 Main Street',city:'Austin',state:'TX',zipCode:'78701',reportingPeriodFrom:'2026-01-01',reportingPeriodTo:'2026-06-30',reportingPeriodClinicCost:options.cost},
@@ -102,10 +104,19 @@ test('zero activity rows stay excluded and clinic text is escaped in every chapt
 test('large clinical reports retain every detail row and the grouped chart legend',()=>{
   const {html}=report({count:40});
   assert.equal((html.match(/<tr class="table-row--/g)||[]).length,40);
+  const tableStart=html.indexOf('<table>',html.indexOf('Clinical Services Breakdown'));
+  assert.equal((html.slice(tableStart,html.indexOf('</table>',tableStart)).match(/<tr class="table-row--/g)||[]).length,40);
+  assert.doesNotMatch(html,/<details class="table-overflow">/);
   assert.doesNotMatch(html,/class="chart-row"|Top ten/);
   assert.match(html,/composition-pie--dense/);
   assert.match(html,/Other services/);
   assert.match(html,/Clinical services total/);
+});
+test('large volunteer reports retain every detail row without collapsing the report table',()=>{
+  const {html}=report({mode:'volunteerHours',category:'all',count:40});
+  const tableStart=html.indexOf('<table>',html.indexOf('Volunteer Roles (Ranked By Hours)'));
+  assert.equal((html.slice(tableStart,html.indexOf('</table>',tableStart)).match(/<tr class="table-row--/g)||[]).length,40);
+  assert.doesNotMatch(html,/<details class="table-overflow">/);
 });
 test('clinical detail tables retain full descriptors while highlights use concise labels',()=>{
   const {html,summary}=report({count:1});

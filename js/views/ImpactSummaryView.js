@@ -11,6 +11,7 @@
 "use strict";
 
 const ImpactSummaryView = (() => {
+  const MAX_VISIBLE_ENTRIES = 20;
 
   function render(summary, { onBack, onStartOver }) {
     // The calculator has already finished its work before this screen is shown.
@@ -362,24 +363,25 @@ const ImpactSummaryView = (() => {
     section.className = "summary-section service-value-chart";
     section.setAttribute("aria-labelledby", "volunteer-value-chart-heading");
     const maximum = Math.max(...rows.map(row => row.estimatedValue), 1);
+    const renderRow = row => {
+      const width = Math.min(100, Math.max(0, row.estimatedValue / maximum * 100));
+      return `
+        <div class="service-value-chart__row">
+          <div class="service-value-chart__label">
+            <span>${_escape(row.roleName)} (${Formatting.number(row.hours, 1)} volunteer hours)</span>
+            <strong>${Formatting.currency(row.estimatedValue)}</strong>
+          </div>
+          <div class="service-value-chart__track" role="img" aria-label="${_escape(row.roleName)}: ${Formatting.currency(row.estimatedValue)} estimated value from ${Formatting.number(row.hours, 1)} volunteer hours">
+            <span style="width: ${width}%"></span>
+          </div>
+        </div>
+      `;
+    };
     section.innerHTML = `
       <h2 class="summary-section__heading" id="volunteer-value-chart-heading">Volunteer roles by value</h2>
       <p class="summary-section__intro">Roles are ranked by estimated value. Reported hours are shown for each role.</p>
       <div class="service-value-chart__rows">
-        ${rows.map(row => {
-          const width = Math.min(100, Math.max(0, row.estimatedValue / maximum * 100));
-          return `
-            <div class="service-value-chart__row">
-              <div class="service-value-chart__label">
-                <span>${_escape(row.roleName)} (${Formatting.number(row.hours, 1)} volunteer hours)</span>
-                <strong>${Formatting.currency(row.estimatedValue)}</strong>
-              </div>
-              <div class="service-value-chart__track" role="img" aria-label="${_escape(row.roleName)}: ${Formatting.currency(row.estimatedValue)} estimated value from ${Formatting.number(row.hours, 1)} volunteer hours">
-                <span style="width: ${width}%"></span>
-              </div>
-            </div>
-          `;
-        }).join("")}
+        ${_renderExpandableValueRows(rows, renderRow, "volunteer roles")}
       </div>
     `;
     return section;
@@ -393,24 +395,25 @@ const ImpactSummaryView = (() => {
     section.className = "summary-section service-value-chart";
     section.setAttribute("aria-labelledby", "service-value-chart-heading");
     const maximum = Math.max(...rows.map(row => row.estimatedValue), 1);
+    const renderRow = row => {
+      const width = Math.min(100, Math.max(0, row.estimatedValue / maximum * 100));
+      return `
+        <div class="service-value-chart__row">
+          <div class="service-value-chart__label">
+            <span>${_escape(row.serviceName)} (${Formatting.number(row.count, 0)} counts)</span>
+            <strong>${Formatting.currency(row.estimatedValue)}</strong>
+          </div>
+          <div class="service-value-chart__track" aria-hidden="true">
+            <span style="width: ${width}%"></span>
+          </div>
+        </div>
+      `;
+    };
     section.innerHTML = `
       <h2 class="summary-section__heading" id="service-value-chart-heading">${_escape(AppCopy.summaryDashboard.valueChartHeading)}</h2>
       <p class="summary-section__intro">${_escape(AppCopy.summaryDashboard.valueChartIntro)}</p>
       <div class="service-value-chart__rows">
-        ${rows.map(row => {
-          const width = Math.min(100, Math.max(0, row.estimatedValue / maximum * 100));
-          return `
-            <div class="service-value-chart__row">
-              <div class="service-value-chart__label">
-                <span>${_escape(row.serviceName)} (${Formatting.number(row.count, 0)} counts)</span>
-                <strong>${Formatting.currency(row.estimatedValue)}</strong>
-              </div>
-              <div class="service-value-chart__track" aria-hidden="true">
-                <span style="width: ${width}%"></span>
-              </div>
-            </div>
-          `;
-        }).join("")}
+        ${_renderExpandableValueRows(rows, renderRow, "services")}
       </div>
     `;
     return section;
@@ -452,40 +455,42 @@ const ImpactSummaryView = (() => {
         : AppCopy.summary.rankingNote;
       section.querySelector(".service-ranking__note").textContent =
         `${rankingNote} Reference rate data: ${getRateDataSummary("clinicalServices")}.`;
+      const tableHeaders = `
+        <thead>
+          <tr>
+            <th scope="col">Rank</th>
+            <th scope="col">Service</th>
+            <th scope="col">Code</th>
+            <th scope="col">Number reported</th>
+            <th scope="col">Reference rate</th>
+            <th scope="col">Estimated value</th>
+            <th scope="col">${mode === "visits" ? "Share of reported units" : "Share of total estimated service value"}</th>
+          </tr>
+        </thead>
+      `;
+      const renderRow = (row, index) => {
+        const share = mode === "visits"
+          ? (totalReportedUnits > 0 ? row.count / totalReportedUnits * 100 : 0)
+          : row.clinicalValueShare;
+        const shareLabel = share > 0 && share < 0.1
+          ? "&lt;0.1%"
+          : `${Formatting.number(share, 1)}%`;
+        return `
+          <tr>
+            <td class="service-ranking__rank">${index + 1}</td>
+            <td>${_escape(row.serviceName)}</td>
+            <td><code>${_escape(row.code)}</code></td>
+            <td>${Formatting.number(row.count, 0)}</td>
+            <td>${Formatting.currency(row.benchmarkRate)}</td>
+            <td>${Formatting.currency(row.estimatedValue)}</td>
+            <td>${shareLabel}</td>
+          </tr>
+        `;
+      };
       tableWrap.innerHTML = `
         <table class="rate-table service-ranking__table" aria-label="Clinical service impact ranking">
-          <thead>
-            <tr>
-              <th scope="col">Rank</th>
-              <th scope="col">Service</th>
-              <th scope="col">Code</th>
-              <th scope="col">Number reported</th>
-              <th scope="col">Reference rate</th>
-              <th scope="col">Estimated value</th>
-              <th scope="col">${mode === "visits" ? "Share of reported units" : "Share of total estimated service value"}</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows.map((row, index) => {
-              const share = mode === "visits"
-                ? (totalReportedUnits > 0 ? row.count / totalReportedUnits * 100 : 0)
-                : row.clinicalValueShare;
-              const shareLabel = share > 0 && share < 0.1
-                ? "&lt;0.1%"
-                : `${Formatting.number(share, 1)}%`;
-              return `
-                <tr>
-                  <td class="service-ranking__rank">${index + 1}</td>
-                  <td>${_escape(row.serviceName)}</td>
-                  <td><code>${_escape(row.code)}</code></td>
-                  <td>${Formatting.number(row.count, 0)}</td>
-                  <td>${Formatting.currency(row.benchmarkRate)}</td>
-                  <td>${Formatting.currency(row.estimatedValue)}</td>
-                  <td>${shareLabel}</td>
-                </tr>
-              `;
-            }).join("")}
-          </tbody>
+          ${tableHeaders}
+          <tbody>${_renderExpandableTableRows(rows, 7, "services", renderRow, "rate-table service-ranking__table", "Additional clinical services", tableHeaders)}</tbody>
         </table>
       `;
     };
@@ -600,47 +605,78 @@ const ImpactSummaryView = (() => {
     const section = document.createElement("section");
     section.className = "summary-section service-ranking";
     section.setAttribute("aria-labelledby", "volunteer-ranking-heading");
+    const tableHeaders = `
+      <thead>
+        <tr>
+          <th scope="col">Rank</th>
+          <th scope="col">Role</th>
+          <th scope="col">Type</th>
+          <th scope="col">Volunteer hours</th>
+          <th scope="col">Reference rate / hour</th>
+          <th scope="col">Estimated value</th>
+          <th scope="col">Share of total estimated volunteer value</th>
+        </tr>
+      </thead>
+    `;
+    const renderRow = (row, index) => {
+      const share = summary.volunteerValue > 0
+        ? row.estimatedValue / summary.volunteerValue * 100
+        : 0;
+      const shareLabel = share > 0 && share < 0.1
+        ? "&lt;0.1%"
+        : `${Formatting.number(share, 1)}%`;
+      return `
+        <tr>
+          <td class="service-ranking__rank">${index + 1}</td>
+          <td>${_escape(row.roleName)}</td>
+          <td>${_escape(row.category)}</td>
+          <td>${Formatting.number(row.hours, 1)}</td>
+          <td>${Formatting.currency(row.benchmarkRate)}</td>
+          <td>${Formatting.currency(row.estimatedValue)}</td>
+          <td>${shareLabel}</td>
+        </tr>
+      `;
+    };
     section.innerHTML = `
       <h2 class="summary-section__heading" id="volunteer-ranking-heading">Volunteer roles ranked by hours</h2>
       <p class="summary-section__intro">Roles are ranked by reported volunteer hours. Share shows each role’s portion of the total estimated volunteer value.</p>
       <div class="service-ranking__table-wrap">
         <table class="rate-table service-ranking__table" aria-label="Volunteer role ranking by total hours">
-          <thead>
-            <tr>
-              <th scope="col">Rank</th>
-              <th scope="col">Role</th>
-              <th scope="col">Type</th>
-              <th scope="col">Volunteer hours</th>
-              <th scope="col">Reference rate / hour</th>
-              <th scope="col">Estimated value</th>
-              <th scope="col">Share of total estimated volunteer value</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows.map((row, index) => {
-              const share = summary.volunteerValue > 0
-                ? row.estimatedValue / summary.volunteerValue * 100
-                : 0;
-              const shareLabel = share > 0 && share < 0.1
-                ? "&lt;0.1%"
-                : `${Formatting.number(share, 1)}%`;
-              return `
-              <tr>
-                <td class="service-ranking__rank">${index + 1}</td>
-                <td>${_escape(row.roleName)}</td>
-                <td>${_escape(row.category)}</td>
-                <td>${Formatting.number(row.hours, 1)}</td>
-                <td>${Formatting.currency(row.benchmarkRate)}</td>
-                <td>${Formatting.currency(row.estimatedValue)}</td>
-                <td>${shareLabel}</td>
-              </tr>
-              `;
-            }).join("")}
-          </tbody>
+          ${tableHeaders}
+          <tbody>${_renderExpandableTableRows(rows, 7, "volunteer roles", renderRow, "rate-table service-ranking__table", "Additional volunteer roles", tableHeaders)}</tbody>
         </table>
       </div>
     `;
     return section;
+  }
+
+  function _renderExpandableTableRows(rows, columnCount, itemLabel, renderRow, tableClass, tableLabel, tableHeaders) {
+    const visibleRows = rows.slice(0, MAX_VISIBLE_ENTRIES);
+    const additionalRows = rows.slice(MAX_VISIBLE_ENTRIES);
+    const overflowRow = additionalRows.length > 0
+      ? `<tr class="table-overflow-row"><td colspan="${columnCount}">
+          <details class="table-overflow">
+            <summary>Show ${additionalRows.length} more ${itemLabel}</summary>
+            <table class="${tableClass} table-overflow__table" aria-label="${tableLabel}">
+              ${tableHeaders}
+              <tbody>${additionalRows.map((row, index) => renderRow(row, index + 20)).join("")}</tbody>
+            </table>
+          </details>
+        </td></tr>`
+      : "";
+    return `${visibleRows.map(renderRow).join("")}${overflowRow}`;
+  }
+
+  function _renderExpandableValueRows(rows, renderRow, itemLabel) {
+    const visibleRows = rows.slice(0, MAX_VISIBLE_ENTRIES);
+    const additionalRows = rows.slice(MAX_VISIBLE_ENTRIES);
+    const overflow = additionalRows.length > 0
+      ? `<details class="service-value-chart__overflow">
+          <summary>Show ${additionalRows.length} more ${itemLabel}</summary>
+          <div class="service-value-chart__overflow-rows">${additionalRows.map(renderRow).join("")}</div>
+        </details>`
+      : "";
+    return `${visibleRows.map(renderRow).join("")}${overflow}`;
   }
 
   function _buildRateDataNote(summary) {

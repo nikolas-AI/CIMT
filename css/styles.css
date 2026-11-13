@@ -1448,6 +1448,18 @@ body {
   background: var(--color-surface);
 }
 
+.service-value-chart__overflow,
+.service-value-chart__overflow-rows {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.service-value-chart__overflow > summary {
+  color: var(--color-accent);
+  cursor: pointer;
+  font-weight: 600;
+}
+
 .service-value-chart__label {
   display: flex;
   justify-content: space-between;
@@ -1515,6 +1527,15 @@ body {
 .service-ranking__table {
   min-width: 720px;
 }
+
+.service-ranking__table .table-overflow-row > td { padding: 0; text-align: left; }
+.table-overflow > summary {
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-accent);
+  cursor: pointer;
+  font-weight: 600;
+}
+.table-overflow__table { margin-top: var(--space-2); }
 
 .service-ranking__table th:not(:nth-child(2)),
 .service-ranking__table td:not(:nth-child(2)) {
