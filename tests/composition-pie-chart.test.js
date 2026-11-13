@@ -89,6 +89,15 @@ test("adds a darkened extrusion beneath every pie slice", () => {
   assert.equal((html.match(/class="composition-pie__depth"/g) || []).length, 1);
 });
 
+test("connects front-facing slice separators through the pie extrusion", () => {
+  const { html } = renderLabels([["A", 25], ["B", 25], ["C", 25], ["D", 25]]);
+  const separators = Array.from(html.matchAll(/class="composition-pie__depth-separator" x1="([^"]+)" y1="([^"]+)" x2="([^"]+)" y2="([^"]+)"/g));
+
+  assert.equal(separators.length, 6);
+  assert.ok(separators.every(([, x1, y1, x2, y2]) => x1 === x2 && Number(y2) - Number(y1) === 8));
+  assert.match(html, /composition-pie__depth-shape[^>]*\/><line class="composition-pie__depth-separator"/);
+});
+
 test("numbers each slice and its matching legend entry in the same order", () => {
   const { html } = renderLabels([["A", 60], ["B", 25], ["C", 15]]);
   const sliceNumbers = Array.from(html.matchAll(/class="composition-pie__slice-number"[^>]*>(\d+)</g), match => match[1]);

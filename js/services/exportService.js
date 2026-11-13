@@ -1079,7 +1079,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
         <div class="metric-grid metric-grid--two">
           ${metricCard("Reported clinic cost", _fmt(summary.reportingPeriodClinicCost), "Total clinic cost reported for this period.")}
           ${metricCard("Estimated total value", _fmt(summary.totalEstimatedValue), "Estimated value of the activity entered.")}
-          ${metricCard(AppCopy.summaryView.valuePerDollarLabel, !hasCostRatio ? "Not available" : `$${summary.valueToCostRatio.toFixed(2)}`, "Informational comparison, not ROI.")}
+          ${metricCard(AppCopy.summaryView.valuePerDollarLabel, !hasCostRatio ? "Not available" : `$${summary.valueToCostRatio.toFixed(2)}`)}
           ${metricCard(AppCopy.summaryView.benchmarkComparisonLabel, summary.reportingPeriodClinicCost > 0 && Number.isFinite(summary.benchmarkValueROI) ? `${Math.abs(summary.benchmarkValueROI).toFixed(1)}% ${summary.benchmarkValueROI > 0 ? "higher" : summary.benchmarkValueROI < 0 ? "lower" : "equal"}` : "Not available", "Estimated value compared with reported clinic cost.")}
         </div>
         <p class="callout callout--note">${_escapeHTML(AppCopy.summary.costComparisonNote)}</p>
@@ -1279,13 +1279,14 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
   .table-serial { width: 3em; color: var(--slate); text-align: center; font-variant-numeric: tabular-nums; }
   .service-code { width: 5.5em; white-space: nowrap; }
   .table-total th { color: var(--navy); border-top: 1.5px solid var(--teal); background: #eaf1ee; }
-  .composition-pie { margin: 20px 0; padding-top: 13px; border-top: 1px solid var(--border); break-before: page; break-inside: auto; }
+  .composition-pie { margin: 20px 0; padding-top: 13px; border-top: 1px solid var(--border); break-inside: auto; }
   .composition-pie .summary-section__intro { font-size: 8pt; color: var(--slate); margin-bottom: 10px; }
   .composition-pie__heading-total { display: block; margin-top: 4px; color: var(--navy); font-size: 12pt; font-weight: 600; letter-spacing: normal; text-transform: none; }
   .composition-pie__content { display: block; }
   .composition-pie__chart { display: block; width: 60%; max-width: none; height: auto; overflow: visible; margin: 0 auto 18px; break-inside: avoid; }
   .composition-pie__shape { stroke: #fff; stroke-width: .6px; stroke-linejoin: round; }
   .composition-pie__depth-shape { filter: brightness(.68); stroke: #fff; stroke-width: .6px; stroke-linejoin: round; }
+  .composition-pie__depth-separator { stroke: #fff; stroke-width: .6px; pointer-events: none; }
   .composition-pie__slice-number-bg { fill: #fff; stroke: var(--navy); stroke-width: .8px; }
   .composition-pie__leader { fill: none; stroke: #9aaea7; stroke-width: .65px; }
   .composition-pie__slice-number { fill: var(--navy); font: 600 6px "Segoe UI", Arial, sans-serif; font-variant-numeric: tabular-nums; }
@@ -1307,10 +1308,14 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
   .source-attribution { padding: 10px 0; border-top: 1px solid var(--border); }
   .report-footer { display: flex; justify-content: space-between; gap: 18px; padding-top: 10px; margin-top: 24px; border-top: 1px solid var(--border); font-size: 7pt; color: var(--slate); }
   .report-footer span { text-align: right; overflow-wrap: anywhere; }
+  .appendix-page-footer { margin-top: auto; break-inside: avoid; }
+  .appendix-page-footer__about { margin: 0; padding-top: 8px; border-top: 1px solid var(--border); font-size: 7pt; line-height: 1.4; color: var(--slate); }
+  .appendix-page-footer .report-footer { margin-top: 10px; }
   @media print {
     body { max-width: none; margin: 0; padding: 0; }
     .report-chapter { break-before: page; margin-top: 0; }
     .report-chapter.appendix-page { break-before: page; page-break-before: always; margin-top: 0; }
+    .appendix-page { display: flex; flex-direction: column; min-height: 9.8in; }
     .appendix-intro { break-inside: avoid; page-break-inside: avoid; }
     .appendix-masthead { margin-bottom: 24px; }
     .volunteer-value-glance { break-inside: avoid; page-break-inside: avoid; }
@@ -1334,7 +1339,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
   .brief-masthead span { color: #627470; white-space: nowrap; }
   .brief-header { padding: 18px 0 13px; border-bottom: 1px solid #cad8d3; }
   .brief-header h1 { font: 700 25pt/1.15 "Segoe UI", Arial, sans-serif; letter-spacing: -.025em; margin: 0 0 5px; color: #203432; }
-  .brief-subtitle { font-size: 16pt; margin: 0 0 10px; }
+  .brief-subtitle { font-size: 14pt; margin: 0 0 10px; }
   .brief-meta { display: flex; justify-content: space-between; gap: 18px; color: #627470; font-size: 8pt; }
   .brief-meta > span { max-width: 52%; overflow-wrap: anywhere; }
   .brief-meta > span:last-child { text-align: right; }
@@ -1382,7 +1387,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
 <div class="brief-masthead"><strong>CARE IN ACTION / CLINIC IMPACT ESTIMATOR</strong><span>EXECUTIVE SUMMARY</span></div>
 <header class="brief-header">
   <h1>${_escapeHTML(clinicName)}</h1>
-  <p class="brief-subtitle">Estimated community impact report</p>
+  <p class="brief-subtitle">Estimated clinic impact report</p>
   <div class="brief-meta"><span>${address}</span><span>${_escapeHTML(period)}</span></div>
 </header>
 <div class="brief-overview">
@@ -1427,6 +1432,7 @@ ${isVolunteerReport ? rateDataNoteHTML : ""}
 ${volunteerHoursPieHTML}
 </section>` : ""}
 <section class="report-chapter appendix-page" aria-label="Methodology and sources">
+  <div class="appendix-content">
   <div class="appendix-intro">
   <div class="appendix-masthead">${chapterMasthead()}</div>
   ${chapterHeader("Methodology &amp; sources", false)}
@@ -1437,8 +1443,12 @@ ${volunteerHoursPieHTML}
   ${volunteerSourceHTML}
   <h2>SOURCES AND REFERENCES</h2>
   <ol class="sources">${referenceItems}</ol>
+  </div>
+  <footer class="appendix-page-footer">
+    <p class="appendix-page-footer__about"><strong>About this report:</strong> This report was generated with the Care in Action tool using the activity information entered for the reporting period and the reference rates cited above. Care in Action was developed by the Translational Health Research Center at Texas State University (THRC) in partnership with the Texas Association of Charitable Clinics (TXACC).</p>
+    <div class="report-footer"><strong>Care in Action</strong><span>${_escapeHTML(clinicName)} | ${_escapeHTML(_methodLabel(summary.impactMethod))}</span></div>
+  </footer>
 </section>
-<footer class="report-footer"><strong>Care in Action</strong><span>${_escapeHTML(clinicName)} | ${_escapeHTML(_methodLabel(summary.impactMethod))}</span></footer>
 </body></html>`;
   }
 

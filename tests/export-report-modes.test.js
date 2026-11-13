@@ -32,6 +32,9 @@ for (const mode of ['clinicalServices','volunteerHours']) {
     assert.doesNotMatch(html,/aria-label="Activity and estimated value"/);
     assert.ok(html.indexOf('<table>')>html.indexOf('aria-label="Detailed activity statement"'));
     assert.match(html,/class="composition-pie__chart"/);
+    assert.match(html,/<footer class="appendix-page-footer">[\s\S]*?<p class="appendix-page-footer__about"><strong>About this report:<\/strong>/);
+    assert.match(html,/This report was generated with the Care in Action tool using the activity information entered for the reporting period and the reference rates cited above\./);
+    assert.match(html,/Translational Health Research Center at Texas State University \(THRC\) in partnership with the Texas Association of Charitable Clinics \(TXACC\)/);
     assert.doesNotMatch(html,/NaN|Infinity|undefined/);
     if(mode==='clinicalServices') {
       assert.match(html,/clinical-services-composition/); assert.match(html,/CMS Physician Fee Schedule/);
@@ -50,6 +53,7 @@ for (const mode of ['clinicalServices','volunteerHours']) {
     const {html}=report({mode,cost:1000});
     assert.match(html,/<strong>\$1,000\.00<\/strong><span>reported clinic cost<\/span>/);
     assert.match(html,/<section class="report-section cost-comparison">/);
+    assert.doesNotMatch(html,/<p class="metric-card__note">Informational comparison, not ROI\.<\/p>/);
     assert.match(html,/Reported cost compared with estimated value/);
     assert.match(html,/estimated value per \$1 of reported cost/);
     for(const ratio of [-10,0,10]) {
@@ -66,12 +70,22 @@ for (const mode of ['clinicalServices','volunteerHours']) {
     assert.match(html,/02 \/ /);
   });
 }
+test('front-page report subtitle uses a reduced font size',()=>{
+  assert.match(report().html,/\.brief-subtitle \{ font-size: 14pt;/);
+});
+test('pie charts are not forced onto a new page',()=>{
+  const {html}=report();
+  assert.doesNotMatch(html,/\.composition-pie \{[^}]*break-before:\s*page/);
+  assert.match(html,/\.composition-pie \{[^}]*break-inside: auto/);
+});
 test('methodology appendix flows naturally and keeps its heading with the description',()=>{
   const {html}=report();
   assert.match(html, /\.report-chapter\.appendix-page \{ break-before: page; page-break-before: always; margin-top: 0; \}/);
+  assert.match(html, /\.appendix-page \{ display: flex; flex-direction: column; min-height: 9\.8in; \}/);
+  assert.match(html, /\.appendix-page-footer \{ margin-top: auto; break-inside: avoid; \}/);
   assert.match(html, /\.appendix-intro \{ break-inside: avoid; page-break-inside: avoid; \}/);
   assert.match(html, /\.appendix-masthead \{ margin-bottom: 24px; \}/);
-  assert.match(html, /<section class="report-chapter appendix-page" aria-label="Methodology and sources">\s*<div class="appendix-intro">\s*<div class="appendix-masthead"><div class="brief-masthead"><strong>CARE IN ACTION \/ CLINIC IMPACT ESTIMATOR<\/strong>[\s\S]*?<\/div><\/div>\s*<header class="chapter-header">\s*<h2>Methodology &amp; sources<\/h2>/);
+  assert.match(html, /<section class="report-chapter appendix-page" aria-label="Methodology and sources">\s*<div class="appendix-content">\s*<div class="appendix-intro">\s*<div class="appendix-masthead"><div class="brief-masthead"><strong>CARE IN ACTION \/ CLINIC IMPACT ESTIMATOR<\/strong>[\s\S]*?<\/div><\/div>\s*<header class="chapter-header">\s*<h2>Methodology &amp; sources<\/h2>/);
   assert.match(html, /<header class="chapter-header">[\s\S]*?<\/header>\s*<p class="narrative">/);
 });
 test('volunteer category comparison appears only for two active categories',()=>{

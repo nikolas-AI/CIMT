@@ -48,9 +48,20 @@ const CompositionPieChart = (() => {
         ? `<circle class="composition-pie__shape" cx="100" cy="100" r="94" fill="${color}" />`
         : `<path class="composition-pie__shape" d="${_slicePath(startAngle, endAngle)}" fill="${color}" />`;
       const depthShape = shape.replace("composition-pie__shape", "composition-pie__depth-shape");
+      const depthSeparators = chartItems.length > 1
+        ? [startAngle, endAngle]
+          .filter(boundaryAngle => Math.sin(boundaryAngle * Math.PI / 180) >= -1e-9)
+          .map(boundaryAngle => {
+            const radians = boundaryAngle * Math.PI / 180;
+            const x = (100 + 94 * Math.cos(radians)).toFixed(3);
+            const y = (100 + 94 * Math.sin(radians)).toFixed(3);
+            return `<line class="composition-pie__depth-separator" x1="${x}" y1="${(Number(y) - 8).toFixed(3)}" x2="${x}" y2="${y}" />`;
+          })
+          .join("")
+        : "";
       const depthPath = `
         <g class="composition-pie__depth-slice" data-slice-index="${index}" transform="translate(0 8)">
-          <g class="composition-pie__depth-lift" style="--slice-x: ${offsetX}px; --slice-y: ${offsetY}px">${depthShape}</g>
+          <g class="composition-pie__depth-lift" style="--slice-x: ${offsetX}px; --slice-y: ${offsetY}px">${depthShape}${depthSeparators}</g>
         </g>
       `;
       const path = `

@@ -1637,6 +1637,12 @@ body {
   stroke-linejoin: round;
 }
 
+.composition-pie__depth-separator {
+  stroke: #FFFFFF;
+  stroke-width: 0.6px;
+  pointer-events: none;
+}
+
 .composition-pie__depth-lift {
   transform-box: fill-box;
   transform-origin: center;
