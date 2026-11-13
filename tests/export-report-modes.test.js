@@ -39,11 +39,16 @@ for (const mode of ['clinicalServices','volunteerHours']) {
     } else {
       assert.match(html,/volunteer-hours-composition/);assert.match(html,/Bureau of Labor Statistics/);
       assert.match(html,/<h2>Volunteer Rate Source/);assert.doesNotMatch(html,/clinical-services-composition|CMS Physician Fee Schedule/);
+      assert.match(html,/composition-pie composition-pie--volunteer-hours/);
+      assert.match(html,/\.composition-pie--volunteer-hours \.composition-pie__label \{ display: inline; \}/);
     }
   });
   test(`${mode}: absent cost is omitted; valid cost retains both comparisons`,()=>{
-    assert.doesNotMatch(report({mode}).html,/<section class="report-section cost-comparison">/);
+    const absentCostHTML=report({mode}).html;
+    assert.doesNotMatch(absentCostHTML,/<section class="report-section cost-comparison">/);
+    assert.doesNotMatch(absentCostHTML,/<span>reported clinic cost<\/span>/);
     const {html}=report({mode,cost:1000});
+    assert.match(html,/<strong>\$1,000\.00<\/strong><span>reported clinic cost<\/span>/);
     assert.match(html,/<section class="report-section cost-comparison">/);
     assert.match(html,/Reported cost compared with estimated value/);
     assert.match(html,/estimated value per \$1 of reported cost/);
@@ -61,6 +66,14 @@ for (const mode of ['clinicalServices','volunteerHours']) {
     assert.match(html,/02 \/ /);
   });
 }
+test('methodology appendix flows naturally and keeps its heading with the description',()=>{
+  const {html}=report();
+  assert.match(html, /\.report-chapter\.appendix-page \{ break-before: page; page-break-before: always; margin-top: 0; \}/);
+  assert.match(html, /\.appendix-intro \{ break-inside: avoid; page-break-inside: avoid; \}/);
+  assert.match(html, /\.appendix-masthead \{ margin-bottom: 24px; \}/);
+  assert.match(html, /<section class="report-chapter appendix-page" aria-label="Methodology and sources">\s*<div class="appendix-intro">\s*<div class="appendix-masthead"><div class="brief-masthead"><strong>CARE IN ACTION \/ CLINIC IMPACT ESTIMATOR<\/strong>[\s\S]*?<\/div><\/div>\s*<header class="chapter-header">\s*<h2>Methodology &amp; sources<\/h2>/);
+  assert.match(html, /<header class="chapter-header">[\s\S]*?<\/header>\s*<p class="narrative">/);
+});
 test('volunteer category comparison appears only for two active categories',()=>{
   for(const category of ['medical professional','non medical']) assert.doesNotMatch(report({mode:'volunteerHours',category}).html,/<section class="report-section volunteer-value-glance">/);
   assert.match(report({mode:'volunteerHours'}).html,/<section class="report-section volunteer-value-glance">/);

@@ -1118,7 +1118,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
           value: row.hours,
           valueLabel: `${row.hours.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} hours`,
         })),
-      })
+      }).replace('class="summary-section composition-pie', 'class="summary-section composition-pie composition-pie--volunteer-hours')
       : "";
     const clinicalCountsPieHTML = !isVolunteerReport
       ? printComposition({
@@ -1214,8 +1214,9 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
 
     const hasActivity = isVolunteerReport ? volunteerHours > 0 : serviceCount > 0;
     let chapterNumber = 1;
-    const chapterHeader = title => `<header class="chapter-header">
-      <div class="brief-masthead"><strong>CARE IN ACTION / CLINIC IMPACT ESTIMATOR</strong><span>${String(++chapterNumber).padStart(2, "0")} / ${_escapeHTML(_methodLabel(summary.impactMethod)).toUpperCase()}</span></div>
+    const chapterMasthead = () => `<div class="brief-masthead"><strong>CARE IN ACTION / CLINIC IMPACT ESTIMATOR</strong><span>${String(++chapterNumber).padStart(2, "0")} / ${_escapeHTML(_methodLabel(summary.impactMethod)).toUpperCase()}</span></div>`;
+    const chapterHeader = (title, showMasthead = true) => `<header class="chapter-header">
+      ${showMasthead ? chapterMasthead() : ""}
       <h2>${title}</h2><div class="chapter-context"><span>${_escapeHTML(clinicName)}</span><span>${_escapeHTML(period)}</span></div>
     </header>`;
     return `<!DOCTYPE html>
@@ -1238,7 +1239,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
   .report-chapter { margin-top: 34px; }
   .chapter-header { margin-bottom: 18px; break-inside: avoid; break-after: avoid; }
   .chapter-header .brief-masthead { margin-bottom: 16px; }
-  .chapter-header h2 { margin: 0 0 5px; color: var(--navy); font-size: 22pt; line-height: 1.2; font-weight: 600; letter-spacing: -.025em; text-transform: none; }
+  .chapter-header h2 { margin: 0 0 5px; color: var(--navy); font-size: 16pt; line-height: 1.2; font-weight: 600; letter-spacing: -.025em; text-transform: none; }
   .chapter-context { display: flex; justify-content: space-between; gap: 16px; color: var(--slate); font-size: 8pt; }
   .chapter-context span { overflow-wrap: anywhere; }
   .chapter-context span:last-child { text-align: right; }
@@ -1297,6 +1298,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
   .composition-pie__swatch { width: 8px; height: 8px; border-radius: 50%; background: var(--pie-color); }
   .composition-pie__details { min-width: 0; }
   .composition-pie__label { display: block; overflow-wrap: anywhere; }
+  .composition-pie--volunteer-hours .composition-pie__label { display: inline; }
   .composition-pie__value { color: var(--slate); margin-right: 6px; }
   .composition-pie__share { color: var(--navy); white-space: nowrap; }
   .methodology-list, .sources { padding-left: 18px; margin: 0 0 20px; }
@@ -1308,6 +1310,9 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
   @media print {
     body { max-width: none; margin: 0; padding: 0; }
     .report-chapter { break-before: page; margin-top: 0; }
+    .report-chapter.appendix-page { break-before: page; page-break-before: always; margin-top: 0; }
+    .appendix-intro { break-inside: avoid; page-break-inside: avoid; }
+    .appendix-masthead { margin-bottom: 24px; }
     .volunteer-value-glance { break-inside: avoid; page-break-inside: avoid; }
     .metric-grid, .cost-comparison { break-inside: avoid; }
     .report-section h2, .report-section .section-intro { break-after: avoid; }
@@ -1382,7 +1387,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
 </header>
 <div class="brief-overview">
   <div><h2>${_escapeHTML(totalLabel)}</h2><p class="brief-total">${_fmt(summary.totalEstimatedValue)}</p><p class="brief-note">Based on ${activityCount} reported ${isVolunteerReport ? "volunteer hours" : "clinical service units"} and reference rates</p></div>
-  <div class="brief-stats"><p><strong>${activityCount}</strong><span>${isVolunteerReport ? "volunteer hours" : "reported units"}</span></p><p><strong>${costReported ? _fmt(summary.reportingPeriodClinicCost) : "Not reported"}</strong><span>reported clinic cost</span></p></div>
+  <div class="brief-stats"><p><strong>${activityCount}</strong><span>${isVolunteerReport ? "volunteer hours" : "reported units"}</span></p>${costReported ? `<p><strong>${_fmt(summary.reportingPeriodClinicCost)}</strong><span>reported clinic cost</span></p>` : ""}</div>
 </div>
 <p class="brief-disclaimer">${_escapeHTML(AppCopy.summary.shortDisclaimer(summary.impactMethod))}</p>
 <section class="brief-section brief-contributor"><h2>Largest estimated contributor</h2>
@@ -1422,8 +1427,11 @@ ${isVolunteerReport ? rateDataNoteHTML : ""}
 ${volunteerHoursPieHTML}
 </section>` : ""}
 <section class="report-chapter appendix-page" aria-label="Methodology and sources">
-  ${chapterHeader("Methodology &amp; sources")}
+  <div class="appendix-intro">
+  <div class="appendix-masthead">${chapterMasthead()}</div>
+  ${chapterHeader("Methodology &amp; sources", false)}
   <p class="narrative">${_escapeHTML(impactNarrative)}</p>
+  </div>
   <h2>HOW THESE ESTIMATES ARE CALCULATED</h2>
   <ul class="methodology-list">${methodologyItems}</ul>
   ${volunteerSourceHTML}
