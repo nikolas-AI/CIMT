@@ -225,3 +225,25 @@ test("reserves gray for the grouped Other slice", () => {
   assert.equal(slices.filter(color => color === "#B8B8B8").length, 1);
   assert.equal(slices.at(-1), "#B8B8B8");
 });
+test('print pies retain slice percentages and connected indices matching the legend', () => {
+  const {html}=renderLabels(Array.from({length:40},(_,i)=>[`Service ${i+1}`,40-i]), {reportStyle:true,totalInHeading:true});
+  const percentages=Array.from(html.matchAll(/class="composition-pie__slice-percentage"[^>]*>([\d.]+%)<\/text>/g),m=>m[1]);
+  const legend=Array.from(html.matchAll(/class="composition-pie__share">([\d.]+%)<\/strong>/g),m=>m[1]);
+  assert.deepEqual(percentages,legend);
+  assert.ok(percentages.length>12);
+  const indices=Array.from(html.matchAll(/class="composition-pie__slice-number" x="([^"]+)" y="([^"]+)"[^>]*>(\d+)<\/text>/g));
+  const legendIndices=Array.from(html.matchAll(/class="composition-pie__number"[^>]*>(\d+)<\/span>/g),m=>m[1]);
+  assert.deepEqual(indices.map(m=>m[3]),legendIndices);
+  assert.equal((html.match(/<polyline class="composition-pie__leader"/g)||[]).length,indices.length);
+  for(const x of new Set(indices.map(m=>m[1]))) {
+    const ys=indices.filter(m=>m[1]===x).map(m=>Number(m[2])).sort((a,b)=>a-b);
+    for(let i=1;i<ys.length;i++) assert.ok(ys[i]-ys[i-1]>=11.99);
+  }
+  assert.ok(html.indexOf('class="composition-pie__legend"')>html.indexOf('</svg>'));
+  assert.match(html,/class="composition-pie__number"[^>]*>01<\/span>/);
+});
+test('a single print slice displays 100 percent at its center',()=>{
+  const {html}=renderLabels([['One role',10]],{reportStyle:true,totalInHeading:true});
+  assert.match(html,/class="composition-pie__slice-percentage" x="100.00" y="100.00"[^>]*>100.0%<\/text>/);
+  assert.match(html,/>100\.0%<\/strong>/);
+});

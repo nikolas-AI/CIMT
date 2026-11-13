@@ -15,3 +15,9 @@ TechWriting.txt
 !PROJECT_REFERENCE.md
 !USER_GUIDE.md
 !REPORT_GUIDE_LLM_BRIEF.md
+
+
+temp/*
+temp/
+tmp/
+output/

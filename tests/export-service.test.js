@@ -160,7 +160,7 @@ test("the volunteer final report omits roles with zero hours", () => {
     timeout: 1000,
   });
 
-  assert.match(reportHTML, /<h2>Volunteer Time<\/h2>/);
+  assert.match(reportHTML, /<h2>Volunteer Roles \(Ranked By Hours\)<\/h2>/);
   assert.match(reportHTML, /Active Role/);
   assert.doesNotMatch(reportHTML, /Unused Role/);
 });
@@ -187,10 +187,10 @@ test("the volunteer roles table is ranked by reported hours", () => {
   const table = reportHTML.match(/<h2>Volunteer Roles \(Ranked By Hours\)<\/h2>[\s\S]*?<table>([\s\S]*?)<\/table>/);
   assert.ok(table);
   const roleNames = Array.from(table[1].matchAll(/<td>([^<]+)<\/td>/g), match => match[1]);
-  assert.deepEqual(roleNames, ["Most Hours", "Middle Hours", "Few Hours"]);
+  assert.deepEqual(roleNames.filter(name => !["medical professional", "non medical"].includes(name)), ["Most Hours", "Middle Hours", "Few Hours"]);
 });
 
-test("the clinical services breakdown table is ranked by reported counts", () => {
+test("the clinical services breakdown table is ranked by estimated value", () => {
   context.summary = {
     impactMethod: "clinicalServices",
     clinicName: "Test Clinic",
@@ -209,13 +209,13 @@ test("the clinical services breakdown table is ranked by reported counts", () =>
 
   vm.runInContext("ExportService.downloadPDF(summary)", context, { timeout: 1000 });
 
-  const table = reportHTML.match(/<h2>Clinical Services Breakdown \(Ranked by counts\)<\/h2>[\s\S]*?<table>([\s\S]*?)<\/table>/);
+  const table = reportHTML.match(/<h2>Clinical Services Breakdown \(Ranked by estimated value\)<\/h2>[\s\S]*?<table>([\s\S]*?)<\/table>/);
   assert.ok(table);
   const serviceNames = Array.from(table[1].matchAll(/<td>([^<]+)<\/td>/g), match => match[1]);
-  assert.deepEqual(serviceNames, ["Most Counts", "Middle Counts", "Few Counts"]);
+  assert.deepEqual(serviceNames, ["Middle Counts", "Most Counts", "Few Counts"]);
 });
 
-test("the volunteer final report shows up to ten roles in its horizontal bars", () => {
+test("the volunteer final report shows only five highlights and retains all detail rows", () => {
   const volunteerBreakdown = Array.from({ length: 12 }, (_value, index) => ({
     roleName: `Role ${index + 1}`,
     category: "non medical",
@@ -238,10 +238,13 @@ test("the volunteer final report shows up to ten roles in its horizontal bars", 
 
   vm.runInContext("ExportService.downloadPDF(summary)", context, { timeout: 1000 });
 
-  assert.match(reportHTML, /Top ten volunteer roles by estimated value/);
-  assert.equal((reportHTML.match(/<div class="chart-row">/g) || []).length, 10);
-  assert.match(reportHTML, /Role 10/);
-  assert.doesNotMatch(reportHTML, /Role 11|Role 12/);
+  assert.doesNotMatch(reportHTML, /Top ten|class="chart-row"/);
+  assert.equal((reportHTML.match(/class="brief-ranking-row"/g) || []).length, 5);
+  assert.equal((reportHTML.match(/<tr class="table-row--/g) || []).length, 12);
+  const highlights = reportHTML.match(/<section class="brief-section brief-ranking">([\s\S]*?)<\/section>/)[1];
+  assert.match(highlights, /Role 12/);
+  assert.doesNotMatch(highlights, />Role [1-7]</);
+
 });
 
 test("the volunteer final report appendix uses volunteer methodology and references", () => {
@@ -295,7 +298,7 @@ test("the volunteer final report appendix uses volunteer methodology and referen
   }
 });
 
-test("the volunteer value-at-a-glance cards appear before the role bar chart", () => {
+test("the volunteer value-at-a-glance cards appear before the full role table", () => {
   const volunteerBreakdown = [
     { roleName: "Medical Role", category: "medical professional", hours: 2, benchmarkRate: 50, estimatedValue: 100 },
     { roleName: "Non-medical Role", category: "non medical", hours: 3, benchmarkRate: 20, estimatedValue: 60 },
@@ -316,8 +319,7 @@ test("the volunteer value-at-a-glance cards appear before the role bar chart", (
 
   vm.runInContext("ExportService.downloadPDF(summary)", context, { timeout: 1000 });
 
-  const atAGlanceIndex = reportHTML.indexOf("<h2>Estimated value at a glance</h2>");
-  const chartIndex = reportHTML.indexOf("<h2>Volunteer roles by estimated value</h2>");
+  const chartIndex = reportHTML.indexOf("<h2>Volunteer Roles (Ranked By Hours)</h2>");
   assert.notEqual(reportHTML.indexOf('<h2 class="glance-heading">Estimated value at a glance</h2>'), -1);
   assert.notEqual(chartIndex, -1);
   assert.ok(reportHTML.indexOf('<h2 class="glance-heading">Estimated value at a glance</h2>') < chartIndex);
@@ -345,7 +347,7 @@ test("the volunteer value-at-a-glance cards are kept together in the compact pri
 
   vm.runInContext("ExportService.downloadPDF(summary)", context, { timeout: 1000 });
 
-  assert.match(reportHTML, /@media print \{[\s\S]*?\.hero \{[\s\S]*?padding: 19px 22px/);
+  assert.match(reportHTML, /\.report-chapter \{ break-before: page/);
   assert.match(reportHTML, /\.volunteer-value-glance \{ break-inside: avoid; page-break-inside: avoid; \}/);
   assert.match(reportHTML, /<section class="report-section volunteer-value-glance">/);
 });
@@ -430,10 +432,10 @@ test("clinical services Excel export includes an editable activity pie chart", a
   assert.ok(rows.some(row => row[0] === context.AppCopy.summary.costComparisonNote));
   assert.ok(rows.some(row => row[0] === "Reference Organization"));
   assert.equal(rows.at(-1)[0], context.AppCopy.summary.shortDisclaimer());
-  assert.match(lastZipFiles["xl/charts/chart1.xml"], /DISTRIBUTION OF CLINICAL SERVICES PROVIDED/);
+  assert.match(lastZipFiles["xl/charts/chart1.xml"], /CLINICAL SERVICES BY COUNT/);
   assert.match(lastZipFiles["xl/charts/chart1.xml"], /'Activity Chart'!\$A\$2:\$A\$4/);
   assert.match(lastZipFiles["xl/charts/chart1.xml"], /'Activity Chart'!\$B\$2:\$B\$4/);
-  assert.match(lastZipFiles["xl/charts/chart2.xml"], /ESTIMATED VALUE BY CLINICAL SERVICE/);
+  assert.match(lastZipFiles["xl/charts/chart2.xml"], /CLINICAL SERVICES BY VALUE/);
   assert.match(lastZipFiles["xl/charts/chart2.xml"], /'Activity Chart'!\$D\$2:\$D\$4/);
   assert.match(lastZipFiles["xl/charts/chart2.xml"], /'Activity Chart'!\$E\$2:\$E\$4/);
   assert.match(lastZipFiles["xl/charts/chart1.xml"], /<c:showLeaderLines val="1"\/><c:dLblPos val="outEnd"\/>/);
@@ -545,8 +547,8 @@ test("volunteer Excel export includes hours by role in its activity pie chart", 
   assert.ok(rows.some(row => row[0] === context.AppCopy.summary.costComparisonNote));
   assert.ok(rows.some(row => row[0] === "Reference Organization"));
   assert.equal(rows.at(-1)[0], context.AppCopy.summary.shortDisclaimer("volunteerHours"));
-  assert.match(lastZipFiles["xl/charts/chart1.xml"], /VOLUNTEER ROLES DISTRIBUTION/);
-  assert.match(lastZipFiles["xl/charts/chart2.xml"], /ESTIMATED VALUE BY VOLUNTEER ROLE/);
+  assert.match(lastZipFiles["xl/charts/chart1.xml"], /VOLUNTEER ROLES BY HOURS/);
+  assert.match(lastZipFiles["xl/charts/chart2.xml"], /VOLUNTEER ROLES BY VALUE/);
   assert.match(lastZipFiles["xl/charts/chart2.xml"], /'Activity Chart'!\$D\$2:\$D\$2/);
   assert.match(lastZipFiles["xl/charts/chart2.xml"], /'Activity Chart'!\$E\$2:\$E\$2/);
   assert.equal(lastZipFiles["xl/worksheets/sheet2.xml"].match(/<drawing\b/g)?.length, 1);

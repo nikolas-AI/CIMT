@@ -996,12 +996,6 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
     const activityCount = isVolunteerReport
       ? volunteerHours.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })
       : serviceCount.toLocaleString("en-US");
-    const activityLabel = isVolunteerReport
-      ? AppCopy.summaryDashboard.volunteerHoursKpi
-      : AppCopy.summaryDashboard.clinicalServicesKpi;
-    const activityNote = isVolunteerReport
-      ? AppCopy.summaryDashboard.donatedTimeNote
-      : AppCopy.summaryDashboard.reportedActivityNote;
     const totalLabel = isVolunteerReport
       ? AppCopy.summaryDashboard.estimatedVolunteerValue
       : AppCopy.summaryDashboard.estimatedServiceValue;
@@ -1024,14 +1018,15 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
       </div>
     `;
 
+    const serviceLabel = row => row.serviceDescription || row.serviceName;
     const svcRows = summary.serviceBreakdown
       .filter(row => row.count > 0)
       .slice()
-      .sort((a, b) => b.count - a.count || a.serviceName.localeCompare(b.serviceName))
+      .sort((a, b) => b.estimatedValue - a.estimatedValue || b.count - a.count || a.serviceName.localeCompare(b.serviceName))
       .map((row, index) => `
       <tr class="table-row--${index % 2 === 0 ? "odd" : "even"}">
         <td class="table-serial">${index + 1}</td>
-        <td>${_escapeHTML(row.serviceName)}</td>
+        <td>${_escapeHTML(row.serviceName || row.serviceDescription)}</td>
         <td class="service-code">${_escapeHTML(row.code)}</td>
         <td class="numeric">${row.count.toLocaleString("en-US")}</td>
         <td class="numeric">${_fmt(row.benchmarkRate)}</td>
@@ -1058,10 +1053,10 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
     `);
 
     const tableBodyHTML = (rows, totalRow) => {
-      if (rows.length > 1) {
+      if (rows.length > 2) {
         return `<tbody class="table-opening">${rows[0]}</tbody>
-          ${rows.length > 2 ? `<tbody>${rows.slice(1, -1).join("")}</tbody>` : ""}
-          <tbody class="table-ending">${rows[rows.length - 1]}${totalRow}</tbody>`;
+          ${rows.length > 3 ? `<tbody>${rows.slice(1, -2).join("")}</tbody>` : ""}
+          <tbody class="table-ending">${rows.slice(-2).join("")}${totalRow}</tbody>`;
       }
       return `<tbody class="table-opening table-ending">${rows.join("")}${totalRow}</tbody>`;
     };
@@ -1076,34 +1071,20 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
     const rateDataNote = `Reference rate data: ${getRateDataSummary(summary.impactMethod)}.`;
     const rateDataNoteHTML = `<p class="section-note rate-data-note">${_escapeHTML(rateDataNote)}</p>`;
 
-    const budgetHTML = summary.reportingPeriodClinicCost !== null ? `
+    const costReported = Number.isFinite(summary.reportingPeriodClinicCost) && summary.reportingPeriodClinicCost >= 0;
+    const hasCostRatio = costReported && summary.reportingPeriodClinicCost > 0 && Number.isFinite(summary.valueToCostRatio);
+    const budgetHTML = costReported ? `
       <section class="report-section cost-comparison">
         <h2>${_escapeHTML(AppCopy.summaryView.costHeading)}</h2>
-        <p class="section-intro">${_escapeHTML(AppCopy.summaryView.costIntro(summary.reportingPeriodClinicCost))}</p>
         <div class="metric-grid metric-grid--two">
           ${metricCard("Reported clinic cost", _fmt(summary.reportingPeriodClinicCost), "Total clinic cost reported for this period.")}
           ${metricCard("Estimated total value", _fmt(summary.totalEstimatedValue), "Estimated value of the activity entered.")}
-          ${metricCard(AppCopy.summaryView.valuePerDollarLabel, summary.valueToCostRatio === null ? "—" : `$${summary.valueToCostRatio.toFixed(2)}`, "Informational comparison, not ROI.")}
-          ${metricCard(AppCopy.summaryView.benchmarkComparisonLabel, `${Math.abs(summary.benchmarkValueROI || 0).toFixed(1)}% ${summary.benchmarkValueROI > 0 ? "higher" : summary.benchmarkValueROI < 0 ? "lower" : "equal"}`, "Estimated value compared with reported clinic cost.")}
+          ${metricCard(AppCopy.summaryView.valuePerDollarLabel, !hasCostRatio ? "Not available" : `$${summary.valueToCostRatio.toFixed(2)}`, "Informational comparison, not ROI.")}
+          ${metricCard(AppCopy.summaryView.benchmarkComparisonLabel, summary.reportingPeriodClinicCost > 0 && Number.isFinite(summary.benchmarkValueROI) ? `${Math.abs(summary.benchmarkValueROI).toFixed(1)}% ${summary.benchmarkValueROI > 0 ? "higher" : summary.benchmarkValueROI < 0 ? "lower" : "equal"}` : "Not available", "Estimated value compared with reported clinic cost.")}
         </div>
         <p class="callout callout--note">${_escapeHTML(AppCopy.summary.costComparisonNote)}</p>
       </section>
     ` : "";
-
-    const serviceImpactHTML = !isVolunteerReport && summary.mostImpactfulService
-      ? `<section class="report-section feature">
-          <h2>${_escapeHTML(AppCopy.metric.mostImpactful)}</h2>
-          <p class="feature__statement"><strong>${_escapeHTML(summary.mostImpactfulService.serviceName)}</strong> had the highest estimated value, with <strong>${summary.mostImpactfulService.count.toLocaleString("en-US")} reported units</strong> and an estimated value of <strong>${_fmt(summary.mostImpactfulService.estimatedValue)}</strong>.</p>
-          <p class="feature__meta">${_escapeHTML(AppCopy.summaryDashboard.topContributorStats(
-            summary.mostImpactfulService.count.toLocaleString("en-US"),
-            _fmt(summary.mostImpactfulService.estimatedValue),
-            _sharePercent(summary.mostImpactfulService.clinicalValueShare)
-          ))}</p>
-          <div class="value-track" role="img" aria-label="${_escapeHTML(summary.mostImpactfulService.serviceName)} contributed ${_escapeHTML(_sharePercent(summary.mostImpactfulService.clinicalValueShare))} percent of estimated service value">
-            <span style="width:${Math.min(100, Math.max(0, summary.mostImpactfulService.clinicalValueShare))}%"></span>
-          </div>
-        </section>`
-      : "";
 
     const rankedVolunteerRoles = isVolunteerReport
       ? summary.volunteerBreakdown
@@ -1115,81 +1096,16 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
           a.roleName.localeCompare(b.roleName)
         )
       : [];
-    const mostImpactfulVolunteerRole = rankedVolunteerRoles[0] || null;
-    const volunteerRoleShare = mostImpactfulVolunteerRole && summary.volunteerValue > 0
-      ? mostImpactfulVolunteerRole.estimatedValue / summary.volunteerValue * 100
-      : 0;
-    const volunteerImpactHTML = mostImpactfulVolunteerRole
-      ? `<section class="report-section feature">
-          <h2>Most impactful volunteer role</h2>
-          <p class="feature__statement"><strong>${_escapeHTML(mostImpactfulVolunteerRole.roleName)}</strong> contributed the largest share of the estimated volunteer value, with <strong>${mostImpactfulVolunteerRole.hours.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} volunteer hours</strong> and an estimated value of <strong>${_fmt(mostImpactfulVolunteerRole.estimatedValue)}</strong>.</p>
-          <p class="feature__meta">${_escapeHTML(_sharePercent(volunteerRoleShare))}% of total estimated volunteer value</p>
-          <div class="value-track" role="img" aria-label="${_escapeHTML(mostImpactfulVolunteerRole.roleName)} contributed ${_escapeHTML(_sharePercent(volunteerRoleShare))} percent of estimated volunteer value">
-            <span style="width:${Math.min(100, Math.max(0, volunteerRoleShare))}%"></span>
-          </div>
-        </section>`
-      : "";
-
-    const topVolunteerRoles = rankedVolunteerRoles.slice(0, 10);
-    const volunteerChartHeading = rankedVolunteerRoles.length > 10
-      ? "Top ten volunteer roles by estimated value"
-      : "Volunteer roles by estimated value";
-    const volunteerChartIntro = rankedVolunteerRoles.length > 10
-      ? "Showing the ten highest-value reported volunteer roles."
-      : "Reported volunteer roles ranked by estimated value.";
-    const maximumVolunteerValue = Math.max(
-      ...topVolunteerRoles.map(role => role.estimatedValue),
-      1
-    );
-    const volunteerChartHTML = topVolunteerRoles.length > 0
-      ? `<section class="report-section chart-section">
-          <h2>${volunteerChartHeading}</h2>
-          <p class="section-intro">${volunteerChartIntro}</p>
-          <div class="chart">
-            ${topVolunteerRoles.map(role => {
-              const width = Math.min(100, Math.max(0, role.estimatedValue / maximumVolunteerValue * 100));
-              const hours = role.hours.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-              return `<div class="chart-row">
-                <div class="chart-row__label"><span>${_escapeHTML(role.roleName)} (${hours} volunteer hours)</span><strong>${_fmt(role.estimatedValue)}</strong></div>
-                <div class="value-track" role="img" aria-label="${_escapeHTML(role.roleName)}: ${_fmt(role.estimatedValue)} estimated value from ${hours} volunteer hours">
-                  <span style="width:${width}%"></span>
-                </div>
-              </div>`;
-            }).join("")}
-          </div>
-        </section>`
-      : "";
-
-    const rankedServices = summary.serviceImpactRanking?.byValue || [];
-    const topServices = rankedServices.slice(0, 10);
-    const serviceChartHeading = rankedServices.length > 10
-      ? "Top ten services by estimated value"
-      : "Services by estimated value";
-    const serviceChartIntro = rankedServices.length > 10
-      ? "Showing the ten highest-value reported services."
-      : "Reported services ranked by estimated value.";
-    const maximumServiceValue = Math.max(
-      ...topServices.map(service => service.estimatedValue),
-      1
-    );
-    const serviceChartHTML = !isVolunteerReport && topServices.length > 0
-      ? `<section class="report-section chart-section">
-          <h2>${serviceChartHeading}</h2>
-          <p class="section-intro">${serviceChartIntro}</p>
-          <div class="chart">
-            ${topServices.map(row => {
-              const width = Math.min(100, Math.max(0, row.estimatedValue / maximumServiceValue * 100));
-              return `<div class="chart-row">
-                <div class="chart-row__label"><span>${_escapeHTML(row.serviceName)} (${row.count.toLocaleString("en-US")} counts)</span><strong>${_fmt(row.estimatedValue)}</strong></div>
-                <div class="value-track" aria-hidden="true"><span style="width:${width}%"></span></div>
-              </div>`;
-            }).join("")}
-          </div>
-        </section>`
-      : "";
-
+    const rankedServices = isVolunteerReport ? [] : (summary.serviceImpactRanking?.byValue || summary.serviceBreakdown)
+      .filter(row => row.count > 0).slice().sort((a, b) =>
+        b.estimatedValue - a.estimatedValue || b.count - a.count || a.serviceName.localeCompare(b.serviceName));
+    const printComposition = options => {
+      const html = CompositionPieChart.render({ ...options, reportStyle: true });
+      const legendCount = (html.match(/class="composition-pie__item/g) || []).length;
+      return legendCount > 12 ? html.replace('summary-section composition-pie', 'summary-section composition-pie composition-pie--dense') : html;
+    };
     const volunteerHoursPieHTML = isVolunteerReport
-      ? CompositionPieChart.render({
+      ? printComposition({
         id: "volunteer-hours-composition",
         title: "Volunteer roles by hours",
         description: "Each slice shows a role's share of total reported volunteer hours. Small shares are combined into Other.",
@@ -1205,7 +1121,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
       })
       : "";
     const clinicalCountsPieHTML = !isVolunteerReport
-      ? CompositionPieChart.render({
+      ? printComposition({
         id: "clinical-services-composition",
         title: "Clinical services by count",
         description: "Each slice shows a service type's share of total reported counts. Small shares are combined into Other.",
@@ -1214,7 +1130,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
         formatValue: value => value.toLocaleString("en-US"),
         totalInHeading: true,
         items: summary.serviceBreakdown.map(row => ({
-          label: row.serviceDescription,
+          label: serviceLabel(row),
           value: row.count,
           valueLabel: `${row.count.toLocaleString("en-US")} services`,
         })),
@@ -1267,6 +1183,25 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
         </section>`
       : "";
 
+    const highlights = (isVolunteerReport ? rankedVolunteerRoles : rankedServices).slice(0, 5);
+    const leader = highlights[0];
+    const leaderName = leader ? (isVolunteerReport ? leader.roleName : serviceLabel(leader)) : "No activity reported";
+    const leaderShare = leader && summary.totalEstimatedValue > 0 ? leader.estimatedValue / summary.totalEstimatedValue * 100 : 0;
+    const comparisonMax = Math.max(summary.totalEstimatedValue, summary.reportingPeriodClinicCost || 0, 1);
+    const costComparison = costReported ? `<section class="brief-section">
+      <h2>Reported cost compared with estimated value</h2>
+      <div class="brief-bar-label"><span>Reported clinic cost</span><strong>${_fmt(summary.reportingPeriodClinicCost)}</strong></div>
+      <div class="brief-track brief-track--cost"><span style="width:${Math.max(0, summary.reportingPeriodClinicCost / comparisonMax * 100)}%"></span></div>
+      <div class="brief-bar-label"><span>Estimated activity value</span><strong>${_fmt(summary.totalEstimatedValue)}</strong></div>
+      <div class="brief-track"><span style="width:${Math.max(0, summary.totalEstimatedValue / comparisonMax * 100)}%"></span></div>
+      <p class="brief-ratio">${hasCostRatio ? `<strong>$${summary.valueToCostRatio.toFixed(2)}</strong> estimated value per $1 of reported cost` : "Value-to-cost comparison is not available."}</p>
+      <p class="brief-note">Informational comparison only - not financial ROI or confirmed savings.</p>
+    </section>` : `<section class="brief-section"><h2>Basis of the estimate</h2><p class="brief-note">${isVolunteerReport ? "Reported volunteer hours multiplied by role-specific hourly reference rates." : "Reported clinical service units multiplied by public clinical reference rates."} Clinic cost was not reported; a cost comparison is not included.</p></section>`;
+    const highlightHTML = highlights.map((row, index) => `<div class="brief-ranking-row">
+      <span class="brief-rank">${String(index + 1).padStart(2, "0")}</span>
+      <div><div class="brief-ranking-name">${_escapeHTML(isVolunteerReport ? row.roleName : serviceLabel(row))}</div><div class="brief-track"><span style="width:${leader.estimatedValue > 0 ? Math.max(0, row.estimatedValue / leader.estimatedValue * 100) : 0}%"></span></div></div>
+      <strong>${_fmt(row.estimatedValue)}</strong>
+    </div>`).join("");
     const methodologyItems = AppCopy.summaryView.methodologyBullets(summary.impactMethod)
       .map(item => `<li>${_escapeHTML(item)}</li>`)
       .join("");
@@ -1277,378 +1212,225 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
         </section>`
       : "";
 
+    const hasActivity = isVolunteerReport ? volunteerHours > 0 : serviceCount > 0;
+    let chapterNumber = 1;
+    const chapterHeader = title => `<header class="chapter-header">
+      <div class="brief-masthead"><strong>CARE IN ACTION / CLINIC IMPACT ESTIMATOR</strong><span>${String(++chapterNumber).padStart(2, "0")} / ${_escapeHTML(_methodLabel(summary.impactMethod)).toUpperCase()}</span></div>
+      <h2>${title}</h2><div class="chapter-context"><span>${_escapeHTML(clinicName)}</span><span>${_escapeHTML(period)}</span></div>
+    </header>`;
     return `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${_escapeHTML(AppCopy.exportCopy.pdfTitle)} — ${_escapeHTML(clinicName)}</title>
 <style>
-  :root {
-    color-scheme: light;
-    --paper: #F8F5EF;
-    --surface: #FFFFFF;
-    --border: #DFE7E3;
-    --navy: #142E2C;
-    --slate: #627470;
-    --muted: #8C9A96;
-    --teal: #295E58;
-    --oxblood: #5B2638;
-    --impact-bg: #EAF0ED;
-    --soft-teal: #EDF1EF;
-    --soft-rose: #EEE7E8;
+  :root { color-scheme: light; --navy: #203432; --teal: #24635d; --slate: #627470; --border: #cad8d3; --oxblood: #763c51; }
+  @page { size: letter portrait; margin: .6in;
+    @top-left { content: "CARE IN ACTION / CLINIC IMPACT ESTIMATOR"; font: 7pt "Segoe UI", Arial, sans-serif; color: #627470; }
+    @bottom-right { content: counter(page); font: 8pt "Segoe UI", Arial, sans-serif; color: #627470; }
   }
-  @page { size: letter portrait; margin: 0.55in; }
+  @page:first { @top-left { content: none; } }
   * { box-sizing: border-box; }
-  body {
-    max-width: 900px;
-    margin: 32px auto;
-    padding: 0 24px;
-    color: var(--navy);
-    background: var(--paper);
-    font: 13px/1.6 Inter, "Segoe UI", Arial, sans-serif;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  p { margin: 0 0 10px; }
-  .hero {
-    margin-bottom: 20px;
-    padding: 30px 28px;
-    text-align: center;
-    background: var(--impact-bg);
-    border: 1px solid #B9D4CF;
-    border-top: 4px solid var(--teal);
-    border-radius: 8px;
-    box-shadow: 0 4px 14px rgba(20,46,44,.08);
-  }
-  .status {
-    display: inline-block;
-    margin: 0 0 14px;
-    padding: 5px 12px;
-    color: var(--teal);
-    background: rgba(255,255,255,.72);
-    border: 1px solid #B9D4CF;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 700;
-  }
-  .eyebrow {
-    margin: 0 0 8px;
-    color: var(--slate);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-  }
-  h1 {
-    margin: 0 auto 8px;
-    color: var(--oxblood);
-    font: 700 25px/1.2 "DM Serif Display", Georgia, serif;
-    overflow-wrap: anywhere;
-  }
-  .address, .period { color: var(--slate); font-size: 11px; }
-  .period { margin-bottom: 20px; }
-  .total {
-    margin: 0 0 5px;
-    color: var(--navy);
-    font: 48px/1.05 "DM Serif Display", Georgia, serif;
-  }
-  .total-label { margin: 0; color: var(--slate); font-size: 14px; }
-  .metric-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    margin: 0 0 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 3px 12px rgba(20,46,44,.07);
-  }
-  .metric-grid--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .metric-card { min-width: 0; padding: 14px 16px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-  .metric-card:nth-child(3n) { border-right: 0; }
-  .metric-grid--two .metric-card:nth-child(3n) { border-right: 1px solid var(--border); }
-  .metric-grid--two .metric-card:nth-child(2n) { border-right: 0; }
-  .metric-card__label { min-height: 2.5em; margin: 0 0 5px; color: var(--slate); font-size: 9px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
-  .metric-card__value { margin: 0 0 4px; color: var(--navy); font: 24px/1.1 "DM Serif Display", Georgia, serif; overflow-wrap: anywhere; }
-  .metric-card__note { margin: 0; color: var(--muted); font-size: 10px; }
-  .glance-heading {
-    margin: 0;
-    padding: 14px 18px;
-    color: var(--navy);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-bottom: 0;
-    border-radius: 8px 8px 0 0;
-    font-size: 15px;
-    letter-spacing: normal;
-    text-transform: none;
-  }
-  .glance-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    margin-bottom: 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 0 0 8px 8px;
-    overflow: hidden;
-    box-shadow: 0 3px 12px rgba(20,46,44,.07);
-  }
-  .glance-card {
-    min-width: 0;
-    padding: 18px 20px;
-    border-top: 3px solid var(--teal);
-    border-right: 1px solid var(--border);
-  }
+  body { max-width: 900px; margin: 32px auto; padding: 0 24px; color: var(--navy); background: #fff; font: 10pt/1.5 "Segoe UI", Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  p { margin: 0 0 9px; }
+  h1, h2, h3 { overflow-wrap: anywhere; }
+  h2 { margin: 0 0 9px; padding: 0; color: var(--teal); font: 600 8pt/1.4 "Segoe UI", Arial, sans-serif; letter-spacing: .09em; text-transform: uppercase; break-after: avoid; }
+  a { color: var(--teal); text-underline-offset: 2px; overflow-wrap: anywhere; }
+  .report-chapter { margin-top: 34px; }
+  .chapter-header { margin-bottom: 18px; break-inside: avoid; break-after: avoid; }
+  .chapter-header .brief-masthead { margin-bottom: 16px; }
+  .chapter-header h2 { margin: 0 0 5px; color: var(--navy); font-size: 22pt; line-height: 1.2; font-weight: 600; letter-spacing: -.025em; text-transform: none; }
+  .chapter-context { display: flex; justify-content: space-between; gap: 16px; color: var(--slate); font-size: 8pt; }
+  .chapter-context span { overflow-wrap: anywhere; }
+  .chapter-context span:last-child { text-align: right; }
+  .report-section { margin: 0 0 17px; }
+  .section-intro, .section-note, .source-attribution, .feature__meta { font-size: 8pt; color: var(--slate); }
+  .section-intro { margin-bottom: 10px; break-after: avoid; }
+  .section-note { margin-top: 8px; }
+  .rate-data-note { margin: 8px 0 18px; }
+  .narrative { font-size: 10pt; margin-bottom: 16px; }
+  .metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--border); margin: 10px 0; }
+  .metric-card { padding: 9px 14px 9px 0; border-bottom: 1px solid var(--border); min-width: 0; }
+  .metric-card:nth-child(even) { padding-left: 14px; border-left: 1px solid var(--border); }
+  .metric-card__label { font-size: 7.5pt; color: var(--slate); margin: 0 0 4px; }
+  .metric-card__value { font-size: 18pt; line-height: 1.25; font-weight: 600; margin: 0 0 4px; overflow-wrap: anywhere; }
+  .metric-card__note { font-size: 7.5pt; color: var(--slate); margin: 0; }
+  .callout { font-size: 8pt; color: var(--slate); border-left: 2px solid var(--oxblood); padding-left: 10px; margin: 10px 0; }
+  .cost-comparison .metric-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .cost-comparison .metric-card { padding: 8px 10px; border-left: 1px solid var(--border); }
+  .cost-comparison .metric-card:first-child { border-left: 0; padding-left: 0; }
+  .cost-comparison .metric-card__value { font-size: 16pt; }
+  .cost-comparison { padding-top: 12px; border-top: 1px solid var(--border); }
+  .glance-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .glance-card { min-width: 0; padding: 10px 12px; border-right: 1px solid var(--border); }
+  .glance-card:first-child { padding-left: 0; }
   .glance-card:last-child { border-right: 0; }
-  .glance-card__label {
-    min-height: 2.5em;
-    margin: 0 0 8px;
-    color: var(--muted);
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: .07em;
-    text-transform: uppercase;
-  }
-  .glance-card__value {
-    margin: 0 0 8px;
-    color: var(--navy);
-    font: 29px/1.05 "DM Serif Display", Georgia, serif;
-    overflow-wrap: anywhere;
-  }
-  .glance-card__note {
-    min-height: 3em;
-    margin: 0;
-    color: var(--slate);
-    font-size: 10px;
-    line-height: 1.5;
-  }
-  .glance-card__share {
-    height: 5px;
-    margin-top: 14px;
-    background: #DFE7E3;
-  }
+  .glance-card__label { color: var(--slate); font-size: 7.5pt; margin: 0 0 6px; }
+  .glance-card__value { font-size: 18pt; line-height: 1.2; font-weight: 600; margin: 0 0 6px; overflow-wrap: anywhere; }
+  .glance-card__note { color: var(--slate); font-size: 7.5pt; margin: 0; }
+  .glance-card__share { height: 3px; background: #e8f1ee; margin-top: 9px; }
   .glance-card__share span { display: block; height: 100%; background: var(--teal); }
-  .callout {
-    margin: 0 0 18px;
-    padding: 14px 16px;
-    color: var(--slate);
-    background: #F0E9DF;
-    border: 1px solid #E1D6C9;
-    border-left: 5px solid var(--oxblood);
-    border-radius: 8px;
-    box-shadow: 0 3px 12px rgba(20,46,44,.07);
-  }
-  .callout strong { color: var(--navy); }
-  .callout--note { margin-top: 12px; font-size: 10px; }
-  .narrative { margin: 0 0 20px; color: var(--slate); font-size: 13px; line-height: 1.7; }
-  .report-section { margin: 0 0 22px; break-inside: auto; page-break-inside: auto; }
-  .appendix-page {
-    page-break-before: always;
-    padding: 18px 20px;
-  }
-  .appendix-page h2 {
-    margin-bottom: 12px;
-    padding-bottom: 6px;
-    color: var(--oxblood);
-    border-bottom-color: rgba(164,84,104,.35);
-    text-transform: uppercase;
-    letter-spacing: .08em;
-  }
-  .appendix-page p {
-    margin: 0 0 8px;
-    color: var(--slate);
-    font-size: 12px;
-    line-height: 1.6;
-  }
-  .appendix-page ul {
-    margin: 0 0 14px 18px;
-    padding-left: 18px;
-    color: var(--slate);
-  }
-  .appendix-page li {
-    margin: 0 0 8px;
-    font-size: 12px;
-    line-height: 1.6;
-  }
-  h2 {
-    margin: 0 0 10px;
-    padding-bottom: 7px;
-    color: var(--teal);
-    border-bottom: 1px solid #C9D8D2;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    break-after: avoid;
-  }
-  .section-intro, .section-note { color: var(--slate); font-size: 11px; }
-  .section-note { margin: 8px 0 0; font-size: 10px; }
-  .rate-data-note { margin-bottom: 28px; }
-  .feature {
-    padding: 18px;
-    background: #ECEFED;
-    border: 1px solid #D2DAD6;
-    border-left: 5px solid var(--teal);
-    border-radius: 8px;
-    box-shadow: 0 3px 12px rgba(20,46,44,.07);
-  }
-  .feature h2 { color: var(--navy); border-bottom-color: #C8D2CD; }
-  .feature__statement { margin: 0; font: 16px/1.6 Inter, "Segoe UI", Arial, sans-serif; }
-  .feature__statement strong { color: var(--navy); }
-  .feature__meta { margin: 10px 0 0; color: var(--slate); font-size: 10px; font-weight: 700; }
-  .feature .value-track { height: 14px; margin-top: 6px; }
-  .feature .value-track span { background: var(--oxblood); }
-  .chart { padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 3px 12px rgba(20,46,44,.07); }
-  .chart-row { margin-bottom: 12px; }
-  .chart-row:last-child { margin-bottom: 0; }
-  .chart-row__label { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 5px; color: var(--slate); font-size: 11px; }
-  .chart-row__label strong { flex-shrink: 0; color: var(--navy); }
-  .value-track { height: 7px; overflow: hidden; background: #DFE7E3; border-radius: 999px; }
-  .chart .value-track { height: 14px; }
-  .value-track span { display: block; height: 100%; background: var(--teal); border-radius: inherit; }
-  .composition-pie { margin-bottom: 36px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 3px 12px rgba(20,46,44,.07); break-inside: avoid; page-break-inside: avoid; }
-  .composition-pie .summary-section__intro { margin-bottom: 14px; }
-  .composition-pie h2 { color: var(--oxblood); font: 700 16px/1.3 "DM Serif Display", Georgia, serif; letter-spacing: normal; text-transform: none; border-bottom: 2px solid var(--oxblood); }
-  .composition-pie__content { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; }
-  .composition-pie__chart { display: block; width: min(100%, 440px); height: auto; margin: 0 auto; overflow: visible; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; font: 8.5pt/1.45 "Segoe UI", Arial, sans-serif; }
+  thead { display: table-header-group; }
+  th { padding: 7px 5px; color: var(--teal); background: #eaf1ee; font-size: 8pt; font-weight: 600; border-top: 1px solid var(--teal); border-bottom: 1px solid var(--border); text-align: left; }
+  td { padding: 6px 6px; border-bottom: 1px solid #e2e9e6; overflow-wrap: anywhere; vertical-align: top; }
+  .table-row--even td { background: #f5f8f6; }
+  .numeric { text-align: right; font-variant-numeric: tabular-nums; }
+  .table-serial { width: 3em; color: var(--slate); text-align: center; font-variant-numeric: tabular-nums; }
+  .service-code { width: 5.5em; white-space: nowrap; }
+  .table-total th { color: var(--navy); border-top: 1.5px solid var(--teal); background: #eaf1ee; }
+  .composition-pie { margin: 20px 0; padding-top: 13px; border-top: 1px solid var(--border); break-before: page; break-inside: auto; }
+  .composition-pie .summary-section__intro { font-size: 8pt; color: var(--slate); margin-bottom: 10px; }
+  .composition-pie__heading-total { display: block; margin-top: 4px; color: var(--navy); font-size: 12pt; font-weight: 600; letter-spacing: normal; text-transform: none; }
+  .composition-pie__content { display: block; }
+  .composition-pie__chart { display: block; width: 60%; max-width: none; height: auto; overflow: visible; margin: 0 auto 18px; break-inside: avoid; }
   .composition-pie__shape { stroke: #fff; stroke-width: .6px; stroke-linejoin: round; }
   .composition-pie__depth-shape { filter: brightness(.68); stroke: #fff; stroke-width: .6px; stroke-linejoin: round; }
-  .composition-pie__slice-number-bg { fill: #fff; stroke: var(--navy); stroke-width: .8px; pointer-events: none; }
-  .composition-pie__leader { stroke: var(--slate); stroke-width: .8px; pointer-events: none; }
-  .composition-pie__slice-number { fill: var(--navy); font-size: 5px; font-weight: 700; pointer-events: none; }
-  .composition-pie__slice-percentage { fill: var(--navy); stroke: #fff; stroke-width: 1.5px; paint-order: stroke; font-size: 4px; font-weight: 700; pointer-events: none; }
+  .composition-pie__slice-number-bg { fill: #fff; stroke: var(--navy); stroke-width: .8px; }
+  .composition-pie__leader { fill: none; stroke: #9aaea7; stroke-width: .65px; }
+  .composition-pie__slice-number { fill: var(--navy); font: 600 6px "Segoe UI", Arial, sans-serif; font-variant-numeric: tabular-nums; }
+  .composition-pie__slice-percentage { fill: var(--navy); stroke: #fff; stroke-width: 1.5px; paint-order: stroke; font: 600 5px "Segoe UI", Arial, sans-serif; }
   .composition-pie__total { fill: var(--navy); font-size: 12px; font-weight: 700; }
-  .composition-pie__total-label { fill: var(--slate); font-size: 6px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
-  .composition-pie__heading-total { display: block; margin-top: 4px; color: var(--navy); font: 700 12px/1.4 Inter, "Segoe UI", Arial, sans-serif; letter-spacing: normal; text-transform: none; }
-  .composition-pie__legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 14px; min-width: 0; margin: 0; padding: 0; list-style: none; }
-  .composition-pie__item { display: grid; grid-template-columns: 13px 7px minmax(0, 1fr); align-items: center; gap: 3px; min-width: 0; padding: 2px 0; background: transparent; font-size: 7px; }
-  .composition-pie__item--percentage-only { grid-template-columns: 13px 7px minmax(0, 1fr); }
-  .composition-pie__details { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 3px; min-width: 0; }
-  .composition-pie__number { display: inline-grid; width: 13px; height: 13px; place-items: center; border: 1px solid var(--border); border-radius: 50%; background: #fff; color: var(--navy); font-size: 8px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-  .composition-pie__swatch { width: 7px; height: 7px; border-radius: 50%; background: var(--pie-color); }
-  .composition-pie__label { min-width: 0; overflow-wrap: anywhere; }
-  .composition-pie__value, .composition-pie__share { color: var(--navy); white-space: nowrap; }
-  .composition-pie__value { color: var(--slate); }
-  .composition-pie__share { min-width: 20px; text-align: right; font-size: 6px; font-weight: 700; }
-  .table-wrap { margin-top: 8px; border-radius: 8px; }
-  table { width: 100%; margin: 0; border: 1px solid var(--border); border-collapse: separate; border-spacing: 0; border-radius: 8px; box-shadow: 0 3px 12px rgba(20,46,44,.07); font-size: 10px; }
-  thead { display: table-header-group; break-after: avoid; page-break-after: avoid; }
-  tbody.table-opening, tbody.table-ending { break-inside: avoid; page-break-inside: avoid; }
-  th { padding: 8px; color: #FFFFFF; background: var(--teal); font-size: 9px; font-weight: 700; text-align: left; }
-  td { padding: 7px 8px; color: var(--slate); border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
-  .table-row--even td { background: #F3F6F4; }
-  .table-row--odd td { background: var(--surface); }
-  .table-serial { width: 3.5em; text-align: center; font-variant-numeric: tabular-nums; }
-  thead th:first-child { border-top-left-radius: 7px; }
-  thead th:last-child { border-top-right-radius: 7px; }
-  tbody.table-ending tr:last-child > :first-child { border-bottom-left-radius: 7px; }
-  tbody.table-ending tr:last-child > :last-child { border-bottom-right-radius: 7px; }
-  .service-code { width: 6em; min-width: 6em; white-space: nowrap; }
-  .numeric { text-align: right; font-variant-numeric: tabular-nums; }
-  .table-total th { color: var(--navy); background: #F0E9DF; }
-  .sources { padding-left: 18px; }
-  .sources li { margin: 0 0 9px; color: var(--slate); font-size: 10px; }
-  .sources a { color: var(--teal); overflow-wrap: anywhere; }
-  .sources span { color: var(--muted); }
-  .source-attribution { color: var(--slate); font-size: 10px; }
-  .source-attribution strong { color: inherit; font-weight: 700; }
-  @media screen and (max-width: 620px) {
-    body { margin: 12px auto; padding: 0 12px; }
-    .hero { padding: 24px 16px; }
-    .metric-grid, .metric-grid--two { grid-template-columns: 1fr; }
-    .metric-card, .metric-card:nth-child(3n), .metric-grid--two .metric-card:nth-child(3n) { border-right: 0; }
-    .total { font-size: 40px; }
-    .table-wrap { overflow-x: auto; }
-    table { min-width: 620px; }
-    .composition-pie__chart { width: min(100%, 360px); }
-  }
+  .composition-pie__total-label { fill: var(--slate); font-size: 6px; }
+  .composition-pie__legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px 20px; margin: 0; padding: 0; list-style: none; }
+  .composition-pie__item { display: grid; grid-template-columns: 20px 8px minmax(0, 1fr); align-items: baseline; gap: 5px; font-size: 8pt; break-inside: avoid; }
+  .composition-pie__number { color: var(--slate); font-size: 8pt; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.5; }
+  .composition-pie__swatch { width: 8px; height: 8px; border-radius: 50%; background: var(--pie-color); }
+  .composition-pie__details { min-width: 0; }
+  .composition-pie__label { display: block; overflow-wrap: anywhere; }
+  .composition-pie__value { color: var(--slate); margin-right: 6px; }
+  .composition-pie__share { color: var(--navy); white-space: nowrap; }
+  .methodology-list, .sources { padding-left: 18px; margin: 0 0 20px; }
+  .methodology-list li, .sources li { padding-left: 4px; margin-bottom: 10px; font-size: 9pt; }
+  .sources span { color: var(--slate); }
+  .source-attribution { padding: 10px 0; border-top: 1px solid var(--border); }
+  .report-footer { display: flex; justify-content: space-between; gap: 18px; padding-top: 10px; margin-top: 24px; border-top: 1px solid var(--border); font-size: 7pt; color: var(--slate); }
+  .report-footer span { text-align: right; overflow-wrap: anywhere; }
   @media print {
-    body { max-width: none; margin: 0; padding: 0; background: #fff; font-size: 10pt; }
-    .hero {
-      margin-bottom: 14px;
-      padding: 19px 22px;
-    }
-    .status { margin-bottom: 8px; padding: 4px 10px; }
-    .eyebrow { margin-bottom: 6px; }
-    h1 { margin-bottom: 6px; font-size: 23px; }
-    .period { margin-bottom: 11px; }
-    .total { margin-bottom: 4px; font-size: 42px; }
-    .total-label { font-size: 13px; }
-    .callout { margin-bottom: 14px; padding: 11px 14px; }
-    .metric-grid { margin-bottom: 14px; }
-    .metric-card { padding: 10px 14px; }
-    .metric-card__label { min-height: 0; margin-bottom: 4px; }
-    .metric-card__value { font-size: 22px; }
-    .metric-card__note { font-size: 9.5px; }
-    .narrative { margin-bottom: 14px; font-size: 12px; }
-    .feature, .volunteer-value-glance { margin-bottom: 14px; }
-    .feature { padding: 14px; }
+    body { max-width: none; margin: 0; padding: 0; }
+    .report-chapter { break-before: page; margin-top: 0; }
     .volunteer-value-glance { break-inside: avoid; page-break-inside: avoid; }
-    .glance-heading { padding: 10px 12px; }
-    .glance-grid { margin-bottom: 14px; }
-    .glance-card { padding: 11px 12px; }
-    .glance-card__label { min-height: 0; margin-bottom: 5px; font-size: 8px; }
-    .glance-card__value { margin-bottom: 5px; font-size: 24px; }
-    .glance-card__note { min-height: 0; font-size: 9px; }
-    .glance-card__share { height: 4px; margin-top: 9px; }
-    .hero, .metric-grid, .feature, .chart-section, .callout,
-    .cost-comparison { break-inside: avoid; page-break-inside: avoid; }
-    .report-section h2, .report-section .section-intro { break-after: avoid; page-break-after: avoid; }
-    table { break-inside: auto; page-break-inside: auto; }
-    tbody.table-opening, tbody.table-ending { break-inside: avoid; page-break-inside: avoid; }
-    tr, .sources li { break-inside: avoid; page-break-inside: avoid; }
+    .metric-grid, .cost-comparison { break-inside: avoid; }
+    .report-section h2, .report-section .section-intro { break-after: avoid; }
+    tr, tbody.table-opening, tbody.table-ending, .sources li { break-inside: avoid; }
     .table-wrap { overflow: visible; }
     p { orphans: 2; widows: 2; }
-    a { color: inherit; text-decoration: none; }
+  }
+  @media screen and (max-width: 620px) {
+    body { margin: 16px auto; padding: 0 14px; }
+    .metric-grid, .cost-comparison .metric-grid, .glance-grid, .composition-pie__content, .composition-pie--dense .composition-pie__legend { grid-template-columns: 1fr; }
+    .metric-card:nth-child(even), .glance-card { border-left: 0; border-right: 0; padding-left: 0; }
+    .table-wrap { overflow-x: auto; }
+    table { min-width: 620px; }
+  }
+  /* Template-inspired executive brief; all detailed charts follow this page. */
+  .executive-page { color: #203432; font: 10pt/1.4 "Segoe UI", Arial, sans-serif; }
+  .brief-masthead { display: flex; justify-content: space-between; gap: 12px; border-top: 2px solid #24635d; padding-top: 10px; font-size: 7pt; color: #24635d; }
+  .brief-masthead strong { letter-spacing: .13em; }
+  .brief-masthead span { color: #627470; white-space: nowrap; }
+  .brief-header { padding: 18px 0 13px; border-bottom: 1px solid #cad8d3; }
+  .brief-header h1 { font: 700 25pt/1.15 "Segoe UI", Arial, sans-serif; letter-spacing: -.025em; margin: 0 0 5px; color: #203432; }
+  .brief-subtitle { font-size: 16pt; margin: 0 0 10px; }
+  .brief-meta { display: flex; justify-content: space-between; gap: 18px; color: #627470; font-size: 8pt; }
+  .brief-meta > span { max-width: 52%; overflow-wrap: anywhere; }
+  .brief-meta > span:last-child { text-align: right; }
+  .brief-overview { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 20px; padding: 20px 0 16px; align-items: center; }
+  .executive-page h2 { margin: 0 0 9px; border: 0; padding: 0; color: #24635d; font: 600 8pt/1.4 "Segoe UI", Arial, sans-serif; letter-spacing: .09em; text-transform: uppercase; }
+  .brief-total { font-size: 33pt; font-weight: 700; letter-spacing: -.025em; line-height: 1.2; margin: 0 0 4px; overflow-wrap: anywhere; }
+  .brief-note { color: #627470; font-size: 8pt; margin: 0; line-height: 1.5; }
+  .brief-stats { border-left: 1px solid #cad8d3; padding-left: 17px; }
+  .brief-stats p { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin: 0 0 10px; }
+  .brief-stats p:last-child { margin: 0; }
+  .brief-stats strong { font-size: 16pt; overflow-wrap: anywhere; }
+  .brief-stats p:first-child strong { font-size: 23pt; }
+  .brief-stats span { color: #627470; font-size: 8pt; }
+  .brief-disclaimer { color: #627470; font-size: 8pt; line-height: 1.5; margin: 0 0 14px; }
+  .brief-section { border-top: 1px solid #cad8d3; padding: 12px 0; break-inside: avoid; }
+  .brief-leader { display: flex; justify-content: space-between; align-items: baseline; gap: 15px; margin-bottom: 5px; }
+  .brief-leader > strong { font-size: 10pt; overflow-wrap: anywhere; }
+  .brief-leader > span { color: #763c51; font-size: 9pt; font-weight: 600; flex-shrink: 0; }
+  .brief-bar-label { display: flex; justify-content: space-between; gap: 14px; font-size: 8.5pt; margin-bottom: 4px; }
+  .brief-track { height: 5px; background: #e8f1ee; border-radius: 2px; margin-bottom: 7px; }
+  .brief-track span { display: block; height: 100%; background: #24635d; border-radius: inherit; }
+  .brief-track--cost span, .brief-ranking-row:first-of-type .brief-track span { background: #763c51; }
+  .brief-ratio { font-size: 8.5pt; margin: 10px 0 4px; }
+  .brief-ranking > .brief-note { margin-bottom: 10px; }
+  .brief-ranking-row { display: grid; grid-template-columns: 18px minmax(0, 1fr) 88px; gap: 7px; margin: 0 0 8px; align-items: start; font-size: 8.5pt; }
+  .brief-ranking-row > strong { text-align: right; font-size: 8.5pt; }
+  .brief-ranking-row .brief-track { height: 3px; margin: 4px 0 0; }
+  .brief-rank { color: #627470; font-size: 7.5pt; padding-top: 1px; }
+  .brief-ranking-name { overflow-wrap: anywhere; }
+  .brief-footer { display: flex; justify-content: space-between; gap: 15px; margin-top: 18px; padding-top: 9px; border-top: 1px solid #cad8d3; color: #627470; font-size: 7pt; }
+  @media print {
+    .executive-page { min-height: 9.65in; display: flex; flex-direction: column; }
+    .brief-footer { margin-top: auto; }
+    .brief-header, .brief-overview { break-inside: avoid; }
+  }
+  @media screen and (max-width: 620px) {
+    .brief-overview { grid-template-columns: 1fr; }
+    .brief-stats { border-left: 0; padding-left: 0; }
+    .brief-leader { flex-wrap: wrap; }
+    .brief-meta { flex-direction: column; gap: 4px; }
+    .brief-meta > span { max-width: 100%; text-align: left !important; }
   }
 </style></head><body>
-<header class="hero">
-  <p class="status">&#10003; ${_escapeHTML(AppCopy.summaryDashboard.reportComplete)}</p>
-  <p class="eyebrow">${_escapeHTML(AppCopy.summaryDashboard.eyebrow)}</p>
-  <h1>${_escapeHTML(clinicName)}’s estimated community impact</h1>
-  <p class="address">${address}</p>
-  <p class="period">Reporting period: ${_escapeHTML(period)}</p>
-  <p class="total">${_fmt(summary.totalEstimatedValue)}</p>
-  <p class="total-label">${_escapeHTML(totalLabel)}</p>
+<section class="executive-page" aria-label="Executive summary">
+<div class="brief-masthead"><strong>CARE IN ACTION / CLINIC IMPACT ESTIMATOR</strong><span>EXECUTIVE SUMMARY</span></div>
+<header class="brief-header">
+  <h1>${_escapeHTML(clinicName)}</h1>
+  <p class="brief-subtitle">Estimated community impact report</p>
+  <div class="brief-meta"><span>${address}</span><span>${_escapeHTML(period)}</span></div>
 </header>
-<p class="callout">${_escapeHTML(AppCopy.summary.shortDisclaimer(summary.impactMethod))}</p>
-<section class="metric-grid" aria-label="${_escapeHTML(AppCopy.summaryDashboard.kpiHeading)}">
-  ${metricCard(activityLabel, activityCount, activityNote)}
-  ${metricCard(AppCopy.summaryDashboard.estimatedCommunityValueKpi, _fmt(summary.totalEstimatedValue), AppCopy.summaryDashboard.estimatedCommunityValueNote)}
-  ${summary.reportingPeriodClinicCost !== null
-    ? metricCard(AppCopy.summaryDashboard.valuePerDollarKpi, summary.valueToCostRatio === null ? "—" : `$${summary.valueToCostRatio.toFixed(2)}`, AppCopy.summaryDashboard.valuePerDollarNote)
-    : ""}
+<div class="brief-overview">
+  <div><h2>${_escapeHTML(totalLabel)}</h2><p class="brief-total">${_fmt(summary.totalEstimatedValue)}</p><p class="brief-note">Based on ${activityCount} reported ${isVolunteerReport ? "volunteer hours" : "clinical service units"} and reference rates</p></div>
+  <div class="brief-stats"><p><strong>${activityCount}</strong><span>${isVolunteerReport ? "volunteer hours" : "reported units"}</span></p><p><strong>${costReported ? _fmt(summary.reportingPeriodClinicCost) : "Not reported"}</strong><span>reported clinic cost</span></p></div>
+</div>
+<p class="brief-disclaimer">${_escapeHTML(AppCopy.summary.shortDisclaimer(summary.impactMethod))}</p>
+<section class="brief-section brief-contributor"><h2>Largest estimated contributor</h2>
+  <div class="brief-leader"><strong>${_escapeHTML(leaderName)}</strong>${leader ? `<span>${_fmt(leader.estimatedValue)} / ${_sharePercent(leaderShare)}% of total</span>` : ""}</div>
+  ${leader ? `<p class="brief-note">${isVolunteerReport ? `${leader.hours.toLocaleString("en-US")} volunteer hours` : `${leader.count.toLocaleString("en-US")} reported units${leader.code ? ` / Code ${_escapeHTML(leader.code)}` : ""}`}</p>` : ""}
 </section>
-<p class="narrative">${_escapeHTML(impactNarrative)}</p>
-${serviceImpactHTML}
-${serviceChartHTML}
-${volunteerImpactHTML}
+${costComparison}
+<section class="brief-section brief-ranking"><h2>${highlights.length > 0 ? `Leading ${isVolunteerReport ? "volunteer roles" : "services"} by estimated value` : "Activity overview"}</h2>
+<p class="brief-note">${highlights.length > 0 ? "Highest estimated values among reported activities. The complete activity statement and composition chart follow." : "No activity was reported for this period."}</p>
+${highlightHTML}
+</section>
+<div class="brief-footer"><span>${_escapeHTML(clinicName)}</span><span>SUMMARY / ${_escapeHTML(_methodLabel(summary.impactMethod))}</span></div>
+</section>
+${hasActivity || costReported ? `<section class="report-chapter" aria-label="Detailed activity statement">
+${chapterHeader("Detailed activity statement")}
 ${volunteerBreakdownHTML}
-${volunteerChartHTML}
 ${budgetHTML}
-${!isVolunteerReport ? `<section class="report-section service-breakdown">
-  <h2>Clinical Services Breakdown (Ranked by counts)</h2>
+${hasActivity && !isVolunteerReport ? `<section class="report-section service-breakdown">
+  <h2>Clinical Services Breakdown (Ranked by estimated value)</h2>
   <div class="table-wrap"><table>
+    <colgroup><col style="width:4%"><col style="width:36%"><col style="width:9%"><col style="width:10%"><col style="width:13%"><col style="width:16%"><col style="width:12%"></colgroup>
     <thead><tr><th scope="col" class="table-serial">S/N</th><th scope="col">Service</th><th class="service-code" scope="col">Code</th><th class="numeric" scope="col">Reported units</th><th class="numeric" scope="col">Reference rate</th><th class="numeric" scope="col">Estimated value</th><th class="numeric" scope="col">Value share</th></tr></thead>
     ${tableBodyHTML(svcRows, `<tr class="table-total"><th colspan="5" class="numeric" scope="row">Clinical services total</th><th class="numeric">${_fmt(summary.clinicalServiceValue)}</th><th class="numeric">${summary.clinicalServiceValue > 0 ? "100.0%" : "0.0%"}</th></tr>`)}
   </table></div>
 </section>` : ""}
 ${!isVolunteerReport ? rateDataNoteHTML : ""}
 ${clinicalCountsPieHTML}
-${isVolunteerReport ? `<section class="report-section">
+${hasActivity && isVolunteerReport ? `<section class="report-section">
   <h2>Volunteer Roles (Ranked By Hours)</h2>
   <div class="table-wrap"><table>
+    <colgroup><col style="width:4%"><col style="width:30%"><col style="width:18%"><col style="width:12%"><col style="width:17%"><col style="width:19%"></colgroup>
     <thead><tr><th scope="col" class="table-serial">S/N</th><th scope="col">Role</th><th scope="col">Type</th><th class="numeric" scope="col">Volunteer hours</th><th class="numeric" scope="col">Reference rate / hour</th><th class="numeric" scope="col">Estimated value</th></tr></thead>
     ${tableBodyHTML(volRows, `<tr class="table-total"><th colspan="5" class="numeric" scope="row">Total volunteer time value</th><th class="numeric">${_fmt(summary.volunteerValue)}</th></tr>`)}
   </table></div>
 </section>` : ""}
 ${isVolunteerReport ? rateDataNoteHTML : ""}
 ${volunteerHoursPieHTML}
-<section class="report-section appendix-page">
+</section>` : ""}
+<section class="report-chapter appendix-page" aria-label="Methodology and sources">
+  ${chapterHeader("Methodology &amp; sources")}
+  <p class="narrative">${_escapeHTML(impactNarrative)}</p>
   <h2>HOW THESE ESTIMATES ARE CALCULATED</h2>
-  <ul>${methodologyItems}</ul>
+  <ul class="methodology-list">${methodologyItems}</ul>
+  ${volunteerSourceHTML}
   <h2>SOURCES AND REFERENCES</h2>
-  <ul>${referenceItems}</ul>
+  <ol class="sources">${referenceItems}</ol>
 </section>
+<footer class="report-footer"><strong>Care in Action</strong><span>${_escapeHTML(clinicName)} | ${_escapeHTML(_methodLabel(summary.impactMethod))}</span></footer>
 </body></html>`;
   }
 

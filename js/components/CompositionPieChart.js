@@ -9,7 +9,7 @@
 const CompositionPieChart = (() => {
   const OTHER_COLOR = "#B8B8B8";
 
-  function render({ id, title, description, items, otherLabel, unitLabel, formatValue, hideLegendValues = false, totalInHeading = false }) {
+  function render({ id, title, description, items, otherLabel, unitLabel, formatValue, hideLegendValues = false, totalInHeading = false, reportStyle = false }) {
     const chartItems = _groupItems(items, otherLabel, unitLabel, formatValue);
     const total = chartItems.reduce((sum, item) => sum + item.value, 0);
     if (chartItems.length === 0 || total <= 0) return "";
@@ -19,6 +19,8 @@ const CompositionPieChart = (() => {
       item.isOther ? OTHER_COLOR : _color(colorIndex++),
     ]));
 
+    const reportLabels = reportStyle ? _reportLabelPositions(chartItems, total) : [];
+    const labelExtent = Math.max(106, ...reportLabels.map(label => Math.abs(label.y - 100) + 12));
     let angle = -90;
     const slices = chartItems.map((item, index) => {
       const startAngle = angle;
@@ -33,8 +35,11 @@ const CompositionPieChart = (() => {
       const lineStartY = (100 + 94 * Math.sin(labelAngle) + lowerHalfOffset).toFixed(2);
       const labelX = (100 + 106 * Math.cos(labelAngle)).toFixed(2);
       const labelY = (100 + 106 * Math.sin(labelAngle) + lowerHalfOffset).toFixed(2);
-      const percentageX = (100 + 78 * Math.cos(midpoint)).toFixed(2);
-      const percentageY = (100 + 78 * Math.sin(midpoint)).toFixed(2);
+      // Alternate radii for narrow print slices so percentages stay inside
+      // their slices without sitting directly beside another small label.
+      const percentageRadius = reportStyle && item.value / total < .04 ? (index % 2 ? 68 : 84) : 78;
+      const percentageX = (reportStyle && chartItems.length === 1 ? 100 : 100 + percentageRadius * Math.cos(midpoint)).toFixed(2);
+      const percentageY = (reportStyle && chartItems.length === 1 ? 100 : 100 + percentageRadius * Math.sin(midpoint)).toFixed(2);
       const percentage = item.value / total * 100;
       const tooltip = `${item.label}: ${item.valueLabel} (${(item.value / total * 100).toFixed(1)}%)`;
       const color = colorByItem.get(item);
@@ -52,10 +57,16 @@ const CompositionPieChart = (() => {
         <g class="composition-pie__slice" data-slice-index="${index}" tabindex="0" role="img"
           aria-label="${_escape(tooltip)}" style="--slice-x: ${offsetX}px; --slice-y: ${offsetY}px">
           ${shape}
+          ${reportStyle ? `
+          <polyline class="composition-pie__leader" points="${lineStartX},${lineStartY} ${reportLabels[index].right ? 204 : -4},${reportLabels[index].y} ${reportLabels[index].right ? 216 : -16},${reportLabels[index].y}" aria-hidden="true" />
+          <text class="composition-pie__slice-number" x="${reportLabels[index].right ? 220 : -20}" y="${reportLabels[index].y}" text-anchor="${reportLabels[index].right ? "start" : "end"}" dominant-baseline="central" aria-hidden="true">${String(index + 1).padStart(2, "0")}</text>
+          <text class="composition-pie__slice-percentage" x="${percentageX}" y="${percentageY}" text-anchor="middle" dominant-baseline="central" aria-hidden="true">${percentage.toFixed(1)}%</text>
+          ` : `
           <text class="composition-pie__slice-percentage" x="${percentageX}" y="${percentageY}" text-anchor="middle" dominant-baseline="central" aria-hidden="true">${percentage.toFixed(1)}%</text>
           <line class="composition-pie__leader" x1="${lineStartX}" y1="${lineStartY}" x2="${labelX}" y2="${labelY}" aria-hidden="true" />
           <circle class="composition-pie__slice-number-bg" cx="${labelX}" cy="${labelY}" r="5" aria-hidden="true" />
           <text class="composition-pie__slice-number" x="${labelX}" y="${labelY}" text-anchor="middle" dominant-baseline="central" aria-hidden="true">${index + 1}</text>
+          `}
         </g>
       `;
       return { item, index, color, percentage, depthPath, path };
@@ -68,7 +79,7 @@ const CompositionPieChart = (() => {
         <h2 class="summary-section__heading" id="${safeId}-heading">${_escape(title)}${totalInHeading ? `<span class="composition-pie__heading-total">${_escape(totalText)} ${_escape(unitLabel)}</span>` : ""}</h2>
         <p class="summary-section__intro">${_escape(description)}</p>
         <div class="composition-pie__content">
-          <svg class="composition-pie__chart" viewBox="-16 -16 232 240" role="group"
+          <svg class="composition-pie__chart" viewBox="${reportStyle ? `0 ${100 - labelExtent} 200 ${labelExtent * 2}` : "-16 -16 232 240"}" role="group"
             aria-label="${_escape(title)}" aria-describedby="${safeId}-svg-desc">
             <desc id="${safeId}-svg-desc">${_escape(description)} Total: ${_escape(totalText)} ${_escape(unitLabel)}.</desc>
             <g class="composition-pie__depth" aria-hidden="true">${slices.map(slice => slice.depthPath).join("")}</g>
@@ -81,7 +92,7 @@ const CompositionPieChart = (() => {
           <ul class="composition-pie__legend">
             ${slices.map(slice => `
               <li class="composition-pie__item${hideLegendValues ? " composition-pie__item--percentage-only" : ""}">
-                <span class="composition-pie__number" aria-hidden="true">${slice.index + 1}</span>
+                <span class="composition-pie__number" aria-hidden="true">${reportStyle ? String(slice.index + 1).padStart(2, "0") : slice.index + 1}</span>
                 <span class="composition-pie__swatch" style="--pie-color: ${slice.color}" aria-hidden="true"></span>
                 <span class="composition-pie__details">
                   <span class="composition-pie__label">${_escape(slice.item.label)}</span>
@@ -94,6 +105,31 @@ const CompositionPieChart = (() => {
         </div>
       </section>
     `;
+  }
+
+  // Keep connected print indices separated and in the same order as the legend.
+  function _reportLabelPositions(items, total) {
+    let angle = -Math.PI / 2;
+    const labels = items.map(item => {
+      const arc = item.value / total * 2 * Math.PI;
+      const midpoint = items.length === 1 ? -Math.PI / 2 : angle + arc / 2;
+      angle += arc;
+      return { right: Math.cos(midpoint) >= 0, y: 100 + 94 * Math.sin(midpoint) };
+    });
+    for (const right of [false, true]) {
+      const side = labels.filter(label => label.right === right).sort((a, b) => a.y - b.y);
+      const halfHeight = Math.max(94, (side.length - 1) * 6);
+      const top = 100 - halfHeight;
+      const bottom = 100 + halfHeight;
+      side.forEach((label, index) => {
+        label.y = Math.max(top, label.y, index ? side[index - 1].y + 12 : top);
+      });
+      for (let index = side.length - 1; index >= 0; index -= 1) {
+        side[index].y = Math.min(side[index].y, index === side.length - 1 ? bottom : side[index + 1].y - 12);
+      }
+      side.forEach(label => { label.y = Number(label.y.toFixed(2)); });
+    }
+    return labels;
   }
 
   function bind(section) {
