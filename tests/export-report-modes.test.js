@@ -29,6 +29,7 @@ function report({mode='clinicalServices', cost=null, category='mixed', count=12,
 for (const mode of ['clinicalServices','volunteerHours']) {
   test(`${mode}: summary, full charts, tables and sources stay mode-specific`,()=>{
     const {html}=report({mode});
+    assert.match(html,/<span>01 \/ EXECUTIVE SUMMARY<\/span>/);
     assert.equal((html.match(/class="brief-ranking-row"/g)||[]).length,5);
     assert.doesNotMatch(html,/class="chart-row"|Top ten/);
     assert.doesNotMatch(html,/aria-label="Activity and estimated value"/);

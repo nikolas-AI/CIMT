@@ -1384,7 +1384,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
   }
 </style></head><body>
 <section class="executive-page" aria-label="Executive summary">
-<div class="brief-masthead"><strong>CARE IN ACTION / CLINIC IMPACT ESTIMATOR</strong><span>EXECUTIVE SUMMARY</span></div>
+<div class="brief-masthead"><strong>CARE IN ACTION / CLINIC IMPACT ESTIMATOR</strong><span>01 / EXECUTIVE SUMMARY</span></div>
 <header class="brief-header">
   <h1>${_escapeHTML(clinicName)}</h1>
   <p class="brief-subtitle">Estimated clinic impact report</p>
