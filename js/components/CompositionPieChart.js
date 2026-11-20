@@ -87,19 +87,21 @@ const CompositionPieChart = (() => {
 
     return `
       <section class="summary-section composition-pie" aria-labelledby="${safeId}-heading">
-        <h2 class="summary-section__heading" id="${safeId}-heading">${_escape(title)}${totalInHeading ? `<span class="composition-pie__heading-total">${_escape(totalText)} ${_escape(unitLabel)}</span>` : ""}</h2>
-        <p class="summary-section__intro">${_escape(description)}</p>
         <div class="composition-pie__content">
-          <svg class="composition-pie__chart" viewBox="${reportStyle ? `0 ${100 - labelExtent} 200 ${labelExtent * 2}` : "-16 -16 232 240"}" role="group"
-            aria-label="${_escape(title)}" aria-describedby="${safeId}-svg-desc">
-            <desc id="${safeId}-svg-desc">${_escape(description)} Total: ${_escape(totalText)} ${_escape(unitLabel)}.</desc>
-            <g class="composition-pie__depth" aria-hidden="true">${slices.map(slice => slice.depthPath).join("")}</g>
-            ${slices.map(slice => slice.path).join("")}
-            ${totalInHeading ? "" : `
-              <text class="composition-pie__total" x="100" y="97" text-anchor="middle">${_escape(totalText)}</text>
-              <text class="composition-pie__total-label" x="100" y="108" text-anchor="middle">total ${_escape(unitLabel)}</text>
-            `}
-          </svg>
+          <div class="composition-pie__visual">
+            <h2 class="summary-section__heading" id="${safeId}-heading">${_escape(title)}${totalInHeading ? `<span class="composition-pie__heading-total">${_escape(totalText)} ${_escape(unitLabel)}</span>` : ""}</h2>
+            <p class="summary-section__intro">${_escape(description)}</p>
+            <svg class="composition-pie__chart" viewBox="${reportStyle ? `0 ${100 - labelExtent} 200 ${labelExtent * 2}` : "-16 -16 232 240"}" role="group"
+              aria-label="${_escape(title)}" aria-describedby="${safeId}-svg-desc">
+              <desc id="${safeId}-svg-desc">${_escape(description)} Total: ${_escape(totalText)} ${_escape(unitLabel)}.</desc>
+              <g class="composition-pie__depth" aria-hidden="true">${slices.map(slice => slice.depthPath).join("")}</g>
+              ${slices.map(slice => slice.path).join("")}
+              ${totalInHeading ? "" : `
+                <text class="composition-pie__total" x="100" y="97" text-anchor="middle">${_escape(totalText)}</text>
+                <text class="composition-pie__total-label" x="100" y="108" text-anchor="middle">total ${_escape(unitLabel)}</text>
+              `}
+            </svg>
+          </div>
           <ul class="composition-pie__legend">
             ${slices.map(slice => `
               <li class="composition-pie__item${hideLegendValues ? " composition-pie__item--percentage-only" : ""}">

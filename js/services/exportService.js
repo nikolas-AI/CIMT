@@ -1281,6 +1281,7 @@ ${charts.map((_chart, index) => `  <Relationship Id="rId${index + 1}" Type="http
   .table-total th { color: var(--navy); border-top: 1.5px solid var(--teal); background: #eaf1ee; }
   .composition-pie { margin: 20px 0; padding-top: 13px; border-top: 1px solid var(--border); break-inside: auto; }
   .composition-pie .summary-section__intro { font-size: 8pt; color: var(--slate); margin-bottom: 10px; }
+  .composition-pie__visual { break-inside: avoid; page-break-inside: avoid; }
   .composition-pie__heading-total { display: block; margin-top: 4px; color: var(--navy); font-size: 12pt; font-weight: 600; letter-spacing: normal; text-transform: none; }
   .composition-pie__content { display: block; }
   .composition-pie__chart { display: block; width: 60%; max-width: none; height: auto; overflow: visible; margin: 0 auto 18px; break-inside: avoid; }

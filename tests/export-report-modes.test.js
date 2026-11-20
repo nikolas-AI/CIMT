@@ -80,6 +80,8 @@ test('pie charts are not forced onto a new page',()=>{
   const {html}=report();
   assert.doesNotMatch(html,/\.composition-pie \{[^}]*break-before:\s*page/);
   assert.match(html,/\.composition-pie \{[^}]*break-inside: auto/);
+  assert.match(html,/\.composition-pie__visual \{ break-inside: avoid; page-break-inside: avoid; \}/);
+  assert.match(html,/<div class="composition-pie__visual">\s*<h2 class="summary-section__heading"[\s\S]*?<p class="summary-section__intro">[\s\S]*?<svg class="composition-pie__chart"/);
 });
 test('methodology appendix flows naturally and keeps its heading with the description',()=>{
   const {html}=report();
